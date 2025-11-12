@@ -30,15 +30,17 @@ export interface Room {
 
 export interface HotelSearchParams {
   city?: string;
-  country?: string;
-  checkIn?: string;
-  checkOut?: string;
-  guests?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  rating?: number;
-  amenities?: string[];
-  distanceFromHaram?: number;
-  distanceFromNabawi?: number;
+  priceToLowOrHigh?: boolean;
+  rating?: boolean;
+  distance?: boolean;
+  sortBy?: string;
 }
-
+// country?: string;
+// checkIn?: string;
+// checkOut?: string;
+// minPrice?: number;
+// maxPrice?: number;
+// guests?: number;
+// amenities?: string[];
+// distanceFromHaram?: number;
+// distanceFromNabawi?: number;
