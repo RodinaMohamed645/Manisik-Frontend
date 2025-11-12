@@ -1,206 +1,157 @@
 <nav
-  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[var(--background)]/80 backdrop-blur-md"
+  class="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/80 backdrop-blur-md shadow-sm"
+  role="navigation"
+  aria-label="Main navigation"
 >
   <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16 lg:h-20">
-      <button
-        class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+      <!-- Logo -->
+      <a
+        routerLink="/"
+        class="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 rounded"
+        aria-label="Manisik Home"
       >
         <div class="bg-[var(--primary)] text-white px-3 py-2 rounded-lg">
-          <span class="font-bold text-xl">🕋</span>
+          <span class="font-bold text-xl" aria-hidden="true">🕋</span>
         </div>
-        <span class="font-bold text-xl text-[var(--text-primary)]"
-          >Manisik</span
-        >
-      </button>
+        <span class="font-bold text-xl text-[var(--text-primary)]">Manisik</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
       <div class="hidden lg:flex items-center gap-8">
-        <button
-          class="hover:text-[var(--primary)] transition-colors text-[var(--primary)]" routerLink="/"
-        >
-          Home</button
-        ><button
-          class="hover:text-[var(--primary)] transition-colors text-[var(--text-primary)]" routerLink="/packages"
-        >
-          Packages</button
-        ><button
-          class="hover:text-[var(--primary)] transition-colors text-[var(--text-primary)]" routerLink="/hotels"
-        >
-          Hotels</button
-        ><button
-          class="hover:text-[var(--primary)] transition-colors text-[var(--text-primary)]" routerLink="/transport"
-        >
-          Transport</button
-        ><button
-          type="button"
-          id="radix-:r0:"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          data-state="closed"
-          data-slot="dropdown-menu-trigger"
-          class="text-[var(--text-primary)] hover:text-[var(--primary)] transition-colors"
-        >
-          About
-        </button>
+        @for (link of navLinks; track link.path) {
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="text-[var(--primary)] font-semibold"
+            [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+            (click)="onNavLinkClick()"
+            class="transition-colors text-[var(--text-primary)] hover:text-[var(--primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 rounded px-2 py-1"
+            [attr.aria-current]="link.path === '/' ? 'page' : null"
+          >
+            {{ link.label }}
+          </a>
+        }
       </div>
+
+      <!-- Action Icons -->
       <div class="flex items-center gap-3">
+        @for (icon of navIcons; track icon.name) {
+          @if (icon.name !== 'menu') {
+            <button
+              type="button"
+              class="nav-icon-btn relative hidden md:flex"
+              [attr.aria-label]="icon.ariaLabel"
+              (click)="onIconClick(icon)"
+              [attr.aria-pressed]="icon.name === 'moon' ? 'false' : null"
+            >
+              <lucide-icon [name]="icon.name" class="h-5 w-5" aria-hidden="true"></lucide-icon>
+              @if (icon.showBadge && hasCartItems()) {
+                <span
+                  class="absolute -top-1 -right-1 bg-[var(--error)] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold"
+                  [attr.aria-label]="cartCount() + ' items in cart'"
+                >
+                  {{ cartCount() }}
+                </span>
+              }
+            </button>
+          }
+        }
+
+        <!-- Mobile Menu Button -->
         <button
-          data-slot="button"
-          class="items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md hidden md:flex"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-search h-5 w-5"
-            aria-hidden="true"
-          >
-            <path d="m21 21-4.34-4.34"></path>
-            <circle cx="11" cy="11" r="8"></circle>
-          </svg></button
-        ><button
-          data-slot="dropdown-menu-trigger"
-          class="items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md hidden md:flex"
           type="button"
-          id="radix-:r2:"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          data-state="closed"
+          class="nav-icon-btn md:hidden"
+          [attr.aria-label]="isMobileMenuOpen() ? 'Close menu' : 'Open menu'"
+          [attr.aria-expanded]="isMobileMenuOpen()"
+          (click)="toggleMobileMenu()"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-globe h-5 w-5"
+          <lucide-icon
+            [name]="isMobileMenuOpen() ? 'x' : 'menu'"
+            class="h-5 w-5"
             aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-            <path d="M2 12h20"></path>
-          </svg></button
-        ><button
-          data-slot="button"
-          class="items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md hidden md:flex"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-moon h-5 w-5"
-            aria-hidden="true"
-          >
-            <path
-              d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"
-            ></path>
-          </svg></button
-        ><button
-          data-slot="button"
-          class="items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md relative hidden md:flex"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-shopping-cart h-5 w-5"
-            aria-hidden="true"
-          >
-            <circle cx="8" cy="21" r="1"></circle>
-            <circle cx="19" cy="21" r="1"></circle>
-            <path
-              d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
-            ></path></svg
-          ><span
-            class="absolute -top-1 -right-1 bg-[var(--error)] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-            >0</span
-          ></button
-        ><button
-          data-slot="dropdown-menu-trigger"
-          class="items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md hidden md:flex"
-          type="button"
-          id="radix-:r4:"
-          aria-haspopup="menu"
-          aria-expanded="false"
-          data-state="closed"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-user h-5 w-5"
-            aria-hidden="true"
-          >
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg></button
-        ><!-- Sign In Button -->
-        <button
-          data-slot="button"
-          class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 hidden lg:flex bg-[var(--primary)] text-white hover:opacity-90"
-          style="border-radius: var(--radius-button)"
+          ></lucide-icon>
+        </button>
+
+        <!-- Sign In / Login Buttons -->
+        <a
+          routerLink="/signIn"
+          class="btn-primary hidden lg:flex focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
         >
           Sign In
-        </button
-        ><!-- Login Button (New) -->
-        <button
-          data-slot="button"
-          class="items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-[var(--primary)] hover:text-white h-9 px-4 py-2 has-[&gt;svg]:px-3 hidden lg:flex border border-[var(--primary)] text-[var(--primary)]"
-          style="border-radius: var(--radius-button)"
+        </a>
+        <a
+          routerLink="/login"
+          class="btn-outline hidden lg:flex focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
         >
           Login
-        </button
-        ><!-- Mobile Menu Button -->
-        <button
-          data-slot="button"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 size-9 rounded-md lg:hidden"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg  "
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-menu h-6 w-6"
-            aria-hidden="true"
-          >
-            <path d="M4 5h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 19h16"></path>
-          </svg>
-        </button>
+        </a>
       </div>
     </div>
+
+    <!-- Mobile Menu -->
+    @if (isMobileMenuOpen()) {
+      <div
+        class="lg:hidden border-t border-[var(--border)] bg-[var(--background)]"
+        role="menu"
+        [attr.aria-label]="'Mobile navigation menu'"
+      >
+        <div class="px-4 py-4 space-y-2">
+          @for (link of navLinks; track link.path) {
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="text-[var(--primary)] font-semibold bg-[var(--surface)]"
+              [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+              (click)="onNavLinkClick()"
+              class="block px-4 py-3 rounded-lg text-[var(--text-primary)] hover:text-[var(--primary)] hover:bg-[var(--surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+              role="menuitem"
+            >
+              {{ link.label }}
+            </a>
+          }
+        </div>
+
+        <!-- Mobile Action Icons -->
+        <div class="px-4 py-4 border-t border-[var(--border)] flex items-center justify-around">
+          @for (icon of navIcons; track icon.name) {
+            @if (icon.name !== 'menu') {
+              <button
+                type="button"
+                class="flex flex-col items-center gap-1 p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 rounded"
+                [attr.aria-label]="icon.ariaLabel"
+                (click)="onIconClick(icon); closeMobileMenu()"
+              >
+                <lucide-icon [name]="icon.name" class="h-5 w-5" aria-hidden="true"></lucide-icon>
+                @if (icon.showBadge && hasCartItems()) {
+                  <span
+                    class="absolute mt-1 ml-4 bg-[var(--error)] text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                    [attr.aria-label]="cartCount() + ' items in cart'"
+                  >
+                    {{ cartCount() }}
+                  </span>
+                }
+              </button>
+            }
+          }
+        </div>
+
+        <!-- Mobile Auth Buttons -->
+        <div class="px-4 py-4 border-t border-[var(--border)] space-y-2">
+          <a
+            routerLink="/signIn"
+            (click)="closeMobileMenu()"
+            class="btn-primary w-full text-center block focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+          >
+            Sign In
+          </a>
+          <a
+            routerLink="/login"
+            (click)="closeMobileMenu()"
+            class="btn-outline w-full text-center block focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+          >
+            Login
+          </a>
+        </div>
+      </div>
+    }
   </div>
 </nav>

@@ -1,54 +1,110 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, signal, computed, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  OnInit,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-/* import { I18nService } from '../../core/services/i18n.service';
- */import { LucideAngularModule, Package, Building2, Bus, Search, Settings, CreditCard, CheckCircle, Users, TrendingUp, Headphones, MapPin, Star, Clock, Check, Mail, Shield, ChevronDown } from 'lucide-angular';
+import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
+
+// Interfaces
+export interface QuickAction {
+  icon: string;
+  title: string;
+  description: string;
+  color: string;
+  route?: string;
+}
+
+export interface Package {
+  id: number;
+  title: string;
+  image: string;
+  price: number;
+  duration: string;
+  rating: number;
+  reviews: number;
+  category: string;
+  included: string[];
+}
+
+export interface Step {
+  icon: string;
+  step: string;
+  title: string;
+  description: string;
+}
+
+export interface Statistic {
+  icon: string;
+  value: number;
+  suffix: string;
+  label: string;
+}
+
+export interface Testimonial {
+  id: number;
+  name: string;
+  avatar: string;
+  rating: number;
+  text: string;
+  verified: boolean;
+}
+
+export interface FAQ {
+  question: string;
+  answer: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit {
-/*   private readonly i18nService = inject(I18nService);
- */  
-  // Animation trigger for hero content
-  animateIn = signal(false);
+  private readonly router = inject(Router);
 
-  // FAQ open state
-  openFAQ = signal<string | null>(null);
+  // State management
+  readonly animateIn = signal<boolean>(false);
+  readonly openFAQ = signal<string | null>(null);
+  readonly searchQuery = signal<string>('');
+  readonly newsletterEmail = signal<string>('');
+  readonly isSubmittingNewsletter = signal<boolean>(false);
 
   // Quick Actions Data
-  readonly actions = [
+  readonly actions: QuickAction[] = [
     {
       icon: 'package',
       title: 'Book Complete Package',
       description: 'All-inclusive Umrah planning',
-      color: 'rgba(var(--primary-rgb), 0.1)'
+      color: 'rgba(var(--primary-rgb), 0.1)',
+      route: '/packages',
     },
     {
       icon: 'building-2',
       title: 'Find Hotels',
       description: 'Near Haram with best prices',
-      color: 'rgba(16, 185, 129, 0.1)'
+      color: 'rgba(16, 185, 129, 0.1)',
+      route: '/hotels',
     },
     {
       icon: 'bus',
       title: 'Transport Options',
       description: 'Comfortable & reliable',
-      color: 'rgba(245, 158, 11, 0.1)'
-    }
+      color: 'rgba(245, 158, 11, 0.1)',
+      route: '/transport',
+    },
   ];
 
   // Featured Packages Data
-  readonly packages = [
+  readonly packages: Package[] = [
     {
       id: 1,
       title: 'Premium Umrah Package',
@@ -107,7 +163,7 @@ export class HomeComponent implements OnInit {
   selectedCategory = signal('All');
 
   // How It Works Data
-  readonly steps = [
+  readonly steps: Step[] = [
     {
       icon: 'search',
       step: '01',
@@ -135,7 +191,7 @@ export class HomeComponent implements OnInit {
   ];
 
   // Statistics Data
-  readonly stats = [
+  readonly stats: Statistic[] = [
     { icon: 'users', value: 50000, suffix: '+', label: 'Total Bookings' },
     { icon: 'trending-up', value: 98, suffix: '%', label: 'Satisfaction Rate' },
     { icon: 'headphones', value: 24, suffix: '/7', label: 'Support Available' },
@@ -143,7 +199,7 @@ export class HomeComponent implements OnInit {
   ];
 
   // Testimonials Data
-  readonly testimonials = [
+  readonly testimonials: Testimonial[] = [
     {
       id: 1,
       name: 'Ahmed Hassan',
@@ -171,7 +227,7 @@ export class HomeComponent implements OnInit {
   ];
 
   // FAQ Data
-  readonly faqs = [
+  readonly faqs: FAQ[] = [
     {
       question: 'How do I book an Umrah package?',
       answer: 'Booking is simple! Browse our packages, select your preferred dates and accommodations, fill in your details, and complete the secure payment. You\'ll receive instant confirmation via email.'
@@ -206,24 +262,104 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  ngOnInit() {
+  ngOnInit(): void {
     // Trigger hero animation on load
     setTimeout(() => this.animateIn.set(true), 100);
   }
 
- /*  translate(key: string): string {
-    return this.i18nService.translate(key);
-  } */
-
+  /**
+   * Set selected category filter
+   */
   setCategory(category: string): void {
     this.selectedCategory.set(category);
   }
 
+  /**
+   * Toggle FAQ item open/close state
+   */
   toggleFAQ(question: string): void {
-    if (this.openFAQ() === question) {
-      this.openFAQ.set(null);
-    } else {
-      this.openFAQ.set(question);
+    this.openFAQ.update((current) => (current === question ? null : question));
+  }
+
+  /**
+   * Check if FAQ is open
+   */
+  isFAQOpen(question: string): boolean {
+    return this.openFAQ() === question;
+  }
+
+  /**
+   * Handle search form submission
+   */
+  onSearchSubmit(): void {
+    const query = this.searchQuery().trim();
+    if (query) {
+      this.router
+        .navigate(['/search'], { queryParams: { q: query } })
+        .catch((err) => console.error('Navigation error:', err));
     }
+  }
+
+  /**
+   * Handle quick action click
+   */
+  onActionClick(action: QuickAction): void {
+    if (action.route) {
+      this.router
+        .navigate([action.route])
+        .catch((err) => console.error('Navigation error:', err));
+    }
+  }
+
+  /**
+   * Handle package view details
+   */
+  onViewPackageDetails(packageId: number): void {
+    this.router
+      .navigate(['/packages', packageId])
+      .catch((err) => console.error('Navigation error:', err));
+  }
+
+  /**
+   * Handle view all packages
+   */
+  onViewAllPackages(): void {
+    this.router
+      .navigate(['/packages'])
+      .catch((err) => console.error('Navigation error:', err));
+  }
+
+  /**
+   * Handle newsletter subscription
+   */
+  onNewsletterSubmit(): void {
+    const email = this.newsletterEmail().trim();
+    if (!email || !this.isValidEmail(email)) {
+      // TODO: Show error message
+      return;
+    }
+
+    this.isSubmittingNewsletter.set(true);
+    // TODO: Implement newsletter subscription API call
+    setTimeout(() => {
+      this.isSubmittingNewsletter.set(false);
+      this.newsletterEmail.set('');
+      // TODO: Show success message
+    }, 1000);
+  }
+
+  /**
+   * Validate email format
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Generate array of numbers for star rating display
+   */
+  getStarArray(count: number): number[] {
+    return Array.from({ length: count }, (_, i) => i);
   }
 }
