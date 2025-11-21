@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User, LoginRequest, RegisterRequest, AuthResponse } from '../../interfaces';
+import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole } from '../../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -14,34 +14,45 @@ export class AuthService {
   public readonly currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    this.loadUserFromStorage();
+    this.loadUserFromToken();
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, credentials).pipe(
       tap(response => {
-        this.setAuthData(response);
+        this.setAuthData(response.data);
+        this.fetchAndSetUser();
       })
     );
   }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, data).pipe(
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/register`, data).pipe(
       tap(response => {
-        this.setAuthData(response);
+        this.setAuthData(response.data);
+        this.fetchAndSetUser();
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    this.currentUserSubject.next(null);
+    this.http.post(`${this.apiUrl}/Auth/logout`, {}).subscribe({
+      next: () => this.clearAuthData(),
+      error: () => this.clearAuthData()
+    });
   }
 
   getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/auth/me`);
+    return this.http.get<{ data: User }>(`${this.apiUrl}/Auth/me`).pipe(
+      map(response => response.data)
+    );
+  }
+
+  private fetchAndSetUser(): void {
+    this.getCurrentUser().subscribe({
+      next: (user) => this.currentUserSubject.next(user),
+      error: () => this.clearAuthData()
+    });
   }
 
   getToken(): string | null {
@@ -56,25 +67,38 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  private setAuthData(response: AuthResponse): void {
-    localStorage.setItem('token', response.token);
-    if (response.refreshToken) {
-      localStorage.setItem('refreshToken', response.refreshToken);
-    }
-    localStorage.setItem('user', JSON.stringify(response.user));
-    this.currentUserSubject.next(response.user);
+  getRole(): UserRole | null {
+    const user = this.getCurrentUserValue();
+    return user ? user.role : null;
   }
 
-  private loadUserFromStorage(): void {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr) as User;
-        this.currentUserSubject.next(user);
-      } catch {
-        this.logout();
-      }
+  setAuthData(data: { token: string; refreshToken: string | null }): void {
+    localStorage.setItem('token', data.token);
+  }
+
+  refreshToken(): Observable<{ token: string; refreshToken: string }> {
+    return this.http.post<{ token: string; refreshToken: string }>(
+      `${this.apiUrl}/Auth/RefreshToken`,
+      {}
+    ).pipe(
+      tap(res => {
+        localStorage.setItem('token', res.token);
+      })
+    );
+  }
+
+  private loadUserFromToken(): void {
+    if (this.getToken()) {
+      this.fetchAndSetUser();
     }
+  }
+
+  private clearAuthData(): void {
+    localStorage.removeItem('token');
+    this.currentUserSubject.next(null);
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
   }
 }
-

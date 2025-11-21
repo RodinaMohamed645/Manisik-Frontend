@@ -1,7 +1,7 @@
 export enum UserRole {
-  CUSTOMER = 'customer',
-  AGENT = 'agent',
-  ADMIN = 'admin'
+  USER = 'User',
+  ADMIN = 'Admin',
+  HOTEL_MANAGER = 'HotelManager'
 }
 
 export interface User {
@@ -12,6 +12,9 @@ export interface User {
   phone?: string;
   role: UserRole;
   createdAt: string;
+  preferredLanguage?: string;
+  isActive?: boolean;
+  fullName?: string;
   updatedAt: string;
 }
 
@@ -29,11 +32,32 @@ export interface RegisterRequest {
   role?: UserRole;
 }
 
-export interface AuthResponse {
-  user: User;
-  token: string;
-  refreshToken?: string;
+export interface MinimalUser {
+  firstName: string;
+  lastName: string;
+  roles: UserRole;
 }
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    refreshToken: string | null;
+    expiresAt: string;
+    user: {
+      id: number;
+      email: string;
+      password: string | null;
+      firstName: string;
+      lastName: string;
+      role: UserRole;
+    };
+  };
+  errors: any;
+  timestamp: string;
+}
+
 
 export interface RegisterResponse {
     success: boolean;

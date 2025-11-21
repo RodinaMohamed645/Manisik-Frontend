@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { I18nService } from 'src/app/core/services/i18n.service';
 
 import { MatToolbarModule, MatToolbar } from '@angular/material/toolbar';
 import { NgModule } from '@angular/core';
@@ -8,12 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-
-
-
-
-
-
 import { FormsModule } from '@angular/forms';
 
 
@@ -38,6 +33,7 @@ interface Flight {
   styleUrl: './transport.component.css'
 })
 export class TransportComponent {
+readonly i18n = inject(I18nService);
 transportType: string = 'air';
   fromCity: string = '';
   toCity: string = 'Jeddah';
@@ -100,4 +96,5 @@ transportType: string = 'air';
     console.log('Booking flight:', flight);
     // Implement booking logic here
   }
+  
 }

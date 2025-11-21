@@ -2,20 +2,23 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
-import { LoginService } from 'src/app/core/services/login.service';
+import { CommonModule } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule ,CommonModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css'],
+  standalone : true
 })
 export class LoginComponent {
 loginForm!: FormGroup;
   errorMessage: string = '';
   showPassword: boolean = false;
 
-  constructor(private fb: FormBuilder, private loginService: AuthService, private router: Router) {
+  constructor(private fb: FormBuilder, private loginService: AuthService, private router: Router , private toastr: ToastrService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.com$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -32,10 +35,14 @@ loginForm!: FormGroup;
 
     this.loginService.login(loginData).subscribe({
       next: (response) => {
-        if (response.token) {
+        if (response.data?.token) {
+          this.loginService.setAuthData(response.data); // pass data object to store token, etc.
+
+          this.toastr.success(`Login successful! , Welcome ${response.data.user.firstName}`, 'Success');
           this.router.navigate(['/home']);
         } else {
           this.errorMessage = 'Login failed. Please try again.'; 
+          console.error('Login failed: No token received');
         }
       },
       error: (error) => {

@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
+
+/* For ngx Toastr  */
+@import 'ngx-toastr/toastr';
+
+
+/* Manasik Design System Variables and Styles */
 @layer base {
   :root {
-      /*
-        Theme variables used across the app. Use these variables in components to
-        keep a single source of truth for color, spacing and radii. We also use
-        the `--primary-rgb` value for semi-transparent variants (e.g. overlays).
-        Components should reference these like: color: var(--primary)
-      */
     /* Light Mode - Manisik Design System */
     --primary: #0e7c3b;
     --primary-rgb: 14, 124, 59;
@@ -51,14 +51,17 @@
     --shadow-heavy: 0 10px 25px rgba(255, 255, 255, 0.15);
   }
 
+  /* Remove global transition - this was causing the delay */
   * {
     @apply border-[color:var(--border)];
   }
-
+ 
   body {
     @apply bg-[var(--background)] text-[var(--text-primary)];
     font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
+    /* Add transition only to body for smooth theme changes */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   }
 
   /* Typography System */
@@ -147,7 +150,17 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-[var(--primary)];
   }
+
+  /* Specific transition classes for navbar and interactive elements */
+  .navbar-transition {
+    transition: background-color 0.2s ease-in-out, backdrop-filter 0.2s ease-in-out;
+  }
+
+  .nav-link-transition {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  }
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
