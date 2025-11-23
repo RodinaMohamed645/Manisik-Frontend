@@ -15,7 +15,12 @@ import { MatSelectModule } from '@angular/material/select';
 
 
 import { FormsModule } from '@angular/forms';
+import { ArrivalAirport, TransportSearchParams, TransportType,DepartureAirport, TransportOption } from 'src/app/interfaces/transport.interface';
 
+import { CommonModule } from '@angular/common';
+import { TransportService } from 'src/app/core/services/transport.service';
+import { Transport } from './transport';
+import { c } from "../../../../node_modules/@angular/cdk/a11y-module.d-DBHGyKoh";
 
 interface Flight {
   airline: string;
@@ -33,71 +38,36 @@ interface Flight {
 
 @Component({
   selector: 'app-transport',
-  imports: [ MatToolbar, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, FormsModule],
+  imports: [MatToolbar, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, FormsModule, CommonModule],
   templateUrl: './transport.component.html',
   styleUrl: './transport.component.css'
 })
 export class TransportComponent {
-transportType: string = 'air';
-  fromCity: string = '';
-  toCity: string = 'Jeddah';
-  departureDate: string = '';
+  //convert enum to array of strings to use in dropdown
+   arrivalAirports : string[] = Object.values(ArrivalAirport); 
+   derpartureAirports : string[] = Object.values(DepartureAirport);
+   searchParams:TransportSearchParams={}
+   flights:TransportOption[]=[];
+ 
+  constructor(private transportService: TransportService) {
   
-  flights: Flight[] = [];
-  showResults: boolean = false;
-
-  searchFlights() {
-    // Simulate API call with static data
-    this.flights = [
-      {
-        airline: 'Saudi Arabian Airlines',
-        code: 'SA',
-        rating: 4.8,
-        reviews: 2340,
-        duration: '8h 30m',
-        class: 'Economy',
-        stops: 'Direct',
-        price: 680,
-        meals: 'Meals included',
-        baggage: '30kg baggage',
-        amenities: ['Entertainment']
-      },
-      {
-        airline: 'Emirates',
-        code: 'AE',
-        rating: 4.9,
-        reviews: 3120,
-        duration: '9h 15m',
-        class: 'Economy',
-        stops: '1 Stop',
-        price: 850,
-        meals: 'Premium meals',
-        baggage: '40kg baggage',
-        amenities: ['WiFi', 'Lounge access']
-      },
-      {
-        airline: 'Qatar Airways',
-        code: 'QA',
-        rating: 4.9,
-        reviews: 2890,
-        duration: '8h 45m',
-        class: 'Economy',
-        stops: 'Direct',
-        price: 820,
-        meals: 'Gourmet meals',
-        baggage: '35kg baggage',
-        amenities: ['Premium entertainment']
-      }
-    ];
-    this.showResults = true;
   }
-
+ 
   setTransportType(type: string) {
-    this.transportType = type;
+    this.searchParams.type = type ;
   }
 
-  bookFlight(flight: Flight) {
-    console.log('Booking flight:', flight);
-    // Implement booking logic here
+  searchflights() {
+      if (!this.searchParams.departureLocation || !this.searchParams.arrivalLocation) {
+      alert('Please select both departure and arrival airports!');
+      return;
+  }
+     console.log(this.searchParams.departureLocation);
+     console.log(this.searchParams.arrivalLocation);
+     this.transportService.searchByRoute(this.searchParams.departureLocation || '', this.searchParams.arrivalLocation || '').subscribe((response: any) => {
+    this.flights = response.data||[];
+    console.log(response);
+    
+    });
   }
 }
