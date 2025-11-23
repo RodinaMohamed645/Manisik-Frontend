@@ -10,6 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { BookingHotelService } from 'src/app/core/services/booking-hotel.service';
 import { HotelsService } from 'src/app/core/services/hotels.service';
 import { I18nService } from 'src/app/core/services/i18n.service';
@@ -36,7 +37,8 @@ export class BookingHotelComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private bookingService: BookingHotelService,
-    private hotelsService: HotelsService
+    private hotelsService: HotelsService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +48,7 @@ export class BookingHotelComponent implements OnInit {
 
       if (isNaN(hId) || isNaN(rId)) {
         console.error('Invalid hotel or room ID');
-        // this.router.navigate(['/hotels']); // Redirect back to hotels
+        this.router.navigate(['/hotels']);
         return;
       }
 
@@ -117,7 +119,7 @@ export class BookingHotelComponent implements OnInit {
     if (this.bookingForm.invalid) return;
 
     const { checkInDate, checkOutDate, numberOfRooms } = this.bookingForm.value;
-    
+
     // Convert to ISO string for API
     const checkInISO = new Date(checkInDate).toISOString();
     const checkOutISO = new Date(checkOutDate).toISOString();
@@ -142,9 +144,16 @@ export class BookingHotelComponent implements OnInit {
     this.bookingService.bookHotel(bookingDto).subscribe({
       next: (res) => {
         console.log('Booking successful');
-        this.router.navigate(['/dashboard']); 
+        this.toastr.success(
+          `Booking Room at (${this.hotel.name}) completed successfully!`
+        );
+        this.router.navigate(['/dashboard']);
       },
-      error: (err) => console.error('Booking failed', err),
+      error: (err) => {
+        const backendMessage = err?.error?.message ?? 'Something went wrong';
+        this.toastr.error(backendMessage, 'Booking Failed');
+        console.error('Booking failed:', backendMessage);
+      },
     });
   }
 }

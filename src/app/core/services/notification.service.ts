@@ -1,22 +1,28 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Notification, NotificationType } from '../../interfaces';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
   private readonly notificationSubject = new Subject<Notification>();
-  public readonly notifications$: Observable<Notification> = this.notificationSubject.asObservable();
+  public readonly notifications$: Observable<Notification> =
+    this.notificationSubject.asObservable();
 
-  show(message: string, type: NotificationType = NotificationType.INFO, title?: string): void {
+  show(
+    message: string,
+    type: NotificationType = NotificationType.INFO,
+    title?: string
+  ): void {
     const notification: Notification = {
       id: this.generateId(),
       title: title || this.getDefaultTitle(type),
       message,
       type,
       read: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     this.notificationSubject.next(notification);
   }
@@ -56,4 +62,3 @@ export class NotificationService {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
-
