@@ -1,0 +1,124 @@
+<div class="max-w-3xl mx-auto p-6 bg-[var(--surface)] rounded-lg shadow-md my-10">
+  <h2 class="text-2xl font-bold mb-4 text-[var(--text-primary)]">{{ i18n.translate('booking.transport.title') }}</h2>
+
+  <div *ngIf="transport" class="border border-[var(--border)] p-4 rounded mb-6 bg-[var(--background)]">
+    <h3 class="text-xl font-semibold text-[var(--text-primary)]">{{ transport.carrierName }}</h3>
+    <p class="text-[var(--text-secondary)]">
+      {{ i18n.translate('booking.transport.route') }}:
+      {{ transport.departureAirport }} → {{ transport.arrivalAirport }}
+    </p>
+  </div>
+
+  <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="space-y-4">
+    <!-- Transport Type -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.type') }}</label>
+      <select
+        formControlName="type"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      >
+        <option value="0">{{ i18n.translate('booking.transport.flight') }}</option>
+        <option value="1">{{ i18n.translate('booking.transport.ship') }}</option>
+      </select>
+    </div>
+
+    <!-- Carrier Name -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.carrierName') }}</label>
+      <input
+        type="text"
+        formControlName="carrierName"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Flight Number (conditional) -->
+    <div *ngIf="bookingForm.get('type')?.value === 0">
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.flightNumber') }}</label>
+      <input
+        type="text"
+        formControlName="flightNumber"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Ship Number (conditional) -->
+    <div *ngIf="bookingForm.get('type')?.value === 1">
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.shipNumber') }}</label>
+      <input
+        type="text"
+        formControlName="shipNumber"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Departure Airport -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.departureAirport') }}</label>
+      <input
+        type="text"
+        formControlName="departureAirport"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Arrival Airport -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.arrivalAirport') }}</label>
+      <input
+        type="text"
+        formControlName="arrivalAirport"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Departure Date -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.departureDate') }}</label>
+      <input
+        type="datetime-local"
+        formControlName="departureDate"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Number of Seats -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.numberOfSeats') }}</label>
+      <input
+        type="number"
+        formControlName="numberOfSeats"
+        min="1"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Price Per Seat -->
+    <div>
+      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.transport.pricePerSeat') }}</label>
+      <input
+        type="number"
+        formControlName="pricePerSeat"
+        min="0"
+        step="0.01"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+      />
+    </div>
+
+    <!-- Total Price -->
+    <div class="text-lg font-semibold text-[var(--text-primary)]">
+      {{ i18n.translate('booking.totalPrice') }}: ${{ totalPrice }}
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="w-full text-white font-medium px-4 py-2 rounded transition-all duration-200
+        disabled:bg-gray-400 disabled:cursor-not-allowed
+        bg-[var(--primary)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+      [disabled]="bookingForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Processing...' : 'Book International Transport' }}
+    </button>
+  </form>
+</div>

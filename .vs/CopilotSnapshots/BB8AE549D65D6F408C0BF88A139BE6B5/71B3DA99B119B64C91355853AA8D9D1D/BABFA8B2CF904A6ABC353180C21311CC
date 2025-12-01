@@ -1,0 +1,304 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map, take, catchError, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    // Defer to avoid potential circular initialization (interceptors etc.)
+    setTimeout(() => {
+      this.loadUserFromToken();
+      this.cleanupOrphanedBookingData();
+    }, 0);
+  }
+
+  login(credentials: LoginRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, credentials).pipe(
+      take(1),
+      tap(response => {
+        const payload = this.normalizeAuthPayload(response);
+        this.setAuthData(payload, rememberMe);
+        this.fetchAndSetUser();
+      })
+    );
+  }
+
+  register(data: RegisterRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/register`, data).pipe(
+      take(1),
+      tap(response => {
+        const payload = this.normalizeAuthPayload(response);
+        this.setAuthData(payload, rememberMe);
+        this.fetchAndSetUser();
+      })
+    );
+  }
+
+  logout(): void {
+    const currentUserId = this.getCurrentUserValue()?.id;
+    this.http.post(`${this.apiUrl}/Auth/logout`, {}).pipe(take(1)).subscribe({
+      next: () => this.clearAuthData(currentUserId?.toString()),
+      error: () => this.clearAuthData(currentUserId?.toString())
+    });
+  }
+
+  getCurrentUser(): Observable<User> {
+    // server may return ApiResponse<User> or { data: User } or raw User
+    return this.http.get<any>(`${this.apiUrl}/Auth/me`).pipe(
+      take(1),
+      map(resp => {
+        if (!resp) return null as any;
+        // ApiResponse<T> shape
+        if ('data' in resp) return resp.data as User;
+        // direct User shape
+        return resp as User;
+      }),
+      catchError(() => of(null as any))
+    );
+  }
+
+  private fetchAndSetUser(): void {
+    this.getCurrentUser().pipe(take(1)).subscribe({
+      next: (user) => {
+        if (user) {
+          // Ensure roles normalized to array
+          user = this.normalizeUserRoles(user);
+          this.currentUserSubject.next(user);
+        } else {
+          // no user -> clear auth
+          this.clearAuthData();
+        }
+      },
+      error: (err) => {
+        // Only clear auth data if it's an authentication error (401)
+        if (err?.status === 401) {
+          this.clearAuthData();
+        }
+      }
+    });
+  }
+
+  getToken(): string | null {
+    const token = this.getCookie('token');
+    return token;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  getRole(): UserRole | null {
+    const user = this.getCurrentUserValue();
+    if (!user) return null;
+    // support both `roles` array and legacy `role` single-field
+    const roles = (user as any).roles ?? ((user as any).role ? [(user as any).role] : []);
+    if (!roles || roles.length === 0) return null;
+    return (roles[0] as UserRole) ?? null;
+  }
+
+  setAuthData(data: { token?: string; refreshToken?: string | null; tokenType?: string; expiresIn?: number } | any, rememberMe: boolean = false): void {
+    // Accept either nested data or full object: normalize
+    const payload = this.normalizeAuthPayload(data);
+
+    // Store rememberMe preference
+    if (rememberMe) {
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      localStorage.removeItem('rememberMe');
+    }
+
+    const days = rememberMe ? 7 : 1;
+    if (payload.token) {
+      this.setCookie('token', payload.token, days);
+    }
+
+    if (payload.refreshToken) {
+      localStorage.setItem('refreshToken', payload.refreshToken);
+    }
+  }
+
+  refreshToken(): Observable<{ token: string; refreshToken: string }> {
+    return this.http.post<any>(`${this.apiUrl}/Auth/RefreshToken`, {}).pipe(
+      take(1),
+      tap(res => {
+        const payload = this.normalizeAuthPayload(res);
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        const days = rememberMe ? 7 : 1;
+        if (payload.token) this.setCookie('token', payload.token, days);
+        if (payload.refreshToken) localStorage.setItem('refreshToken', payload.refreshToken);
+      }),
+      map(resp => {
+        const normalized = this.normalizeAuthPayload(resp);
+        return { token: normalized.token ?? '', refreshToken: normalized.refreshToken ?? '' };
+      })
+    );
+  }
+
+  private loadUserFromToken(): void {
+    const token = this.getToken();
+    if (token) {
+      this.fetchAndSetUser();
+    }
+  }
+
+  private clearAuthData(userId?: string): void {
+    // keep booking data persistence by default as requested by UX
+    this.deleteCookie('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('rememberMe');
+    this.currentUserSubject.next(null);
+
+    // Clean up any orphaned booking data only when no user present
+    this.cleanupOrphanedBookingData();
+  }
+
+  // Call this ONLY after successful payment/booking
+  clearUserBookingData(): void {
+    const user = this.getCurrentUserValue();
+    if (!user) return;
+    const key = `bookingData_${user.id}`;
+    localStorage.removeItem(key);
+  }
+
+  private clearUserSpecificData(userId: string) {
+    if (!userId) return;
+    const bookingKey = `bookingData_${userId}`;
+    localStorage.removeItem(bookingKey);
+  }
+
+  // Booking helpers
+  saveBookingData(data: any) {
+    const user = this.getCurrentUserValue();
+    if (!user) return;
+    const key = `bookingData_${user.id}`;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  getBookingData(): any {
+    const user = this.getCurrentUserValue();
+    if (!user) return null;
+    const key = `bookingData_${user.id}`;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  }
+
+  // Clean up legacy and orphaned booking data
+  cleanupOrphanedBookingData(): void {
+    const user = this.getCurrentUserValue();
+
+    // List of legacy keys that should be removed
+    const legacyKeys = [
+      'bookingData',
+      'bookingId',
+      'makkahHotelData',
+      'madinahHotelData',
+      'transportData',
+      'groundData',
+      'passengerData',
+      'makkahHotelBooked',
+      'madinahHotelBooked',
+      'transportBooked',
+      'groundBooked',
+      'selectedTransportId',
+      'selectedGroundTransportId'
+    ];
+
+    // Remove legacy root-level booking keys
+    legacyKeys.forEach(key => localStorage.removeItem(key));
+
+    // If user is not logged in, remove any user-specific booking keys
+    if (!user) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('bookingData_')) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+  }
+
+  // Cookie Helpers
+  private setCookie(name: string, value: string, days?: number) {
+    let expires = "";
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax" + secure;
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie ? document.cookie.split(';') : [];
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i]!;
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax' + secure;
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(this.normalizeUserRoles(user));
+  }
+
+  // ---------------------- Helpers ----------------------
+
+  /**
+   * Normalize various server payload shapes into { token, refreshToken, tokenType, expiresIn }
+   */
+  private normalizeAuthPayload(input: any): { token?: string; refreshToken?: string | null; tokenType?: string; expiresIn?: number } {
+    if (!input) return {};
+    // If full ApiResponse with data
+    if (input.data && typeof input.data === 'object') {
+      const d = input.data;
+      return {
+        token: d.token ?? d.accessToken ?? d?.token?.toString(),
+        refreshToken: d.refreshToken ?? d.refresh_Token ?? d?.refreshToken?.toString() ?? null,
+        tokenType: d.tokenType ?? d.token_type,
+        expiresIn: d.expiresIn ?? d.expires_in
+      };
+    }
+    // If direct payload
+    return {
+      token: input.token ?? input.accessToken,
+      refreshToken: input.refreshToken ?? null,
+      tokenType: input.tokenType,
+      expiresIn: input.expiresIn
+    };
+  }
+
+  /**
+   * Ensure user.roles is an array of strings (and map if older `role` single-field exists)
+   */
+  private normalizeUserRoles(user: any): User {
+    if (!user) return user;
+    if (!user.roles) {
+      if (user.role) {
+        user.roles = Array.isArray(user.role) ? user.role : [user.role];
+      } else {
+        user.roles = [];
+      }
+    }
+    return user as User;
+  }
+}
