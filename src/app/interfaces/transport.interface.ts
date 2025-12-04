@@ -2,35 +2,29 @@ export enum TransportType {
   BUS = 'bus',
   CAR = 'car',
   VAN = 'van',
-  PRIVATE = 'private'
+  PRIVATE = 'private',
 }
- export enum AirArrivalAirport
-{
-    
-    Jeddah='Jeddah',
-    Madinah='Madinah',
-    Taif='Taif'
+export enum AirArrivalAirport {
+  Jeddah = 'Jeddah',
+  Madinah = 'Madinah',
+  Taif = 'Taif',
 }
- export enum AirDepartureAirport
- {
-     
-     CairoInternational='CairoInternational',        // CAI
-     BorgElArabAlexandria='BorgElArabAlexandria',      // HBE
-     SharmElSheikhInternational='SharmElSheikhInternational',// SSH
-     HurghadaInternational='HurghadaInternational',     // HRG
-     AssiutInternational='AssiutInternational',       // ATZ
-     SohagInternational='SohagInternational'         // HMB
- }
- export enum SeaDepartureAirport
- {
- SafagaPort='SafagaPort',
- AlexandriaPort='AlexandriaPort',
- HurghadaPort='HurghadaPort'
- }
-  export enum SeaArrivalAirport
-{
-    Jeddah='Jeddah',
-    Madinah='Madinah',  
+export enum AirDepartureAirport {
+  CairoInternational = 'Cairo', // CAI
+  BorgElArabAlexandria = 'BorgElArabAlexandria', // HBE
+  SharmElSheikhInternational = 'SharmElSheikh', // SSH
+  HurghadaInternational = 'Hurghada', // HRG
+  AssiutInternational = 'Assiut', // ATZ
+  SohagInternational = 'Sohag', // HMB
+}
+export enum SeaDepartureAirport {
+  SafagaPort = 'SafagaPort',
+  AlexandriaPort = 'AlexandriaPort',
+  HurghadaPort = 'HurghadaPort',
+}
+export enum SeaArrivalAirport {
+  Jeddah = 'Jeddah',
+  Madinah = 'Madinah',
 }
 // export interface TransportOption {
 //   id: string;
@@ -73,10 +67,9 @@ export interface TransportOption {
   createdByUserId?: string;
 }
 
-
 export interface TransportSearchParams {
-  departureLocation?: string| null;
-  arrivalLocation?: string| null;
+  departureLocation?: string | null;
+  arrivalLocation?: string | null;
   departureDate?: string;
   returnDate?: string;
   passengers?: number;
@@ -85,16 +78,16 @@ export interface TransportSearchParams {
   maxPrice?: number;
 }
 
-  export interface GroundTransport {
+export interface GroundTransport {
   id?: string;
   serviceName: string;
-  type: string; 
+  type: string;
   pricePerPerson: number;
   description?: string;
   capacity: number;
   isActive: boolean;
-  route:string;
-  duration:string;
-  rate:string;
+  route: string;
+  duration: string;
+  rate: string;
   amenities?: string[];
-   }
+}
