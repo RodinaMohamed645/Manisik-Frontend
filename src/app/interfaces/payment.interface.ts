@@ -24,3 +24,30 @@ export interface Payment {
   updatedAt: string;
 }
 
+// Client -> server request to create a payment (Stripe PaymentIntent or Checkout session)
+export interface CreatePaymentRequest {
+  bookingId: number | string;
+  currency?: string; // e.g. 'usd'
+  amount?: number; // optional; server can calculate
+  idempotencyKey?: string;
+}
+
+// Server -> client minimal payment response
+export interface PaymentResponse {
+  clientSecret?: string; // for PaymentIntent (Elements)
+  sessionId?: string; // for Checkout (client redirect)
+  url?: string; // optional direct url to redirect to
+  publishableKey?: string; // optional override
+}
+
+// PayPal capture request shape (if integrated)
+export interface PayPalCaptureRequest {
+  orderId: string;
+  bookingId?: number | string;
+}
+
+export enum PaymentProvider {
+  STRIPE = 'stripe',
+  PAYPAL = 'paypal'
+}
+

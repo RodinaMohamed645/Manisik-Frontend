@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
-import { RegisterRequest, UserRole } from 'src/app/interfaces/user.interface';
+import { UserRole } from 'src/app/interfaces/user.interface';
+import { RegisterDto } from 'src/app/models/api';
 import { ToastrService } from 'ngx-toastr';
 
 
@@ -48,42 +49,25 @@ export class SignInComponent {
     if (this.registrationForm.invalid) {
       this.registrationForm.markAllAsTouched();
 
-      this.registerService.register(this.registrationForm.value).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.toastr.success('Registration successful! Please log in.', 'Success');
-          if (response.data.user) {
-            this.router.navigate(['/login']);
-          } else {
-            this.errorMessage = 'Registration failed. Please try again.';
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
-          console.error('Registration error:', error);
-        }
-      });
-
+      // Form invalid: mark touched and bail out (do not submit)
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const registerData: RegisterRequest = {
-      // Uncomment these when needed
-      // fullName: this.registrationForm.value.fullName,
+    const registerData: RegisterDto = {
       email: this.registrationForm.value.email,
       password: this.registrationForm.value.password,
-      // phoneNumber: this.registrationForm.value.phoneNumber,
-      // userType: this.registrationForm.value.userType,
+      firstName: this.registrationForm.value.FirstName || this.registrationForm.value.firstName || '',
+      lastName: this.registrationForm.value.LastName || this.registrationForm.value.lastName || '',
+      phoneNumber: this.registrationForm.value.phoneNumber || null,
     };
 
     this.registerService.register(registerData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        if (response.data.user) {
+        if (response?.data?.user) {
           this.router.navigate(['/login']);
         } else {
           this.errorMessage = 'Registration failed. Please try again.';

@@ -1,0 +1,30 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Booking, CreateBookingRequest } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BookingsService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+
+  getBookings(): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.apiUrl}/bookings`);
+  }
+
+  getBookingById(id: string): Observable<Booking> {
+    return this.http.get<Booking>(`${this.apiUrl}/bookings/${id}`);
+  }
+
+  createBooking(booking: CreateBookingRequest): Observable<Booking> {
+    return this.http.post<Booking>(`${this.apiUrl}/bookings`, booking);
+  }
+
+  cancelBooking(id: string): Observable<Booking> {
+    return this.http.patch<Booking>(`${this.apiUrl}/bookings/${id}/cancel`, {});
+  }
+}
+

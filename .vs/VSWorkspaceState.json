@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.angular\\cache\\19.2.19\\Manasik-Client",
+    "\\.github\\workflows",
+    "\\src",
+    "\\src\\app",
+    "\\src\\app\\Components",
+    "\\src\\app\\Components\\booking-package"
+  ],
+  "SelectedNode": "\\src\\app\\Components\\booking-package\\booking-package.component.ts",
+  "PreviewInSolutionExplorer": false
+}

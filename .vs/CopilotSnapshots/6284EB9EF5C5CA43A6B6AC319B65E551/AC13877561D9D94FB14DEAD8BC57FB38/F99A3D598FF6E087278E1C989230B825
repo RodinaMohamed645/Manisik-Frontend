@@ -1,0 +1,7 @@
+﻿export const environment = {
+  production: true,
+  apiUrl: 'https://api.manisik.com/api',
+  appName: 'Manisik Umrah Booking Platform',
+  version: '1.0.0'
+};
+

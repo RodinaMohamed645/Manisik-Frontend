@@ -8,12 +8,21 @@ export class LoadingService {
   private readonly loadingSubject = new BehaviorSubject<boolean>(false);
   public readonly loading$: Observable<boolean> = this.loadingSubject.asObservable();
 
+  private requestCount = 0;
+
   show(): void {
-    Promise.resolve().then(() => this.loadingSubject.next(true));
+    this.requestCount++;
+    if (this.requestCount === 1) {
+      Promise.resolve().then(() => this.loadingSubject.next(true));
+    }
   }
 
   hide(): void {
-    Promise.resolve().then(() => this.loadingSubject.next(false));
+    this.requestCount--;
+    if (this.requestCount <= 0) {
+      this.requestCount = 0;
+      Promise.resolve().then(() => this.loadingSubject.next(false));
+    }
   }
 
   getLoadingValue(): boolean {

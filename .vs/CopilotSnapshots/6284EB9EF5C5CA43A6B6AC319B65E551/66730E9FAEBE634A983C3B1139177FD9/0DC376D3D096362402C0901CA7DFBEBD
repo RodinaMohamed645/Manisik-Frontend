@@ -1,0 +1,249 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole, ApiResponse, Booking } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    this.loadUserFromToken();
+  }
+
+  // keep optional rememberMe param for flexibility
+  login(credentials: LoginRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/Login`, credentials).pipe(
+      tap(response => {
+        if (response?.data) {
+          this.setAuthData({ token: response.data.token, refreshToken: response.data.refreshToken }, rememberMe);
+          this.fetchAndSetUser();
+        }
+      })
+    );
+  }
+
+  register(data: RegisterRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/Register`, data).pipe(
+      tap response => {
+        if (response?.data) {
+          this.setAuthData({ token: response.data.token, refreshToken: response.data.refreshToken }, rememberMe);
+          this.fetchAndSetUser();
+        }
+      })
+    );
+  }
+
+  logout(): void {
+    // backend logout may not exist — try best-effort then clear
+    this.http.post(`${this.apiUrl}/Auth/Logout`, {}).subscribe({
+      next: () => this.clearAuthData(),
+      error: () => this.clearAuthData()
+    });
+  }
+
+  // Get currently authenticated user
+  getCurrentUser(): Observable<User> {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/Auth/Me`).pipe(
+      map(response => response.data)
+    );
+  }
+
+  // Fetch and store user in BehaviorSubject
+  private fetchAndSetUser(): void {
+    this.getCurrentUser().subscribe({
+      next: (user) => this.currentUserSubject.next(user),
+      error: () => this.clearAuthData()
+    });
+  }
+
+  // Users administration endpoints
+  getUsers(): Observable<User[]> {
+    return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/Auth/Users`).pipe(map(r => r.data || []));
+  }
+
+  getUsersByRole(roleName: string): Observable<User[]> {
+    return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/Auth/UsersByRole/${encodeURIComponent(roleName)}`).pipe(map(r => r.data || []));
+  }
+
+  assignRole(userId: string, role: UserRole | string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/Auth/AssignRole`, { userId, role });
+  }
+
+  removeRole(userId: string, role: UserRole | string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/Auth/RemoveRole`, { userId, role });
+  }
+
+  // Auth-specific MyBookings (some backends expose it under Auth)
+  getMyBookings(): Observable<Booking[]> {
+    return this.http.get<ApiResponse<Booking[]>>(`${this.apiUrl}/Auth/MyBookings`).pipe(map(r => r.data || []));
+  }
+
+  getToken(): string | null {
+    return this.getCookie('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  getRole(): UserRole | null {
+    const user = this.getCurrentUserValue();
+    return user ? user.role : null;
+  }
+
+  /**
+   * Stores the auth token in a cookie and refresh token in localStorage.
+   * @param data The auth data containing the token.
+   * @param rememberMe If true, sets a persistent cookie (7 days). If false, sets a session cookie.
+   */
+  setAuthData(data: { token: string; refreshToken: string | null }, rememberMe: boolean = false): void {
+    if (!data?.token) return;
+    // store token as cookie for compatibility
+    const days = rememberMe ? 7 : undefined;
+    this.setCookie('token', data.token, days);
+
+    try {
+      if (rememberMe) localStorage.setItem('auth_remember', '1');
+      else localStorage.removeItem('auth_remember');
+    } catch {}
+
+    // store refresh token in localStorage (used by interceptor for refresh)
+    try {
+      if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+      else localStorage.removeItem('refreshToken');
+    } catch {}
+  }
+
+  refreshToken(): Observable<{ token: string; refreshToken: string }> {
+    // Include stored refresh token in the request body to support backends that expect it
+    let stored: string | null = null;
+    try { stored = localStorage.getItem('refreshToken'); } catch { stored = null; }
+
+    return this.http.post<{ token: string; refreshToken: string }>(`${this.apiUrl}/Auth/RefreshToken`, { refreshToken: stored }).pipe(
+      tap(res => {
+        if (res?.token) {
+          // Preserve remember preference when refreshing
+          const remember = localStorage.getItem('auth_remember') === '1';
+          const days = remember ? 7 : undefined;
+          this.setCookie('token', res.token, days);
+        }
+        try {
+          if (res?.refreshToken) localStorage.setItem('refreshToken', res.refreshToken);
+        } catch {}
+
+        // After refresh, fetch current user so currentUser$ is populated
+        if (res?.token) {
+          try {
+            this.fetchAndSetUser();
+          } catch (e) {
+            // ignore fetch errors here; caller will handle
+          }
+        }
+      })
+    );
+  }
+
+  private loadUserFromToken(): void {
+    if (this.getToken()) {
+      this.fetchAndSetUser();
+    }
+  }
+
+  private clearAuthData(): void {
+    this.deleteCookie('token');
+    try {
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('auth_remember');
+    } catch {}
+    this.currentUserSubject.next(null);
+  }
+
+  // Cookie Helpers
+  private setCookie(name: string, value: string, days?: number) {
+    try {
+      const encoded = encodeURIComponent(value || '');
+      let cookie = `${name}=${encoded}; Path=/; SameSite=Strict;`;
+      if (typeof days === 'number') {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        cookie += ` Expires=${date.toUTCString()}; Max-Age=${days * 24 * 60 * 60};`;
+      }
+
+      // Add Secure only when running over HTTPS or in production
+      try {
+        const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+        if (isHttps || environment.production) {
+          cookie += ' Secure;';
+        }
+      } catch {}
+
+      document.cookie = cookie;
+    } catch (e) {
+      // ignore cookie set errors
+      console.error('Failed to set cookie', e);
+    }
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    try {
+      // set expiration in the past and keep SameSite/Path; Secure not required for deletion
+      document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Strict;`;
+    } catch (e) {}
+  }
+
+  // ---------------- Per-user booking draft helpers ----------------
+  getBookingData(): any {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user && user.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  saveBookingData(data: any): void {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user && user.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }
+
+  clearUserBookingData(): void {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user && user.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      localStorage.removeItem(key);
+    } catch (e) {}
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+  }
+}

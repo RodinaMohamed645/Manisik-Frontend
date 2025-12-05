@@ -13,7 +13,7 @@
       @for (action of actions; track $index) {
         <button type="button"
                 (click)="onActionClick(action)"
-                class="group p-8 border border-[var(--border)] bg-[var(--background)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 hover:-translate-y-2 cursor-pointer text-left w-full"
+                class="group p-8 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 hover:-translate-y-2 cursor-pointer text-left w-full"
                 style="border-radius: var(--radius-card)"
                 [attr.aria-label]="t(action.titleKey) + ' - ' + t(action.descriptionKey)">
           <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
@@ -22,19 +22,19 @@
                          class="h-8 w-8 text-[var(--primary)]"
                          aria-hidden="true"></lucide-icon>
           </div>
-          <h4 class="text-[var(--text-primary)] mb-2 font-semibold">{{ t(action.titleKey) }}</h4>
-          <p class="text-[var(--text-secondary)]">{{ t(action.descriptionKey) }}</p>
+          <h4 class="text-[var(--color-text)] mb-2 font-semibold">{{ t(action.titleKey) }}</h4>
+          <p class="text-[var(--color-text-muted)]">{{ t(action.descriptionKey) }}</p>
         </button>
       }
     </div>
   </section>
 
   <!-- FEATURED PACKAGES -->
-  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--surface)]">
+  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--color-surface)]">
     <!-- heading -->
     <div class="text-center mb-12">
-      <h2 class="text-[var(--text-primary)] mb-4">{{ t('home.trending') }}</h2>
-      <p class="text-[var(--text-secondary)] text-lg">{{ t('home.trendingDesc') }}</p>
+      <h2 class="text-[var(--color-text)] mb-4">{{ t('home.trending') }}</h2>
+      <p class="text-[var(--color-text-muted)] text-lg">{{ t('home.trendingDesc') }}</p>
     </div>
 
     <!-- category filter -->
@@ -44,7 +44,7 @@
                 class="px-4 py-2 rounded-full text-sm font-medium transition-all"
                 [ngClass]="selectedCategory() === cat
                   ? 'bg-[var(--primary)] text-white border-transparent'
-                  : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:bg-[var(--background)] hover:text-[var(--text-primary)]'"
+                  : 'border border-[var(--border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text)]'"
                 style="border-radius: var(--radius-pill)">
           {{ t('home.packages.category.'+cat) }}
         </button>
@@ -54,7 +54,7 @@
     <!-- grid – identical card structure -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       @for (pkg of filteredPackages(); track $index) {
-        <div class="flex flex-col group overflow-hidden border border-[var(--border)] bg-[var(--background)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
+        <div class="flex flex-col group overflow-hidden border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
              style="border-radius: var(--radius-card)">
           <!-- image + badge -->
           <div class="relative h-48 overflow-hidden">
@@ -72,13 +72,13 @@
             <div class="flex items-center gap-1 mb-2">
               <lucide-icon name="star"
                            class="h-4 w-4 fill-[var(--warning)] text-[var(--warning)]"></lucide-icon>
-              <span class="text-[var(--text-primary)]">{{ pkg.rating }}</span>
-              <span class="text-[var(--text-secondary)]">({{ pkg.reviews }})</span>
+              <span class="text-[var(--color-text)]">{{ pkg.rating }}</span>
+              <span class="text-[var(--color-text-muted)]">({{ pkg.reviews }})</span>
             </div>
 
-            <h4 class="text-[var(--text-primary)] mb-2">{{ t(pkg.titleKey) }}</h4>
+            <h4 class="text-[var(--color-text)] mb-2">{{ t(pkg.titleKey) }}</h4>
 
-            <div class="flex items-center gap-4 mb-3 text-[var(--text-secondary)]">
+            <div class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]">
               <div class="flex items-center gap-1">
                 <lucide-icon name="clock" class="h-4 w-4"></lucide-icon>
                 <span>{{ pkg.duration }} {{ t('home.packages.duration.days') }}</span>
@@ -92,7 +92,7 @@
             <!-- included – keys only -->
             <div class="space-y-1 mb-4">
               @for (key of pkg.includedKeys.slice(0,3); track $index) {
-                <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+                <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
                   <lucide-icon name="check"
                                class="h-3 w-3 text-[var(--success)]"></lucide-icon>
                   <span>{{ t('home.packages.included.'+key) }}</span>
@@ -103,15 +103,15 @@
             <!-- bottom row – always at the bottom -->
             <div class="mt-auto pt-4 flex items-end justify-between">
               <div>
-                <span class="text-[var(--text-secondary)]">{{ t('home.packages.from') }}</span>
-                <div class="text-[var(--text-primary)]">
+                <span class="text-[var(--color-text-muted)]">{{ t('home.packages.from') }}</span>
+                <div class="text-[var(--color-text)]">
                   <span class="text-2xl">${{ pkg.price }}</span>
-                  <span class="text-[var(--text-secondary)]">{{ t('home.packages.perPerson') }}</span>
+                  <span class="text-[var(--color-text-muted)]">{{ t('home.packages.perPerson') }}</span>
                 </div>
               </div>
               <button type="button"
                       (click)="onViewPackageDetails(pkg.id)"
-                      class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
+                      class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
                 {{ t('common.viewDetails') }}
               </button>
             </div>
@@ -124,7 +124,7 @@
     <div class="text-center">
       <button type="button"
               (click)="onViewAllPackages()"
-              class="border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white px-6 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+              class="border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white px-6 py-2 rounded focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
               style="border-radius: var(--radius-button)">
         {{ t('home.viewAllPackages') }}
       </button>
@@ -134,8 +134,8 @@
   <!-- HOW IT WORKS -->
   <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="text-center mb-16">
-      <h2 class="text-[var(--text-primary)] mb-4">{{ t('home.howItWorks') }}</h2>
-      <p class="text-[var(--text-secondary)] text-lg">{{ t('home.howItWorksDesc') }}</p>
+      <h2 class="text-[var(--color-text)] mb-4">{{ t('home.howItWorks') }}</h2>
+      <p class="text-[var(--color-text-muted)] text-lg">{{ t('home.howItWorksDesc') }}</p>
     </div>
 
     <div class="relative">
@@ -152,8 +152,8 @@
               </div>
             </div>
 
-            <h4 class="text-[var(--text-primary)] mb-3">{{ t(step.titleKey) }}</h4>
-            <p class="text-[var(--text-secondary)]">{{ t(step.descriptionKey) }}</p>
+            <h4 class="text-[var(--color-text)] mb-3">{{ t(step.titleKey) }}</h4>
+            <p class="text-[var(--color-text-muted)]">{{ t(step.descriptionKey) }}</p>
           </div>
         }
       </div>
@@ -167,7 +167,7 @@
         @for (stat of stats; track $index) {
           <div class="text-center">
             <div class="flex justify-center mb-4">
-              <div class="w-16 h-16 rounded-full flex items-center justify-center bg-white/10">
+              <div class="w-16 h-16 rounded-full flex items-center justify-center bg-[var(--color-bg)]/10">
                 <lucide-icon [name]="stat.icon" class="h-8 w-8 text-white"></lucide-icon>
               </div>
             </div>
@@ -182,25 +182,25 @@
   </section>
 
   <!-- TESTIMONIALS -->
-  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--surface)]">
+  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--color-surface)]">
     <div class="text-center mb-12">
-      <h2 class="text-[var(--text-primary)] mb-4">{{ t('home.testimonials.title') }}</h2>
-      <p class="text-[var(--text-secondary)] text-lg">{{ t('home.testimonials.desc') }}</p>
+      <h2 class="text-[var(--color-text)] mb-4">{{ t('home.testimonials.title') }}</h2>
+      <p class="text-[var(--color-text-muted)] text-lg">{{ t('home.testimonials.desc') }}</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       @for (testimonial of testimonials; track $index) {
-        <div class="p-6 border border-[var(--border)] bg-[var(--background)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
+        <div class="p-6 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
              style="border-radius: var(--radius-card)">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full overflow-hidden bg-[var(--surface)] flex items-center justify-center">
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-[var(--color-surface)] flex items-center justify-center">
               <img [src]="testimonial.avatar"
                    [alt]="testimonial.name"
                    class="w-full h-full object-cover">
             </div>
             <div class="flex-1">
               <div class="flex items-center gap-2">
-                <h4 class="text-[var(--text-primary)]">{{ testimonial.name }}</h4>
+                <h4 class="text-[var(--color-text)]">{{ testimonial.name }}</h4>
                 @if (testimonial.verified) {
                   <div class="bg-[var(--success)]/10 text-[var(--success)] border-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs">
                     <lucide-icon name="check-circle" class="h-3 w-3"></lucide-icon>
@@ -218,7 +218,7 @@
               </div>
             </div>
           </div>
-          <p class="text-[var(--text-secondary)] italic">
+          <p class="text-[var(--color-text-muted)] italic">
             “{{ t(testimonial.textKey) }}”
           </p>
         </div>
@@ -242,7 +242,7 @@
                  [ngModel]="newsletterEmail()"
                  (ngModelChange)="newsletterEmail.set($event)"
                  [placeholder]="t('home.newsletter.emailPlaceholder')"
-                 class="bg-white border-0 h-12 flex-1 px-4 rounded outline-none
+                 class="bg-[var(--color-bg)] border-0 h-12 flex-1 px-4 rounded outline-none text-[var(--color-text)]
                         focus:ring-2 focus:ring-white focus:ring-offset-2
                         focus:ring-offset-[var(--primary)]"
                  aria-label="Email address for newsletter subscription"
@@ -250,9 +250,9 @@
 
           <button type="submit"
                   [disabled]="isSubmittingNewsletter()"
-                  class="bg-[var(--background)] text-[var(--primary)]
-                         hover:bg-white h-12 px-8 rounded
-                         focus:outline-none focus:ring-2 focus:ring-white
+                  class="bg-[var(--color-bg)] text-[var(--primary)]
+                         hover:bg-[var(--color-bg)] h-12 px-8 rounded
+                         focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-white
                          focus:ring-offset-2 focus:ring-offset-[var(--primary)]
                          disabled:opacity-50 disabled:cursor-not-allowed">
             @if (isSubmittingNewsletter()) {
@@ -272,7 +272,7 @@
   </section>
 
   <!-- ABOUT SECTION -->
-  <section id="about" class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--background)]">
+  <section id="about" class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--color-bg)]">
     <div class="flex flex-col lg:flex-row items-center gap-12">
       <!-- Image Side -->
       <div class="w-full lg:w-1/2 relative">
@@ -301,31 +301,31 @@
           <span>{{ t('nav.about') }}</span>
         </div>
         
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--text-primary)] leading-tight">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] leading-tight">
           {{ t('home.about.title') }}
         </h2>
         
-        <p class="text-[var(--text-secondary)] text-lg leading-relaxed">
+        <p class="text-[var(--color-text-muted)] text-lg leading-relaxed">
           {{ t('home.about.description') }}
         </p>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
           <div class="flex items-start gap-3">
-            <div class="p-2 rounded-lg bg-[var(--surface)] text-[var(--primary)]">
+            <div class="p-2 rounded-lg bg-[var(--color-surface)] text-[var(--primary)]">
               <lucide-icon name="users" class="h-6 w-6"></lucide-icon>
             </div>
             <div>
-              <h4 class="font-semibold text-[var(--text-primary)]">{{ t('home.about.feature2.title') }}</h4>
-              <p class="text-sm text-[var(--text-secondary)]">{{ t('home.about.feature2.desc') }}</p>
+              <h4 class="font-semibold text-[var(--color-text)]">{{ t('home.about.feature2.title') }}</h4>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ t('home.about.feature2.desc') }}</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
-            <div class="p-2 rounded-lg bg-[var(--surface)] text-[var(--primary)]">
+            <div class="p-2 rounded-lg bg-[var(--color-surface)] text-[var(--primary)]">
               <lucide-icon name="award" class="h-6 w-6"></lucide-icon>
             </div>
             <div>
-              <h4 class="font-semibold text-[var(--text-primary)]">{{ t('home.about.feature1.title') }}</h4>
-              <p class="text-sm text-[var(--text-secondary)]">{{ t('home.about.feature1.desc') }}</p>
+              <h4 class="font-semibold text-[var(--color-text)]">{{ t('home.about.feature1.title') }}</h4>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ t('home.about.feature1.desc') }}</p>
             </div>
           </div>
         </div>
@@ -341,19 +341,19 @@
   </section>
 
   <!-- FAQ -->
-  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--surface)]">
+  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--color-surface)]">
     <div class="text-center mb-12">
-      <h2 class="text-[var(--text-primary)] mb-4">{{ t('home.faq.title') }}</h2>
-      <p class="text-[var(--text-secondary)] text-lg">{{ t('home.faq.desc') }}</p>
+      <h2 class="text-[var(--color-text)] mb-4">{{ t('home.faq.title') }}</h2>
+      <p class="text-[var(--color-text-muted)] text-lg">{{ t('home.faq.desc') }}</p>
     </div>
 
     <div class="max-w-3xl mx-auto space-y-4">
       @for (faq of faqs; track $index) {
-        <div class="border border-[var(--border)] bg-[var(--background)] rounded-lg overflow-hidden">
+        <div class="border border-[var(--border)] bg-[var(--color-bg)] rounded-lg overflow-hidden">
           <button type="button"
                   class="w-full px-6 py-4 text-left flex items-center gap-4
-                         text-[var(--text-primary)] hover:text-[var(--primary)]
-                         focus:outline-none focus:ring-2 focus:ring-[var(--primary)]
+                         text-[var(--color-text)] hover:text-[var(--primary)]
+                         focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]
                          focus:ring-offset-2"
                   (click)="toggleFAQ(faq.questionKey)"
                   [attr.aria-expanded]="isFAQOpen(faq.questionKey)"
@@ -370,7 +370,7 @@
 
           @if (isFAQOpen(faq.questionKey)) {
             <div [id]="'faq-ans-'+$index"
-                 class="px-6 py-4 text-[var(--text-secondary)]" role="region">
+                 class="px-6 py-4 text-[var(--color-text-muted)]" role="region">
               {{ t(faq.answerKey) }}
             </div>
           }

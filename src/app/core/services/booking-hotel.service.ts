@@ -1,21 +1,17 @@
-import { Booking } from './../../interfaces/booking.interface';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiResponse, HotelBooking } from 'src/app/interfaces';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../environments/environment';
+import { ApiResponse, HotelBookingDto } from 'src/app/models/api';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BookingHotelService {
+  private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
-  constructor(private http: HttpClient) {}
 
-  bookHotel(dto: HotelBooking): Observable<ApiResponse<HotelBooking>> {
-    return this.http.post<ApiResponse<HotelBooking>>(
-      `${this.apiUrl}/HotelBooking/BookHotel`,
-      dto
-    );
+  bookHotel(booking: HotelBookingDto): Observable<ApiResponse<HotelBookingDto>> {
+    return this.http.post<ApiResponse<HotelBookingDto>>(`${this.apiUrl}/HotelBooking/BookHotel`, booking, { withCredentials: true });
   }
 }

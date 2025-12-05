@@ -1,0 +1,231 @@
+﻿import { Component, inject, signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { I18nService } from 'src/app/core/services/i18n.service';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { FormsModule } from '@angular/forms';
+import { BookingsService } from 'src/app/core/services/bookings.service';
+import { Booking } from 'src/app/interfaces';
+
+interface Trip {
+  id: number;
+  type: string;
+  destination: string;
+  hotel: string;
+  date: string;
+  daysLeft: number;
+  status: string;
+}
+
+interface Activity {
+  action: string;
+  item: string;
+  time: string;
+}
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
+})
+export class DashboardComponent implements OnInit {
+  readonly i18n = inject(I18nService);
+  readonly auth = inject(AuthService);
+  readonly bookings = inject(BookingsService);
+
+  role = signal<string | null>(null);
+  currentUser = signal<any>(null);
+  upcomingTrips = signal<Trip[]>([]);
+  recentActivity = signal<Activity[]>([]);
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
+  manageHotelData = {
+    name: '',
+    city: 0,
+    address: '',
+    starRating: 0,
+    distanceToHaram: 0,
+    description: '',
+    descriptionAr: '',
+    imageUrl: '',
+    rooms: [] as any[]
+  };
+
+  constructor() {
+    // React to user changes
+    this.auth.currentUser$.subscribe(user => {
+      this.currentUser.set(user);
+      this.role.set(user?.role ?? null);
+      if (user) {
+        this.loadDashboardData(user.role);
+      } else {
+        this.upcomingTrips.set([]);
+        this.recentActivity.set([]);
+      }
+    });
+  }
+
+  ngOnInit() {
+    // Initial load if user is already present
+    const user = this.auth.getCurrentUserValue();
+    if (user) {
+      this.currentUser.set(user);
+      this.role.set(user.role);
+      this.loadDashboardData(user.role);
+    }
+  }
+
+  private loadDashboardData(role: string) {
+    this.loading.set(true);
+    this.error.set(null);
+
+    // For users, fetch their bookings and map to UI-friendly structures
+    if (role === 'User') {
+      // Show cached data (if any) immediately for snappy UI
+      try {
+        const user = this.auth.getCurrentUserValue();
+        const key = user && user.id ? `user_bookings_${user.id}` : 'user_bookings_anonymous';
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const cached = JSON.parse(raw) as Booking[];
+          if (cached && Array.isArray(cached)) {
+            this.upcomingTrips.set(this.mapBookingsToTrips(cached));
+            this.recentActivity.set(this.mapBookingsToActivity(cached));
+            // keep loading true while we refresh
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      // Now subscribe to cached-first observable which will emit cached value (if any) then network
+      this.bookings.getMyBookingsWithCache().subscribe({
+        next: (bookings: Booking[]) => {
+          this.upcomingTrips.set(this.mapBookingsToTrips(bookings));
+          this.recentActivity.set(this.mapBookingsToActivity(bookings));
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load bookings', err);
+          this.error.set('Failed to load bookings');
+          this.loading.set(false);
+        }
+      });
+
+    } else if (role === 'Admin') {
+      // Admin: show recent system activity and top stats (placeholder)
+      this.bookings.getAllBookings().subscribe({
+        next: (bookings) => {
+          this.upcomingTrips.set([]);
+          this.recentActivity.set(this.mapBookingsToActivity(bookings).slice(0, 6));
+          this.loading.set(false);
+        },
+        error: () => {
+          this.recentActivity.set([
+            { action: 'System', item: 'Unable to fetch bookings', time: 'now' }
+          ]);
+          this.loading.set(false);
+        }
+      });
+    } else if (role === 'HotelManager') {
+      // Hotel manager: show cached bookings first then refresh
+      try {
+        const user = this.auth.getCurrentUserValue();
+        const key = user && user.id ? `user_bookings_${user.id}` : 'user_bookings_anonymous';
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const cached = JSON.parse(raw) as Booking[];
+          if (cached && Array.isArray(cached)) {
+            this.upcomingTrips.set(this.mapBookingsToTrips(cached));
+            this.recentActivity.set(this.mapBookingsToActivity(cached));
+          }
+        }
+      } catch (e) {}
+
+      this.bookings.getMyBookingsWithCache().subscribe({
+        next: (bookings) => {
+          this.upcomingTrips.set(this.mapBookingsToTrips(bookings));
+          this.recentActivity.set(this.mapBookingsToActivity(bookings));
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+        }
+      });
+    } else {
+      this.upcomingTrips.set([]);
+      this.recentActivity.set([]);
+      this.loading.set(false);
+    }
+  }
+
+  private mapBookingsToTrips(bookings: Booking[]): Trip[] {
+    return (bookings || []).map(b => {
+      const hb = b.hotelBooking;
+      const dest = hb?.city ?? hb?.hotelName ?? '—';
+      const hotelName = hb?.hotelName ?? '';
+      const checkIn = hb?.checkInDate ?? hb?.checkIn ?? '';
+      const daysLeft = this.calculateDaysLeft(checkIn);
+
+      return {
+        id: Number(b.id) || 0,
+        type: b.type ?? (hb ? 'Hotel' : 'Package'),
+        destination: dest,
+        hotel: hotelName || dest,
+        date: checkIn ? new Date(checkIn).toLocaleDateString() : '',
+        daysLeft,
+        status: b.status ?? 'unknown'
+      } as Trip;
+    });
+  }
+
+  private mapBookingsToActivity(bookings: Booking[]): Activity[] {
+    const items = (bookings || []).slice().reverse(); // newest first
+    return items.slice(0, 6).map(b => {
+      const item = b.hotelBooking?.hotelName ?? b.transportBooking?.transportOptionId ?? `Booking ${b.id}`;
+      return {
+        action: `Status: ${b.status ?? 'unknown'}`,
+        item,
+        time: this.timeAgo(b.updatedAt ?? b.createdAt)
+      } as Activity;
+    });
+  }
+
+  private calculateDaysLeft(dateStr?: string): number {
+    if (!dateStr) return 0;
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 0;
+  }
+
+  private timeAgo(dateStr?: string): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
+  confirmBooking(id: number) {
+    console.log('confirm', id);
+  }
+
+  cancelBooking(id: number) {
+    console.log('cancel', id);
+  }
+
+  refundBooking(id: number) {
+    console.log('refund', id);
+  }
+
+  addHotel() {
+    console.log('Hotel Request:', this.manageHotelData);
+  }
+}

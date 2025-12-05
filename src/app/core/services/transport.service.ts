@@ -11,20 +11,35 @@ export class TransportService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
-  getTransportOptions(params?: TransportSearchParams): Observable<TransportOption[]> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, value.toString());
-        }
-      });
-    }
-    return this.http.get<TransportOption[]>(`${this.apiUrl}/transport`, { params: httpParams });
+
+  searchByRoute(departure: string, arrival: string): Observable<TransportOption[]> {
+    const params = new HttpParams()
+      .set('departureAirport', departure)
+      .set('arrivalAirport', arrival);
+
+    return this.http.get<TransportOption[]>(
+      `${this.apiUrl}/InternationalTransport/SearchByRoute`,
+      { params }
+    );
+  }
+  getAllInternationalTransports(): Observable<{ success: boolean; message: string; data: any[] }> {
+    return this.http.get<{ success: boolean; message: string; data: any[] }>(`${this.apiUrl}/InternationalTransport/GetAllTransports`);
+  }
+
+  getAllGroundTransports(): Observable<{ success: boolean; message: string; data: any[] }> {
+    return this.http.get<{ success: boolean; message: string; data: any[] }>(`${this.apiUrl}/GroundTransport/GetAllGroundTransports`);
   }
 
   getTransportOptionById(id: string): Observable<TransportOption> {
     return this.http.get<TransportOption>(`${this.apiUrl}/transport/${id}`);
+  }
+
+  getInternationalById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/InternationalTransport/GetTransportById/${id}`);
+  }
+
+  getGroundById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/GroundTransport/GetGroundTransportById/${id}`);
   }
 }
 

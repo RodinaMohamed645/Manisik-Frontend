@@ -1,149 +1,260 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { Observable, BehaviorSubject, tap, map, catchError, of } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole } from '../../interfaces';
+import { LoginDto, RegisterDto, AuthResponseDto, UserDto, ApiResponse } from 'src/app/models/api';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly apiUrl = environment.apiUrl;
-  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  // Keep internal user shape tolerant to accommodate existing app `User` interface
+  private readonly currentUserSubject = new BehaviorSubject<any | null>(null);
   public readonly currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    this.loadUserFromToken();
-  }
-
-  login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, credentials).pipe(
-      tap(response => {
-        this.setAuthData(response.data);
-        this.fetchAndSetUser();
-      })
-    );
-  }
-
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/register`, data).pipe(
-      tap(response => {
-        this.setAuthData(response.data);
-        this.fetchAndSetUser();
-      })
-    );
-  }
-
-  logout(): void {
-    this.http.post(`${this.apiUrl}/Auth/logout`, {}).subscribe({
-      next: () => this.clearAuthData(),
-      error: () => this.clearAuthData()
-    });
-  }
-
-  getCurrentUser(): Observable<User> {
-    return this.http.get<{ data: User }>(`${this.apiUrl}/Auth/me`).pipe(
-      map(response => response.data)
-    );
-  }
-
-  private fetchAndSetUser(): void {
-    this.getCurrentUser().subscribe({
-      next: (user) => this.currentUserSubject.next(user),
-      error: () => this.clearAuthData()
-    });
-  }
-
-  getToken(): string | null {
-    return this.getCookie('token');
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
-
-  getCurrentUserValue(): User | null {
-    return this.currentUserSubject.value;
-  }
-
-  getRole(): UserRole | null {
-    const user = this.getCurrentUserValue();
-    return user ? user.role : null;
+    // Check authentication status on service initialization
+    this.checkAuth().subscribe();
   }
 
   /**
-   * Stores the auth token in a cookie.
-   * @param data The auth data containing the token.
-   * @param rememberMe If true, sets a persistent cookie (7 days). If false, sets a session cookie.
+   * Login with email and password
+   * Backend sets httpOnly secure cookie with token
+   * Remember Me determines cookie expiry (1 day vs 7 days)
    */
-  setAuthData(data: { token: string; refreshToken: string | null }, rememberMe: boolean = false): void {
-    if (rememberMe) {
-      this.setCookie('token', data.token, 7); // Persistent for 7 days
-    } else {
-      this.setCookie('token', data.token); // Session cookie (no expires)
-    }
-  }
-
-  refreshToken(): Observable<{ token: string; refreshToken: string }> {
-    return this.http.post<{ token: string; refreshToken: string }>(
-      `${this.apiUrl}/Auth/RefreshToken`,
-      {}
+  login(credentials: LoginDto, rememberMe: boolean = false): Observable<ApiResponse<AuthResponseDto>> {
+    return this.http.post<ApiResponse<AuthResponseDto>>(
+      `${this.apiUrl}/Auth/Login`,
+      { ...credentials, rememberMe },
+      { withCredentials: true }
     ).pipe(
-      tap(res => {
-        // Update the cookie. We don't know if it was persistent or session easily without checking expiration,
-        // but for simplicity, we can default to session or try to preserve.
-        // A better approach is to check if we have a persistent logic or just overwrite.
-        // Since we don't track "rememberMe" state in the service, we'll just update the value.
-        // If the user had "Remember Me", this might convert it to session if we don't pass days.
-        // However, reading cookie expiration client-side is hard.
-        // Let's assume if they are refreshing, we keep it alive.
-        // For now, let's just set it as a session cookie or maybe 1 day to be safe if we can't determine.
-        // Or better: check if we can infer it. We can't.
-        // Let's just set it.
-        this.setCookie('token', res.token);
+      tap(response => {
+        if (response?.data?.user) {
+          this.currentUserSubject.next(response.data.user as UserDto);
+        }
+        // Persist token for Authorization header fallback
+        if (response?.data?.token) {
+          try { localStorage.setItem('auth_token', response.data.token); } catch (e) { }
+        }
       })
     );
   }
 
-  private loadUserFromToken(): void {
-    if (this.getToken()) {
-      this.fetchAndSetUser();
+  /**
+   * Register new user
+   */
+  register(data: RegisterDto, rememberMe: boolean = false): Observable<ApiResponse<AuthResponseDto>> {
+    return this.http.post<ApiResponse<AuthResponseDto>>(
+      `${this.apiUrl}/Auth/Register`,
+      { ...data, rememberMe },
+      { withCredentials: true }
+    ).pipe(
+      tap(response => {
+        if (response?.data?.user) {
+          this.currentUserSubject.next(response.data.user as UserDto);
+        }
+        if (response?.data?.token) {
+          try { localStorage.setItem('auth_token', response.data.token); } catch (e) { }
+        }
+      })
+    );
+  }
+
+  /**
+   * Logout - clears httpOnly cookie on backend
+   */
+  logout(): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/Auth/Logout`,
+      {},
+      { withCredentials: true }
+    ).pipe(
+      tap(() => {
+        this.currentUserSubject.next(null);
+        try { localStorage.removeItem('auth_token'); } catch (e) { }
+        this.router.navigate(['/login']);
+      }),
+      catchError(() => {
+        // Even if backend fails, clear local state
+        this.currentUserSubject.next(null);
+        try { localStorage.removeItem('auth_token'); } catch (e) { }
+        this.router.navigate(['/login']);
+        return of(null);
+      })
+    );
+  }
+
+  /**
+   * Check authentication status by calling /Auth/Me
+   * This verifies the httpOnly cookie is valid
+   * Called on app init and after page refresh
+   */
+  checkAuth(): Observable<UserDto | null> {
+    return this.http.get<ApiResponse<UserDto>>(
+      `${this.apiUrl}/Auth/Me`,
+      { withCredentials: true }
+    ).pipe(
+      map(response => {
+        if (response?.success && response.data) {
+          return response.data;
+        }
+        return null;
+      }),
+      tap(user => this.currentUserSubject.next(user)),
+      catchError(() => {
+        this.currentUserSubject.next(null);
+        return of(null);
+      })
+    );
+  }
+
+  /**
+   * Get currently authenticated user
+   */
+  getCurrentUser(): Observable<any> {
+    return this.http.get<ApiResponse<UserDto>>(
+      `${this.apiUrl}/Auth/Me`,
+      { withCredentials: true }
+    ).pipe(
+      map(response => response.data as any)
+    );
+  }
+
+  /**
+   * Check if user is authenticated
+   * Based on BehaviorSubject state (populated by checkAuth)
+   */
+  isAuthenticated(): boolean {
+    return this.currentUserSubject.value !== null;
+  }
+
+  /**
+   * Get current user value (synchronous)
+   */
+  getCurrentUserValue(): any | null {
+    return this.currentUserSubject.value;
+  }
+
+  /**
+   * Get current user role
+   */
+  getRole(): any | null {
+    const user = this.getCurrentUserValue();
+    // backward compatible: prefer `role` if present, otherwise use first `roles` entry
+    return user?.role ?? (user?.roles && user.roles[0]) ?? null;
+  }
+
+  // ============ Admin User Management ============
+
+  getUsers(): Observable<UserDto[]> {
+    return this.http.get<ApiResponse<UserDto[]>>(
+      `${this.apiUrl}/Auth/Users`,
+      { withCredentials: true }
+    ).pipe(
+      map(r => r.data || [])
+    );
+  }
+
+  getUsersByRole(roleName: string): Observable<UserDto[]> {
+    return this.http.get<ApiResponse<UserDto[]>>(
+      `${this.apiUrl}/Auth/UsersByRole/${encodeURIComponent(roleName)}`,
+      { withCredentials: true }
+    ).pipe(
+      map(r => r.data || [])
+    );
+  }
+
+  assignRole(userId: string, role: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/Auth/AssignRole`,
+      { userId, role },
+      { withCredentials: true }
+    );
+  }
+
+  removeRole(userId: string, role: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/Auth/RemoveRole`,
+      { userId, role },
+      { withCredentials: true }
+    );
+  }
+
+  // ============ Booking Helpers ============
+
+  getMyBookings(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(
+      `${this.apiUrl}/Auth/MyBookings`,
+      { withCredentials: true }
+    ).pipe(
+      map(r => r.data || [])
+    );
+  }
+
+  /**
+   * Expose token for Authorization header fallback
+   */
+  getToken(): string | null {
+    try { return localStorage.getItem('auth_token'); } catch (e) { return null; }
+  }
+
+  // Per-user booking draft helpers (still OK to use localStorage for this)
+  getBookingData(): any {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user?.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
     }
   }
 
-  private clearAuthData(): void {
-    this.deleteCookie('token');
-    this.currentUserSubject.next(null);
-  }
-
-  // Cookie Helpers
-  private setCookie(name: string, value: string, days?: number) {
-    let expires = "";
-    if (days) {
-      const date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      expires = "; expires=" + date.toUTCString();
+  saveBookingData(data: any): void {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user?.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      // ignore storage errors
     }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure";
   }
 
-  private getCookie(name: string): string | null {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
+  clearUserBookingData(): void {
+    try {
+      const user = this.getCurrentUserValue();
+      const key = user?.id ? `user_booking_data_${user.id}` : 'user_booking_data_anonymous';
+      localStorage.removeItem(key);
+    } catch (e) {}
   }
 
-  private deleteCookie(name: string) {
-    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-  }
-
-  updateCurrentUser(user: User): void {
+  updateCurrentUser(user: any): void {
     this.currentUserSubject.next(user);
   }
+
+  // ============ Pending Booking Sync ============
+  
+
+
+  // ============ CLEANUP ON INIT ============
+  // Remove any legacy localStorage items from old auth implementation
+  static cleanupLegacyAuth(): void {
+    try {
+      localStorage.removeItem('auth_remember');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('token');
+      // Clear any cookies set by JavaScript (should be replaced by backend httpOnly cookies)
+      document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Strict;';
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  }
 }
+
+// Run cleanup when service is first imported
+AuthService.cleanupLegacyAuth();

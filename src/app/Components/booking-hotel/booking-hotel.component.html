@@ -1,30 +1,51 @@
-<div class="max-w-3xl mx-auto p-6 bg-[var(--surface)] rounded-lg shadow-md my-10">
-  <h2 class="text-2xl font-bold mb-4 text-[var(--text-primary)]">{{ i18n.translate('booking.title') }}</h2>
+<div class="max-w-3xl mx-auto p-6 bg-[var(--color-surface)] rounded-lg shadow-md my-10">
+  <h2 class="text-2xl font-bold mb-4 text-[var(--color-text)]">{{ i18n.translate('booking.title') }}</h2>
 
-  <div *ngIf="hotel" class="border border-[var(--border)] p-4 rounded mb-6 bg-[var(--background)]">
-    <h3 class="text-xl font-semibold text-[var(--text-primary)]">{{ hotel.name }} ({{ hotel.city }})</h3>
-    <p class="text-[var(--text-secondary)]">{{ i18n.translate('booking.roomType') }}: {{ room?.roomType }}</p>
-    <p class="text-[var(--text-secondary)]">{{ i18n.translate('booking.pricePerNight') }}: ${{ room?.pricePerNight }}</p>
+  <!-- Pending Booking Alert -->
+  <div *ngIf="pendingBooking" class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="font-bold">{{ i18n.isRTL() ? 'لديك حجز معلق' : 'You have a pending booking' }}</p>
+        <p class="text-sm mt-1">
+          {{ pendingBooking.hotelName }} - {{ pendingBooking.city }}
+        </p>
+        <p class="text-sm text-yellow-600 mt-2">
+          {{ i18n.isRTL() ? 'يجب إكمال الحجز المعلق أو حذفه قبل إنشاء حجز جديد.' : 'You must complete or discard the pending booking before creating a new one.' }}
+        </p>
+      </div>
+      <button 
+        (click)="discardPendingBooking()"
+        class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition-colors"
+      >
+        {{ i18n.isRTL() ? 'حذف المسودة' : 'Discard Draft' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="hotel" class="border border-[var(--border)] p-4 rounded mb-6 bg-[var(--color-bg)]">
+    <h3 class="text-xl font-semibold text-[var(--color-text)]">{{ hotel.name }} ({{ hotel.city }})</h3>
+    <p class="text-[var(--color-text-muted)]">{{ i18n.translate('booking.roomType') }}: {{ room?.roomType }}</p>
+    <p class="text-[var(--color-text-muted)]">{{ i18n.translate('booking.pricePerNight') }}: ${{ room?.pricePerNight }}</p>
   </div>
 
   <form [formGroup]="bookingForm" (ngSubmit)="submitBooking()" class="space-y-4">
     <!-- Check-In Date -->
     <div>
-      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.checkIn') }}</label>
+      <label class="block mb-1 font-medium text-[var(--color-text)]">{{ i18n.translate('booking.checkIn') }}</label>
       <input
         type="date"
         formControlName="checkInDate"
-        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] bg-[var(--color-bg)] text-[var(--color-text)]"
       />
     </div>
 
     <!-- Check-Out Date -->
     <div>
-      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.checkOut') }}</label>
+      <label class="block mb-1 font-medium text-[var(--color-text)]">{{ i18n.translate('booking.checkOut') }}</label>
       <input
         type="date"
         formControlName="checkOutDate"
-        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] bg-[var(--color-bg)] text-[var(--color-text)]"
       />
     </div>
 
@@ -38,17 +59,17 @@
 
     <!-- Number of Rooms -->
     <div>
-      <label class="block mb-1 font-medium text-[var(--text-primary)]">{{ i18n.translate('booking.rooms') }}</label>
+      <label class="block mb-1 font-medium text-[var(--color-text)]">{{ i18n.translate('booking.rooms') }}</label>
       <input
         type="number"
         formControlName="numberOfRooms"
         min="1"
-        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none focus:ring-2 focus:ring-[var(--primary)] bg-[var(--background)] text-[var(--text-primary)]"
+        class="border border-[var(--border)] rounded px-4 py-2 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] bg-[var(--color-bg)] text-[var(--color-text)]"
       />
     </div>
 
     <!-- Total Price -->
-    <div class="text-lg font-semibold text-[var(--text-primary)]">
+    <div class="text-lg font-semibold text-[var(--color-text)]">
       {{ i18n.translate('booking.totalPrice') }}: ${{ totalPrice }}
     </div>
 
@@ -57,7 +78,7 @@
       type="submit"
       class="w-full text-white font-medium px-4 py-2 rounded transition-all duration-200
         disabled:bg-gray-400 disabled:cursor-not-allowed
-        bg-[var(--primary)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+        bg-[var(--primary)] hover:opacity-90 focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
       [disabled]="bookingForm.invalid || bookingForm.pristine"
     >
       {{ i18n.translate('booking.submit') }}

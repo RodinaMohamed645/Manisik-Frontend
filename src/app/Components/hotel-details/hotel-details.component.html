@@ -1,13 +1,13 @@
 <div class="max-w-5xl mx-auto p-6">
   <!-- Loading -->
-  <div *ngIf="loading" class="p-8 text-center text-gray-500">
+  <div *ngIf="loading" class="p-8 text-center text-[var(--color-text-muted)]">
     {{ i18n.translate('hotel.loading') }}
   </div>
 
   <!-- Hotel Details -->
   <div
     *ngIf="!loading && hotel"
-    class="border border-[var(--border)] bg-[var(--background)] rounded-xl overflow-hidden shadow-md flex flex-col md:flex-row transition-all"
+    class="border border-[var(--border)] bg-[var(--color-bg)] rounded-xl overflow-hidden shadow-md flex flex-col md:flex-row transition-all"
   >
     <!-- Hotel Image -->
     <img
@@ -20,12 +20,12 @@
     <div class="p-6 flex-1 flex flex-col justify-between">
       <div>
         <!-- Name -->
-        <h2 class="text-3xl font-bold mb-2 text-[var(--text-primary)]">
+        <h2 class="text-3xl font-bold mb-2 text-[var(--color-text)]">
           {{ hotel.name }}
         </h2>
 
         <!-- Location & Distance -->
-        <div class="flex items-center gap-4 mb-3 text-[var(--text-secondary)]">
+        <div class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]">
           <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
           <span
             >{{ hotel.city }} &middot; {{ hotel.distanceToHaram }} {{ i18n.translate('hotel.fromHaram') }}</span
@@ -40,17 +40,17 @@
               class="h-5 w-5"
               [ngClass]="{
                 'text-yellow-500 fill-yellow-500': hotel.starRating >= i,
-                'text-gray-300': hotel.starRating < i
+                'text-[var(--color-text-muted)]300': hotel.starRating < i
               }"
             ></lucide-icon>
           </ng-container>
-          <span class="text-gray-500 ml-2 text-sm"
+          <span class="text-[var(--color-text-muted)] ml-2 text-sm"
             >{{ hotel.starRating }}/5</span
           >
         </div>
 
         <!-- Description -->
-        <p class="text-[var(--text-secondary)] mb-6">{{ hotel.description }}</p>
+        <p class="text-[var(--color-text-muted)] mb-6">{{ hotel.description }}</p>
       </div>
 
       <!-- Actions -->
@@ -67,32 +67,32 @@
 
   <!-- Rooms section (shown after clicking) -->
   <div *ngIf="showRooms && hotel?.rooms?.length" class="mt-6">
-    <!-- <h3 class="text-2xl font-semibold mb-4 text-[var(--text-primary)]">
+    <!-- <h3 class="text-2xl font-semibold mb-4 text-[var(--color-text)]">
       Room Types
     </h3> -->
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div
         *ngFor="let room of hotel.rooms"
-        class="border p-4 rounded-lg bg-[var(--background)] hover:shadow-md transition cursor-pointer"
+        class="border p-4 rounded-lg bg-[var(--color-bg)] hover:shadow-md transition cursor-pointer"
         [class.border-primary]="selectedRoom?.id === room.id"
         (click)="selectRoom(room)"
       >
         <div class="flex justify-between items-start">
           <div>
-            <div class="text-lg font-semibold text-[var(--text-primary)]">
+            <div class="text-lg font-semibold text-[var(--color-text)]">
               {{ room.roomType }}
             </div>
-            <div class="text-sm text-[var(--text-secondary)]">
+            <div class="text-sm text-[var(--color-text-muted)]">
               {{ i18n.translate('hotel.capacity') }}: {{ room.capacity }} {{ i18n.translate('hotel.person') }}
             </div>
           </div>
 
           <div class="text-right">
-            <div class="text-lg font-bold text-[var(--text-primary)]">
+            <div class="text-lg font-bold text-[var(--color-text)]">
               ${{ formatPrice(room.pricePerNight) }}
             </div>
-            <div class="text-sm text-[var(--text-secondary)]">
+            <div class="text-sm text-[var(--color-text-muted)]">
               {{ i18n.translate('hotel.available') }}: {{ room.availableRooms }} {{ i18n.translate('hotel.rooms') }}
             </div>
           </div>
@@ -106,8 +106,8 @@
             {{ i18n.translate('hotel.selected') }}
           </div>
           <button
-            (click)="bookSelectedRoom(); $event.stopPropagation()"
-            class="bg-[var(--primary)] text-white px-3 py-1 rounded text-sm"
+            (click)="bookRoom(room); $event.stopPropagation()"
+            class="bg-[var(--primary)] text-white px-3 py-1 rounded text-sm hover:opacity-90"
             [disabled]="room.availableRooms <= 0"
           >
             {{ i18n.translate('hotel.book') }}
@@ -120,13 +120,13 @@
   <!-- no rooms -->
   <div
     *ngIf="showRooms && (!hotel?.rooms || hotel.rooms.length === 0)"
-    class="mt-6 p-4 text-center text-gray-500 border rounded"
+    class="mt-6 p-4 text-center text-[var(--color-text-muted)] border rounded"
   >
     {{ i18n.translate('hotel.noRooms') }}
   </div>
 
   <!-- No hotel found -->
-  <div *ngIf="!loading && !hotel" class="p-8 text-center text-gray-500">
+  <div *ngIf="!loading && !hotel" class="p-8 text-center text-[var(--color-text-muted)]">
     {{ i18n.translate('hotel.notFound') }}
   </div>
 </div>

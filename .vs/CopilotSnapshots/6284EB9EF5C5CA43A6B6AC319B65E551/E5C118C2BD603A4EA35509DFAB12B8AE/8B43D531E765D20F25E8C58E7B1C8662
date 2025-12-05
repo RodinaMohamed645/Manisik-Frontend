@@ -1,0 +1,92 @@
+﻿import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { throwError, Subject, of } from 'rxjs';
+import { catchError, switchMap, filter, take } from 'rxjs/operators';
+
+let isRefreshing = false;
+const refreshTokenSubject = new Subject<string | null>();
+
+export const authInterceptorInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+
+  // If this is the refresh token request, forward without adding Authorization header
+  const isRefreshRequest = req.url.includes('/Auth/RefreshToken');
+
+  const token = authService.getToken();
+  let authReq = req;
+
+  if (!isRefreshRequest && token) {
+    authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  return next(authReq).pipe(
+    catchError((error: any) => {
+      if (error?.status === 401) {
+        // If it's a refresh request that failed, force logout
+        if (isRefreshRequest) {
+          authService.logout();
+          return throwError(() => error);
+        }
+
+        // try to get refresh token from storage
+        let storedRefresh: string | null = null;
+        try { storedRefresh = localStorage.getItem('refreshToken'); } catch { storedRefresh = null; }
+
+        if (!storedRefresh) {
+          authService.logout();
+          return throwError(() => error);
+        }
+
+        if (!isRefreshing) {
+          isRefreshing = true;
+          // notify others we're refreshing
+          refreshTokenSubject.next(null);
+
+          return authService.refreshToken().pipe(
+            switchMap((res: any) => {
+              isRefreshing = false;
+              // broadcast new token
+              refreshTokenSubject.next(res?.token ?? null);
+
+              // retry original request with new token
+              const newReq = req.clone({
+                setHeaders: {
+                  Authorization: `Bearer ${res?.token ?? ''}`
+                }
+              });
+
+              return next(newReq);
+            }),
+            catchError((refreshError: any) => {
+              isRefreshing = false;
+              refreshTokenSubject.next(null);
+              authService.logout();
+              return throwError(() => refreshError);
+            })
+          );
+        }
+
+        // If refresh already in progress, wait for it to complete then retry
+        return refreshTokenSubject.pipe(
+          filter(t => t != null),
+          take(1),
+          switchMap((t: any) => {
+            const newReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${t}`
+              }
+            });
+            return next(newReq);
+          })
+        );
+      }
+
+      return throwError(() => error);
+    })
+  );
+};

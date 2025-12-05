@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { I18nService } from 'src/app/core/services/i18n.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { MatToolbarModule, MatToolbar } from '@angular/material/toolbar';
-import { NgModule } from '@angular/core';
+import { MatToolbar } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,91 +10,283 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { ArrivalAirport, DepartureAirport } from 'src/app/interfaces/transport.interface';
 
-
-interface Flight {
-  airline: string;
-  code: string;
-  rating: number;
-  reviews: number;
-  duration: string;
-  class: string;
-  stops: string;
-  price: number;
-  meals: string;
-  baggage: string;
-  amenities: string[];
-}
-
+import { CommonModule } from '@angular/common';
+import { TransportService } from 'src/app/core/services/transport.service';
+import { BookingsService } from 'src/app/core/services/bookings.service';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-transport',
-  imports: [ MatToolbar, MatCardModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatSelectModule, FormsModule],
+  standalone: true,
+  imports: [
+    MatToolbar,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    FormsModule,
+    CommonModule
+  ],
   templateUrl: './transport.component.html',
   styleUrl: './transport.component.css'
 })
-export class TransportComponent {
-readonly i18n = inject(I18nService);
-transportType: string = 'air';
-  fromCity: string = '';
-  toCity: string = 'Jeddah';
-  departureDate: string = '';
-  
-  flights: Flight[] = [];
-  showResults: boolean = false;
+export class TransportComponent implements OnInit {
+  readonly i18n = inject(I18nService);
+  private readonly toastr = inject(ToastrService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly bookingsService = inject(BookingsService);
 
-  searchFlights() {
-    // Simulate API call with static data
-    this.flights = [
-      {
-        airline: 'Saudi Arabian Airlines',
-        code: 'SA',
-        rating: 4.8,
-        reviews: 2340,
-        duration: '8h 30m',
-        class: 'Economy',
-        stops: 'Direct',
-        price: 680,
-        meals: 'Meals included',
-        baggage: '30kg baggage',
-        amenities: ['Entertainment']
-      },
-      {
-        airline: 'Emirates',
-        code: 'AE',
-        rating: 4.9,
-        reviews: 3120,
-        duration: '9h 15m',
-        class: 'Economy',
-        stops: '1 Stop',
-        price: 850,
-        meals: 'Premium meals',
-        baggage: '40kg baggage',
-        amenities: ['WiFi', 'Lounge access']
-      },
-      {
-        airline: 'Qatar Airways',
-        code: 'QA',
-        rating: 4.9,
-        reviews: 2890,
-        duration: '8h 45m',
-        class: 'Economy',
-        stops: 'Direct',
-        price: 820,
-        meals: 'Gourmet meals',
-        baggage: '35kg baggage',
-        amenities: ['Premium entertainment']
+  // Data
+  internationalTransports: any[] = [];
+  filteredInternationalTransports: any[] = [];
+
+  groundTransports: any[] = [];
+  filteredGroundTransports: any[] = [];
+
+  // Pending Bookings
+  pendingGroundBooking: any = null;
+  pendingTransportBooking: any = null;
+
+  // UI State
+  activeTab: 'international' | 'ground' = 'international';
+
+  // Search Params
+  internationalSearchParams: any = {
+    type: 'All',
+    departure: '',
+    arrival: '',
+    date: ''
+  };
+
+  groundSearchParams: any = {
+    type: 'All',
+    departure: '',
+    arrival: '',
+    date: ''
+  };
+
+  // Dropdown Options
+  arrivalAirports: string[] = Object.values(ArrivalAirport);
+  departureAirports: string[] = Object.values(DepartureAirport);
+
+  // Mock ground locations
+  groundLocations = ['Makkah', 'Madinah', 'Jeddah', 'Taif', 'Riyadh'];
+
+  constructor(private transportService: TransportService) { }
+
+  ngOnInit(): void {
+    this.loadData();
+    this.checkPendingBookings();
+    
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      if (tab === 'ground' || tab === 'international') {
+        this.activeTab = tab;
       }
-    ];
-    this.showResults = true;
+    });
   }
 
-  setTransportType(type: string) {
-    this.transportType = type;
+  checkPendingBookings() {
+    // Check Ground Transport
+    this.bookingsService.getMyPendingGroundBookings().subscribe({
+      next: (bookings) => {
+        if (bookings && bookings.length > 0) {
+          this.pendingGroundBooking = bookings[0];
+        }
+      }
+    });
+
+    // Check International Transport
+    this.bookingsService.getMyPendingTransportBookings().subscribe({
+      next: (bookings) => {
+        if (bookings && bookings.length > 0) {
+          this.pendingTransportBooking = bookings[0];
+        }
+      }
+    });
   }
 
-  bookFlight(flight: Flight) {
-    console.log('Booking flight:', flight);
-    // Implement booking logic here
+  discardGroundDraft() {
+    if (!this.pendingGroundBooking) return;
+    
+    if (confirm(this.i18n.isRTL() ? 'هل أنت متأكد من حذف حجز النقل البري المعلق؟' : 'Are you sure you want to discard the pending ground transport booking?')) {
+      this.bookingsService.deletePendingGroundBooking(this.pendingGroundBooking.id).subscribe({
+        next: () => {
+          this.pendingGroundBooking = null;
+          this.toastr.success(
+            this.i18n.isRTL() ? 'تم حذف الحجز المعلق' : 'Pending booking discarded',
+            this.i18n.translate('success')
+          );
+        },
+        error: () => {
+          this.toastr.error(
+            this.i18n.isRTL() ? 'فشل حذف الحجز' : 'Failed to discard booking',
+            this.i18n.translate('error')
+          );
+        }
+      });
+    }
   }
-  
+
+  discardTransportDraft() {
+    if (!this.pendingTransportBooking) return;
+    
+    if (confirm(this.i18n.isRTL() ? 'هل أنت متأكد من حذف حجز الطيران المعلق؟' : 'Are you sure you want to discard the pending flight booking?')) {
+      this.bookingsService.deletePendingTransportBooking(this.pendingTransportBooking.id).subscribe({
+        next: () => {
+          this.pendingTransportBooking = null;
+          this.toastr.success(
+            this.i18n.isRTL() ? 'تم حذف الحجز المعلق' : 'Pending booking discarded',
+            this.i18n.translate('success')
+          );
+        },
+        error: () => {
+          this.toastr.error(
+            this.i18n.isRTL() ? 'فشل حذف الحجز' : 'Failed to discard booking',
+            this.i18n.translate('error')
+          );
+        }
+      });
+    }
+  }
+
+  loadData() {
+    this.transportService.getAllInternationalTransports().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.internationalTransports =
+            this.normalizeInternationalTransports(res.data);
+          this.filteredInternationalTransports = this.internationalTransports;
+        }
+      },
+      error: (err) => console.error(err)
+    });
+
+    this.transportService.getAllGroundTransports().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.groundTransports = this.normalizeGroundTransports(res.data);
+          this.filteredGroundTransports = this.groundTransports;
+        }
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  setActiveTab(tab: 'international' | 'ground') {
+    this.activeTab = tab;
+  }
+
+  filterInternational() {
+    this.filteredInternationalTransports = this.internationalTransports.filter(t => {
+      const matchType = this.internationalSearchParams.type === 'All' || t.internationalTransportType === this.internationalSearchParams.type;
+      const matchDeparture = !this.internationalSearchParams.departure || t.departureAirport === this.internationalSearchParams.departure;
+      const matchArrival = !this.internationalSearchParams.arrival || t.arrivalAirport === this.internationalSearchParams.arrival;
+      return matchType && matchDeparture && matchArrival;
+    });
+  }
+
+  filterGround() {
+    this.filteredGroundTransports = this.groundTransports.filter(t => {
+      const matchType = this.groundSearchParams.type === 'All' || t.serviceName === this.groundSearchParams.type;
+      return matchType;
+    });
+  }
+
+  bookTransport(transport: any) {
+    const isInternational = this.isInternationalTransport(transport);
+    const targetId = this.resolveTransportId(transport, isInternational);
+
+    if (!targetId) {
+      console.error('Missing ID for transport:', transport);
+      this.toastr.error(
+        this.i18n.translate('toast.error.invalidTransport') || 'Invalid transport ID',
+        this.i18n.translate('toast.error.title') || 'Error'
+      );
+      return;
+    }
+
+    const queryParams = isInternational
+      ? { transportId: targetId }
+      : { groundTransportId: targetId };
+
+    const navigationState = isInternational
+      ? { transport }
+      : { groundTransport: transport };
+
+    const targetRoute = isInternational ? '/booking-transport' : '/booking-ground';
+
+    this.router
+      .navigate([targetRoute], { queryParams, state: navigationState })
+      .catch((err) => {
+        console.error('Navigation error:', err);
+        this.toastr.error(
+          this.i18n.translate('toast.error.navigationFailed') ||
+          'Failed to navigate to booking page',
+          this.i18n.translate('toast.error.title') || 'Error'
+        );
+      });
+  }
+
+  private isInternationalTransport(transport: any): boolean {
+    return (
+      Object.prototype.hasOwnProperty.call(
+        transport,
+        'internationalTransportType'
+      ) || Object.prototype.hasOwnProperty.call(transport, 'departureAirport')
+    );
+  }
+
+  private resolveTransportId(transport: any, isInternational: boolean): number | null {
+    const rawId = isInternational
+      ? transport?.id ??
+      transport?.transportId ??
+      transport?.internationalTransportId ??
+      transport?.internationalId ??
+      null
+      : transport?.id ??
+      transport?.groundTransportId ??
+      transport?.internalTransportId ??
+      transport?.bookingGroundTransportId ??
+      null;
+
+    if (rawId === null || rawId === undefined) {
+      return null;
+    }
+
+    const parsed = Number(rawId);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  private normalizeInternationalTransports(data: any[]): any[] {
+    if (!Array.isArray(data)) return [];
+    return data
+      .map((item) => {
+        const id = this.resolveTransportId(item, true);
+        if (!id) {
+          console.warn('International transport missing ID', item);
+          return null;
+        }
+        return { ...item, id };
+      })
+      .filter((item): item is any => item !== null);
+  }
+
+  private normalizeGroundTransports(data: any[]): any[] {
+    if (!Array.isArray(data)) return [];
+    return data
+      .map((item) => {
+        const id = this.resolveTransportId(item, false);
+        if (!id) {
+          console.warn('Ground transport missing ID', item);
+          return null;
+        }
+        return { ...item, id };
+      })
+      .filter((item): item is any => item !== null);
+  }
 }

@@ -8,7 +8,7 @@
   <div
     *ngIf="LoadingService.loading$ | async"
     class="fixed inset-0 bg-white/60 dark:bg-black/40 flex items-center justify-center z-50">
-    <div class="w-16 h-16 border-6 border-gray-300 border-t-[var(--primary)] rounded-full animate-spin"></div>
+    <div class="w-16 h-16 border-6 border-[var(--border)]300 border-t-[var(--primary)] rounded-full animate-spin"></div>
   </div>
 
     <router-outlet></router-outlet>  <!-- dynamic content goes here -->

@@ -67,6 +67,14 @@ export class HotelDetailsComponent implements OnInit {
     });
   }
 
+  // Book a specific room directly (called from Book button)
+  bookRoom(room: Room) {
+    if (!this.hotel || !room) return;
+    this.router.navigate(['/booking-hotel'], {
+      queryParams: { hotelId: this.hotel.id, roomId: room.id },
+    });
+  }
+
   formatPrice(price: number) {
     return price?.toFixed(2);
   }

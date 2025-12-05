@@ -1,19 +1,19 @@
 <!-- Filters & Search -->
 <section
-  class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 sticky top-0 bg-[var(--surface)] z-20 p-4 shadow-md flex flex-wrap gap-3 items-center"
+  class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 sticky top-0 bg-[var(--color-surface)] z-20 p-4 shadow-md flex flex-wrap gap-3 items-center"
 >
   <!-- Search Input -->
   <input
     type="text"
     [placeholder]="i18n.translate('hotel.searchPlaceholder')"
     [(ngModel)]="searchText"
-    class="bg-[var(--background)] text-[var(--text-primary)] flex-1 min-w-[200px] border border-[var(--border)] rounded px-4 py-2 outline-none focus:ring-2 focus:ring-[var(--primary)]"
+    class="bg-[var(--color-bg)] text-[var(--color-text)] flex-1 min-w-[200px] border border-[var(--border)] rounded px-4 py-2 outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]"
   />
 
   <!-- City Filter -->
   <select
     [(ngModel)]="city"
-    class="bg-[var(--background)] text-[var(--text-primary)] border border-[var(--border)] rounded px-4 py-2 outline-none focus:ring-2 focus:ring-[var(--primary)]"
+    class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] rounded px-4 py-2 outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]"
     (change)="onFilterChange()"
   >
     <option value="Makkah" selected>🕋 {{ i18n.translate('hotel.city.makkah') }}</option>
@@ -23,7 +23,7 @@
   <!-- Sort Filter -->
   <select
     [(ngModel)]="sortBy"
-    class="bg-[var(--background)] text-[var(--text-primary)] border border-[var(--border)] rounded px-4 py-2 outline-none focus:ring-2 focus:ring-[var(--primary)]"
+    class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] rounded px-4 py-2 outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]"
     (change)="onFilterChange()"
   >
     <option value="recommended">{{ i18n.translate('hotel.sort.recommended') }}</option>
@@ -39,9 +39,9 @@
       [ngClass]="
         viewMode === 'grid'
           ? 'bg-[var(--primary)] text-white hover:opacity-90'
-          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+          : 'bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] hover:bg-[var(--color-surface)] dark:bg-gray-800 dark:text-[var(--color-text-muted)]200 dark:border-[var(--border)]600 dark:hover:bg-gray-700'
       "
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all rounded-md px-4 py-2 focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -69,9 +69,9 @@
       [ngClass]="
         viewMode === 'list'
           ? 'bg-[var(--primary)] text-white hover:opacity-90'
-          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'
+          : 'bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] hover:bg-[var(--color-surface)] dark:bg-gray-800 dark:text-[var(--color-text-muted)]200 dark:border-[var(--border)]600 dark:hover:bg-gray-700'
       "
-      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all rounded-md px-4 py-2 focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -102,7 +102,7 @@
   >
     <div
       *ngFor="let hotel of filteredHotels()"
-      class="overflow-hidden border border-[var(--border)] bg-[var(--background)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 group"
+      class="overflow-hidden border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 group"
       style="border-radius: var(--radius-card)"
     >
       <div class="relative h-48 overflow-hidden">
@@ -127,21 +127,21 @@
               class="h-4 w-4"
               [ngClass]="{
                 'text-yellow-500 fill-yellow-500': hotel.starRating >= i,
-                'text-gray-300': hotel.starRating < i
+                'text-[var(--color-text-muted)]300': hotel.starRating < i
               }"
             ></lucide-icon>
           </ng-container>
 
-          <span class="text-gray-500 ml-1 text-sm"
+          <span class="text-[var(--color-text-muted)] ml-1 text-sm"
             >{{ hotel.starRating }}/5</span
           >
         </div>
 
         <!-- Hotel Name -->
-        <h4 class="text-[var(--text-primary)] mb-2">{{ hotel.name }}</h4>
+        <h4 class="text-[var(--color-text)] mb-2">{{ hotel.name }}</h4>
 
         <!-- Distance -->
-        <div class="flex items-center gap-4 mb-3 text-[var(--text-secondary)]">
+        <div class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]">
           <div class="flex items-center gap-1">
             <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
             <span
@@ -152,19 +152,19 @@
         </div>
 
         <!-- Description -->
-        <p class="text-[var(--text-secondary)] mb-4 text-sm">
+        <p class="text-[var(--color-text-muted)] mb-4 text-sm">
           {{ hotel.description }}
         </p>
 
         <!-- Price & Button -->
         <div class="flex items-end justify-between">
           <!-- <div>
-            <span class="text-[var(--text-secondary)]">{{
+            <span class="text-[var(--color-text-muted)]">{{
               i18n.translate("common.from")
             }}</span>
-            <div class="text-[var(--text-primary)]">
+            <div class="text-[var(--color-text)]">
               <span class="text-2xl">${{ hotel.pricePerNight }}</span>
-              <span class="text-[var(--text-secondary)]">{{
+              <span class="text-[var(--color-text-muted)]">{{
                 i18n.translate("common.perPerson")
               }}</span>
             </div>
@@ -172,7 +172,7 @@
           <button
             type="button"
             (click)="viewDetails(hotel.id)"
-            class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+            class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
             [attr.aria-label]="
               i18n.translate('aria.viewDetailsFor') + ' ' + hotel.name
             "
@@ -188,7 +188,7 @@
   <div *ngIf="viewMode === 'list'" class="flex flex-col gap-4">
     <div
       *ngFor="let hotel of filteredHotels()"
-      class="border border-[var(--border)] bg-[var(--background)] rounded-xl overflow-hidden flex flex-col md:flex-row hover:shadow-[var(--shadow-heavy)] transition-all"
+      class="border border-[var(--border)] bg-[var(--color-bg)] rounded-xl overflow-hidden flex flex-col md:flex-row hover:shadow-[var(--shadow-heavy)] transition-all"
     >
       <img
         [src]="getImageUrl(hotel)"
@@ -197,12 +197,12 @@
       />
       <div class="p-4 flex-1 flex flex-col justify-between">
         <div>
-          <h4 class="text-[var(--text-primary)] font-semibold mb-2">
+          <h4 class="text-[var(--color-text)] font-semibold mb-2">
             {{ hotel.name }}
           </h4>
           <!-- Distance -->
           <div
-            class="flex items-center gap-4 mb-3 text-[var(--text-secondary)]"
+            class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]"
           >
             <div class="flex items-center gap-1">
               <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
@@ -212,7 +212,7 @@
               >
             </div>
           </div>
-          <p class="text-[var(--text-secondary)] mb-2 text-sm">
+          <p class="text-[var(--color-text-muted)] mb-2 text-sm">
             {{ hotel.description }}
           </p>
           <!-- Rating -->
@@ -223,12 +223,12 @@
               class="h-4 w-4"
               [ngClass]="{
                 'text-yellow-500 fill-yellow-500': hotel.starRating >= i,
-                'text-gray-300': hotel.starRating < i
+                'text-[var(--color-text-muted)]300': hotel.starRating < i
               }"
             ></lucide-icon>
           </ng-container>
 
-          <span class="text-gray-500 ml-1 text-sm"
+          <span class="text-[var(--color-text-muted)] ml-1 text-sm"
             >{{ hotel.starRating }}/5</span
           >
         </div>
@@ -238,7 +238,7 @@
           <button
             type="button"
             (click)="viewDetails(hotel.id)"
-            class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+            class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
             [attr.aria-label]="
               i18n.translate('aria.viewDetailsFor') + ' ' + hotel.name
             "

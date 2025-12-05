@@ -1,0 +1,232 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    this.loadUserFromToken();
+    this.cleanupOrphanedBookingData();
+  }
+
+  login(credentials: LoginRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/login`, credentials).pipe(
+      tap(response => {
+        this.setAuthData(response.data, rememberMe);
+        this.fetchAndSetUser();
+      })
+    );
+  }
+
+  register(data: RegisterRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/register`, data).pipe(
+      tap(response => {
+        this.setAuthData(response.data, rememberMe);
+        this.fetchAndSetUser();
+      })
+    );
+  }
+
+  logout(): void {
+    const currentUserId = this.getCurrentUserValue()?.id;
+    this.http.post(`${this.apiUrl}/Auth/logout`, {}).subscribe({
+      next: () => this.clearAuthData(currentUserId),
+      error: () => this.clearAuthData(currentUserId)
+    });
+  }
+
+  getCurrentUser(): Observable<User> {
+    return this.http.get<{ data: User }>(`${this.apiUrl}/Auth/me`).pipe(
+      map(response => response.data)
+    );
+  }
+
+  private fetchAndSetUser(): void {
+    this.getCurrentUser().subscribe({
+      next: (user) => this.currentUserSubject.next(user),
+      error: () => this.clearAuthData()
+    });
+  }
+
+  getToken(): string | null {
+    return this.getCookie('token') || localStorage.getItem('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  getRole(): UserRole | null {
+    const user = this.getCurrentUserValue();
+    return user ? user.role : null;
+  }
+
+  setAuthData(data: { token: string; refreshToken: string | null }, rememberMe: boolean = false): void {
+    localStorage.setItem('token', data.token);
+
+    if (rememberMe) {
+      this.setCookie('token', data.token, 7);
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      this.setCookie('token', data.token);
+      localStorage.removeItem('rememberMe');
+    }
+
+    if (data.refreshToken) {
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+  }
+
+  refreshToken(): Observable<{ token: string; refreshToken: string }> {
+    return this.http.post<{ token: string; refreshToken: string }>(
+      `${this.apiUrl}/Auth/RefreshToken`,
+      {}
+    ).pipe(
+      tap(res => {
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        const days = rememberMe ? 7 : undefined;
+        this.setCookie('token', res.token, days);
+        localStorage.setItem('token', res.token);
+
+        if (res.refreshToken) {
+          localStorage.setItem('refreshToken', res.refreshToken);
+        }
+      })
+    );
+  }
+
+  private loadUserFromToken(): void {
+    const token = this.getToken();
+    if (token) {
+      this.fetchAndSetUser();
+    }
+  }
+
+  private clearAuthData(userId?: string): void {
+    // We do NOT clear user specific data (bookingData) here anymore
+    // to allow persistence across sessions as requested.
+
+    this.deleteCookie('token');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('rememberMe');
+    this.currentUserSubject.next(null);
+
+    // Clean up any orphaned booking data after logout
+    this.cleanupOrphanedBookingData();
+  }
+
+  // Call this ONLY after successful payment/booking
+  clearUserBookingData(): void {
+    const user = this.getCurrentUserValue();
+    if (!user) return;
+    const key = `bookingData_${user.id}`;
+    localStorage.removeItem(key);
+  }
+
+  private clearUserSpecificData(userId: string) {
+    if (!userId) return;
+    const bookingKey = `bookingData_${userId}`;
+    localStorage.removeItem(bookingKey);
+  }
+
+  // Booking helpers
+  saveBookingData(data: any) {
+    const user = this.getCurrentUserValue();
+    if (!user) return;
+    const key = `bookingData_${user.id}`;
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  getBookingData(): any {
+    const user = this.getCurrentUserValue();
+    if (!user) return null;
+    const key = `bookingData_${user.id}`;
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  }
+
+  // Clean up legacy and orphaned booking data
+  cleanupOrphanedBookingData(): void {
+    const user = this.getCurrentUserValue();
+
+    // List of legacy keys that should be removed
+    const legacyKeys = [
+      'bookingData',
+      'bookingId',
+      'makkahHotelData',
+      'madinahHotelData',
+      'transportData',
+      'groundData',
+      'passengerData',
+      'makkahHotelBooked',
+      'madinahHotelBooked',
+      'transportBooked',
+      'groundBooked',
+      'selectedTransportId',
+      'selectedGroundTransportId'
+    ];
+
+    // Remove legacy root-level booking keys
+    legacyKeys.forEach(key => {
+      if (localStorage.getItem(key)) {
+        localStorage.removeItem(key);
+        console.log(`🧹 Cleaned up legacy key: ${key}`);
+      }
+    });
+
+    // If user is not logged in, remove any user-specific booking keys
+    if (!user) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('bookingData_')) {
+          localStorage.removeItem(key);
+          console.log(`🧹 Cleaned up orphaned user booking: ${key}`);
+        }
+      });
+    }
+  }
+
+  // Cookie Helpers
+  private setCookie(name: string, value: string, days?: number) {
+    let expires = "";
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax" + secure;
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+  }
+}

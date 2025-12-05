@@ -1,0 +1,129 @@
+<div class="max-w-3xl mx-auto p-6 bg-[var(--color-surface)] rounded-lg shadow-md my-10">
+    <!-- Page Title -->
+    <h2 class="text-2xl font-bold mb-6 text-[var(--color-text)]">
+        {{ ground?.serviceName || 'Ground Transport Booking' }}
+    </h2>
+
+    <!-- Loading State -->
+    <div *ngIf="!ground" class="text-center py-12">
+        <div
+            class="animate-spin inline-block w-12 h-12 border-4 border-[var(--primary)] border-t-transparent rounded-full mb-4">
+        </div>
+        <p class="text-[var(--color-text-muted)] text-lg">Loading ground transport details...</p>
+    </div>
+
+    <!-- Ground Transport Details Card -->
+    <div *ngIf="ground" class="border border-[var(--border)] rounded-lg p-6 mb-6 bg-[var(--color-bg)] shadow-sm">
+        <h3 class="text-xl font-semibold text-[var(--color-text)] mb-4">
+            {{ ground.serviceName }}
+        </h3>
+        <div class="space-y-2">
+            <div class="flex items-center">
+                <span class="text-[var(--color-text-muted)] min-w-[120px]">Type:</span>
+                <span class="text-[var(--color-text)] font-medium">{{ ground.type }}</span>
+            </div>
+            <div class="flex items-center">
+                <span class="text-[var(--color-text-muted)] min-w-[120px]">From:</span>
+                <span class="text-[var(--color-text)] font-medium">{{ ground.pickupLocation || ground.from }}</span>
+            </div>
+            <div class="flex items-center">
+                <span class="text-[var(--color-text-muted)] min-w-[120px]">To:</span>
+                <span class="text-[var(--color-text)] font-medium">{{ ground.dropoffLocation || ground.to }}</span>
+            </div>
+            <div class="flex items-center">
+                <span class="text-[var(--color-text-muted)] min-w-[120px]">Price per person:</span>
+                <span class="text-[var(--primary)] font-bold text-lg">{{ pricePerPerson | currency }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Form -->
+    <form *ngIf="ground" class="space-y-5" (ngSubmit)="submit()" #bookingForm="ngForm">
+
+        <!-- Number of Passengers -->
+        <div>
+            <label for="passengers" class="block mb-2 font-semibold text-[var(--color-text)]">
+                Number of Passengers <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="passengers" name="passengers" [(ngModel)]="passengers" min="1" max="50" required
+                (ngModelChange)="recalculateTotal()"
+                class="border border-[var(--border)] rounded-lg px-4 py-3 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent bg-[var(--color-bg)] transition-all"
+                placeholder="Enter number of passengers" />
+            <p class="text-sm text-[var(--color-text-muted)] mt-1">
+                Minimum 1, Maximum 50 passengers
+            </p>
+        </div>
+
+        <!-- Pickup Location -->
+        <div>
+            <label for="pickupLocation" class="block mb-2 font-semibold text-[var(--color-text)]">
+                Pickup Location <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="pickupLocation" name="pickupLocation" [(ngModel)]="pickupLocation" required
+                maxlength="200"
+                class="border border-[var(--border)] rounded-lg px-4 py-3 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent bg-[var(--color-bg)] transition-all"
+                placeholder="Enter pickup location (e.g., Jeddah Airport)" />
+        </div>
+
+        <!-- Dropoff Location -->
+        <div>
+            <label for="dropoffLocation" class="block mb-2 font-semibold text-[var(--color-text)]">
+                Dropoff Location <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="dropoffLocation" name="dropoffLocation" [(ngModel)]="dropoffLocation" required
+                maxlength="200"
+                class="border border-[var(--border)] rounded-lg px-4 py-3 w-full outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent bg-[var(--color-bg)] transition-all"
+                placeholder="Enter dropoff location (e.g., Makkah Hotel)" />
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="border border-[var(--border)] rounded-lg p-4 bg-[var(--color-bg)] space-y-2">
+            <div class="flex justify-between items-center">
+                <span class="text-[var(--color-text-muted)]">Price per person:</span>
+                <span class="text-[var(--color-text)] font-medium">{{ pricePerPerson | currency }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[var(--color-text-muted)]">Number of passengers:</span>
+                <span class="text-[var(--color-text)] font-medium">{{ passengers }}</span>
+            </div>
+            <div class="border-t border-[var(--border)] pt-2 mt-2"></div>
+            <div class="flex justify-between items-center">
+                <span class="text-lg font-bold text-[var(--color-text)]">Total Price:</span>
+                <span class="text-xl font-bold text-[var(--primary)]">{{ total | currency }}</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 pt-2">
+            <button type="submit" [disabled]="isSubmitting || !bookingForm.valid" class="flex-1 font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-md
+               disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none
+               bg-[var(--primary)] text-white hover:opacity-90 hover:shadow-lg 
+               focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
+                <span *ngIf="!isSubmitting">Book Ground Transport</span>
+                <span *ngIf="isSubmitting" class="flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    Booking...
+                </span>
+            </button>
+
+            <button type="button" (click)="cancel()" [disabled]="isSubmitting" class="px-6 py-3 font-semibold bg-[var(--color-surface)] text-[var(--color-text)] 
+               border-2 border-[var(--border)] rounded-lg hover:bg-[var(--color-bg)] 
+               transition-all duration-200 shadow-sm hover:shadow-md
+               disabled:opacity-50 disabled:cursor-not-allowed">
+                Cancel
+            </button>
+        </div>
+
+        <!-- Form Validation Message -->
+        <p *ngIf="!bookingForm.valid && (bookingForm.dirty || bookingForm.touched)" class="text-sm text-red-500 mt-2">
+            Please fill in all required fields before submitting.
+        </p>
+    </form>
+</div>

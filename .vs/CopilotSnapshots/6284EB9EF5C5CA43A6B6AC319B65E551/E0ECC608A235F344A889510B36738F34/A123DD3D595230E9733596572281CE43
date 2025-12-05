@@ -1,0 +1,86 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { Booking, CreateBookingRequest, ApiResponse } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BookingsService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+
+  // Compatibility: returns list of bookings (uses /Booking/AllBookings)
+  getBookings(): Observable<Booking[]> {
+    return this.http
+      .get<ApiResponse<Booking[]>>(`${this.apiUrl}/Booking/AllBookings`)
+      .pipe(map(res => res?.data || []));
+  }
+
+  // Returns current user's bookings
+  getMyBookings(): Observable<Booking[]> {
+    return this.http
+      .get<ApiResponse<Booking[]>>(`${this.apiUrl}/Booking/MyBookings`)
+      .pipe(map(res => res?.data || []));
+  }
+
+  // Alias for clarity
+  getAllBookings(): Observable<Booking[]> {
+    return this.getBookings();
+  }
+
+  // Uses GetBooking endpoint
+  getBookingById(id: string): Observable<Booking> {
+    return this.http
+      .get<ApiResponse<Booking>>(`${this.apiUrl}/Booking/GetBooking/${id}`)
+      .pipe(map(res => res.data));
+  }
+
+  // Uses BookingId endpoint (if needed by backend)
+  getBookingByBookingId(id: string): Observable<Booking> {
+    return this.http
+      .get<ApiResponse<Booking>>(`${this.apiUrl}/Booking/BookingId/${id}`)
+      .pipe(map(res => res.data));
+  }
+
+  // Search bookings by status (optional query param)
+  searchByStatus(status?: string): Observable<Booking[]> {
+    const url = status
+      ? `${this.apiUrl}/Booking/SearchByStatus?status=${encodeURIComponent(status)}`
+      : `${this.apiUrl}/Booking/SearchByStatus`;
+
+    return this.http
+      .get<ApiResponse<Booking[]>>(url)
+      .pipe(map(res => res?.data || []));
+  }
+
+  // Create booking
+  createBooking(booking: CreateBookingRequest): Observable<Booking> {
+    return this.http
+      .post<ApiResponse<Booking>>(`${this.apiUrl}/Booking/CreateBooking`, booking)
+      .pipe(map(res => res.data));
+  }
+
+  // Update booking status
+  updateStatus(id: string, status: string): Observable<Booking> {
+    return this.http
+      .put<ApiResponse<Booking>>(`${this.apiUrl}/Booking/UpdateStatus/${id}`, { status })
+      .pipe(map(res => res.data));
+  }
+
+  // Update payment status
+  updatePaymentStatus(id: string, paymentStatus: string): Observable<Booking> {
+    return this.http
+      .put<ApiResponse<Booking>>(`${this.apiUrl}/Booking/UpdatePaymentStatus/${id}`, { paymentStatus })
+      .pipe(map(res => res.data));
+  }
+
+  // Cancel booking (DELETE)
+  cancelBooking(id: string): Observable<any> {
+    return this.http
+      .delete<ApiResponse<any>>(`${this.apiUrl}/Booking/CancelBooking/${id}`)
+      .pipe(map(res => res.data));
+  }
+}
+

@@ -5,24 +5,11 @@ import { I18nService } from 'src/app/core/services/i18n.service';
 import { DashboardService } from 'src/app/core/services/dashboard.service';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { Subscription } from 'rxjs';
-import { User } from 'src/app/interfaces';
+import { User, NavLink, NavIcon } from 'src/app/interfaces';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgZone } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 
-
-export interface NavLink {
-  key: string;
-  path: string;
-  icon?: string;
-}
-
-export interface NavIcon {
-  name: string;
-  ariaLabel: string;
-  action?: () => void;
-  showBadge?: boolean;
-}
 
 @Component({
   selector: 'app-navbar',
@@ -59,9 +46,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   readonly navLinks: NavLink[] = [
     { key: 'nav.home', path: '/', icon: 'home' },
-    { key: 'nav.packages', path: '/packages', icon: 'package' },
+    { key: 'nav.bookingTrip', path: '/booking-package', icon: 'calendar-check' },
     { key: 'nav.hotels', path: '/hotels', icon: 'building-2' },
-    { key: 'nav.bookingHotel', path: '/booking-hotel', icon: 'calendar-check' },
     { key: 'nav.transport', path: '/transport', icon: 'bus' },
   ];
 
@@ -100,14 +86,23 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logOut(): void {
-    // make toastr confirmation
-
-    this.authService.logout();
-    this.toastr.error('You have been logged out.', 'Logged Out');
-    this.closeMobileMenu();
-    this.closeUserDropdown();
-    this.currentUser.set(null);
-    this.router.navigate(['/home']);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.toastr.success(this.i18n.translate('nav.logoutSuccess'), 'Success');
+        this.closeMobileMenu();
+        this.closeUserDropdown();
+        this.currentUser.set(null);
+        // Navigation is handled by auth service
+      },
+      error: (err) => {
+        console.error('Logout failed:', err);
+        this.toastr.error('Logout failed', 'Error');
+        // Still clear local state on error
+        this.closeMobileMenu();
+        this.closeUserDropdown();
+        this.currentUser.set(null);
+      }
+    });
   }
 
   closeMobileMenu(): void {

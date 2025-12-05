@@ -1,4 +1,4 @@
-<footer class="bg-[var(--surface)] border-t border-[var(--border)] mt-24">
+<footer class="bg-[var(--color-surface)] border-t border-[var(--border)] mt-24">
   <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
 
@@ -8,22 +8,22 @@
           <div class="bg-[var(--primary)] text-white px-3 py-2 rounded-lg">
             <span class="font-bold">🕋</span>
           </div>
-          <span class="font-bold text-xl text-[var(--text-primary)]">{{ i18n.translate('app.shortName') }}</span>
+          <span class="font-bold text-xl text-[var(--color-text)]">{{ i18n.translate('app.shortName') }}</span>
         </div>
-        <p class="text-[var(--text-secondary)] mb-4">
+        <p class="text-[var(--color-text-muted)] mb-4">
           {{ i18n.translate('footer.aboutText') }}
         </p>
         <div class="flex gap-3">
-          <a href="#" class="w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
+          <a href="#" class="w-10 h-10 rounded-full bg-[var(--color-bg)] border border-[var(--border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
             <i class="fa-brands fa-facebook-f"></i>
           </a>
-          <a href="#" class="w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
+          <a href="#" class="w-10 h-10 rounded-full bg-[var(--color-bg)] border border-[var(--border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
             <i class="fa-brands fa-twitter"></i>
           </a>
-          <a href="#" class="w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
+          <a href="#" class="w-10 h-10 rounded-full bg-[var(--color-bg)] border border-[var(--border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
             <i class="fa-brands fa-instagram"></i>
           </a>
-          <a href="#" class="w-10 h-10 rounded-full bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
+          <a href="#" class="w-10 h-10 rounded-full bg-[var(--color-bg)] border border-[var(--border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors">
             <i class="fa-brands fa-youtube"></i>
           </a>
         </div>
@@ -31,64 +31,64 @@
 
       <!-- Column 2: Quick Links -->
       <div>
-        <h4 class="mb-4 text-[var(--text-primary)]">{{ i18n.translate('footer.quickLinks') }}</h4>
+        <h4 class="mb-4 text-[var(--color-text)]">{{ i18n.translate('footer.quickLinks') }}</h4>
         <ul class="space-y-2">
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('nav.home') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('nav.about') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('home.howItWorks') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.blog') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.careers') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.press') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('nav.home') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('nav.about') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('home.howItWorks') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.blog') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.careers') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.press') }}</a></li>
         </ul>
       </div>
 
       <!-- Column 3: Services -->
       <div>
-        <h4 class="mb-4 text-[var(--text-primary)]">{{ i18n.translate('footer.services') }}</h4>
+        <h4 class="mb-4 text-[var(--color-text)]">{{ i18n.translate('footer.services') }}</h4>
         <ul class="space-y-2">
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.umrahPackages') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.hotelsMakkah') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.hotelsMadinah') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.airTransport') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.groundTransport') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.travelInsurance') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.umrahPackages') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.hotelsMakkah') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.hotelsMadinah') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.airTransport') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.groundTransport') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.services.travelInsurance') }}</a></li>
         </ul>
       </div>
 
       <!-- Column 4: Support -->
       <div>
-        <h4 class="mb-4 text-[var(--text-primary)]">{{ i18n.translate('footer.support') }}</h4>
+        <h4 class="mb-4 text-[var(--color-text)]">{{ i18n.translate('footer.support') }}</h4>
         <ul class="space-y-2">
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.helpCenter') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.contactUs') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.faqs') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.terms') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.privacy') }}</a></li>
-          <li><a href="#" class="text-[var(--text-secondary)] hover:text-[var(--primary)]">{{ i18n.translate('footer.cookies') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.helpCenter') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.contactUs') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.faqs') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.terms') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.privacy') }}</a></li>
+          <li><a href="#" class="text-[var(--color-text-muted)] hover:text-[var(--primary)]">{{ i18n.translate('footer.cookies') }}</a></li>
         </ul>
       </div>
 
       <!-- Column 5: Contact -->
       <div>
-        <h4 class="mb-4 text-[var(--text-primary)]">{{ i18n.translate('footer.contact') }}</h4>
+        <h4 class="mb-4 text-[var(--color-text)]">{{ i18n.translate('footer.contact') }}</h4>
         <ul class="space-y-3">
-          <li class="flex gap-2 text-[var(--text-secondary)]">
+          <li class="flex gap-2 text-[var(--color-text-muted)]">
             <i class="fa-solid fa-phone"></i>
             <div>
               <div>+966 12 345 6789</div>
               <div>+1 800 123 4567</div>
             </div>
           </li>
-          <li class="flex gap-2 text-[var(--text-secondary)]">
+          <li class="flex gap-2 text-[var(--color-text-muted)]">
             <i class="fa-solid fa-envelope"></i>
             <span>support&#64;manisik.com</span>
           </li>
-          <li class="flex gap-2 text-[var(--text-secondary)]">
+          <li class="flex gap-2 text-[var(--color-text-muted)]">
             <i class="fa-solid fa-map-pin"></i>
             <span>Jeddah, Saudi Arabia</span>
           </li>
         </ul>
-        <p class="text-[var(--text-secondary)] mt-4">
+        <p class="text-[var(--color-text-muted)] mt-4">
           {{ i18n.translate('footer.businessHours') }}<br />
           {{ i18n.translate('footer.supportAvailable') }}
         </p>
@@ -97,16 +97,16 @@
 
     <!-- Bottom Bar -->
     <div class="border-t border-[var(--border)] mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p class="text-[var(--text-secondary)]">
+      <p class="text-[var(--color-text-muted)]">
         {{ i18n.translate('footer.bottomCopyright') }}
       </p>
       <div class="flex items-center gap-4">
-        <span class="text-[var(--text-secondary)]">{{ i18n.translate('footer.weAccept') }}</span>
+        <span class="text-[var(--color-text-muted)]">{{ i18n.translate('footer.weAccept') }}</span>
         <div class="flex gap-2">
-          <div class="bg-white text-black border border-gray-300 px-3 py-1 rounded text-xs">VISA</div>
-          <div class="bg-white text-black border border-gray-300 px-3 py-1 rounded text-xs">Mastercard</div>
-          <div class="bg-white text-black border border-gray-300 px-3 py-1 rounded text-xs">Amex</div>
-          <div class="bg-white text-black border border-gray-300 px-3 py-1 rounded text-xs">PayPal</div>
+          <div class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] px-3 py-1 rounded text-xs">VISA</div>
+          <div class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] px-3 py-1 rounded text-xs">Mastercard</div>
+          <div class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] px-3 py-1 rounded text-xs">Amex</div>
+          <div class="bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--border)] px-3 py-1 rounded text-xs">PayPal</div>
         </div>
       </div>
     </div>

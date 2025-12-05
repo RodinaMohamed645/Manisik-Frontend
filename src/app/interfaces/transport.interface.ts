@@ -35,3 +35,17 @@ export interface TransportSearchParams {
   maxPrice?: number;
 }
 
+export enum ArrivalAirport {
+  Jeddah = 'Jeddah',
+  Madinah = 'Madinah',
+  Taif = 'Taif'
+}
+
+export enum DepartureAirport {
+  CairoInternational = 'CairoInternational',
+  BorgElArabAlexandria = 'BorgElArabAlexandria',
+  SharmElSheikhInternational = 'SharmElSheikhInternational',
+  HurghadaInternational = 'HurghadaInternational',
+  AssiutInternational = 'AssiutInternational',
+  SohagInternational = 'SohagInternational'
+}

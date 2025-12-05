@@ -2,21 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-
-export interface AIChatResponse {
-  answer: string;
-  // Optional fields if the backend returns them in future or other endpoints
-  sessionId?: string;
-  message?: string; 
-  suggestedActions?: string[];
-  data?: {
-    intent: string;
-    hotels: any | null;
-    transports: any | null;
-    userBookings: any | null;
-  };
-}
+import { AIChatResponse } from 'src/app/interfaces';
 
 
 /**

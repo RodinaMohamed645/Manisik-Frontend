@@ -1,0 +1,125 @@
+﻿:host {
+  display: block;
+  color: var(--text-primary);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-light);
+}
+
+.welcome-card {
+  background: linear-gradient(90deg, rgba(var(--primary-rgb),0.12), rgba(10,92,45,0.12));
+  border: none;
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  position: relative;
+}
+
+.icon-btn .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--error);
+  color: white;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border-radius: 50%;
+}
+
+.nav-link {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.nav-link:hover {
+  background: var(--surface);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--radius-button);
+  border: none;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: var(--radius-button);
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.06) 37%, rgba(0,0,0,0.04) 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* RTL adjustments: use logical properties where possible */
+:host-context([dir="rtl"]) .icon-btn .badge {
+  right: auto;
+  left: -6px;
+}
+
+@media (max-width: 1024px) {
+  .nav-link {
+    display: none;
+  }
+}
+
+/* Minor spacing for cards inside list */
+.card + .card {
+  margin-top: 12px;
+}
+
+/* Support dark theme subtle override (dark class on html root) */
+html.dark .card {
+  background: var(--surface);
+  border-color: var(--border);
+}

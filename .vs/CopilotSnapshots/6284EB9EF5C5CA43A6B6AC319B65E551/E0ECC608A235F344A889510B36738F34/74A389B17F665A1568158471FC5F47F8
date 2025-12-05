@@ -1,0 +1,169 @@
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { User, LoginRequest, RegisterRequest, AuthResponse, UserRole, ApiResponse, Booking } from '../../interfaces';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
+  private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
+  public readonly currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor() {
+    this.loadUserFromToken();
+  }
+
+  // keep optional rememberMe param for flexibility
+  login(credentials: LoginRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/Login`, credentials).pipe(
+      tap(response => {
+        if (response?.data) {
+          this.setAuthData({ token: response.data.token, refreshToken: response.data.refreshToken }, rememberMe);
+          this.fetchAndSetUser();
+        }
+      })
+    );
+  }
+
+  register(data: RegisterRequest, rememberMe: boolean = false): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/Auth/Register`, data).pipe(
+      tap(response => {
+        if (response?.data) {
+          this.setAuthData({ token: response.data.token, refreshToken: response.data.refreshToken }, rememberMe);
+          this.fetchAndSetUser();
+        }
+      })
+    );
+  }
+
+  logout(): void {
+    // backend logout may not exist — try best-effort then clear
+    this.http.post(`${this.apiUrl}/Auth/Logout`, {}).subscribe({
+      next: () => this.clearAuthData(),
+      error: () => this.clearAuthData()
+    });
+  }
+
+  // Get currently authenticated user
+  getCurrentUser(): Observable<User> {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/Auth/Me`).pipe(
+      map(response => response.data)
+    );
+  }
+
+  // Fetch and store user in BehaviorSubject
+  private fetchAndSetUser(): void {
+    this.getCurrentUser().subscribe({
+      next: (user) => this.currentUserSubject.next(user),
+      error: () => this.clearAuthData()
+    });
+  }
+
+  // Users administration endpoints
+  getUsers(): Observable<User[]> {
+    return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/Auth/Users`).pipe(map(r => r.data || []));
+  }
+
+  getUsersByRole(roleName: string): Observable<User[]> {
+    return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/Auth/UsersByRole/${encodeURIComponent(roleName)}`).pipe(map(r => r.data || []));
+  }
+
+  assignRole(userId: string, role: UserRole | string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/Auth/AssignRole`, { userId, role });
+  }
+
+  removeRole(userId: string, role: UserRole | string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/Auth/RemoveRole`, { userId, role });
+  }
+
+  // Auth-specific MyBookings (some backends expose it under Auth)
+  getMyBookings(): Observable<Booking[]> {
+    return this.http.get<ApiResponse<Booking[]>>(`${this.apiUrl}/Auth/MyBookings`).pipe(map(r => r.data || []));
+  }
+
+  getToken(): string | null {
+    return this.getCookie('token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  getRole(): UserRole | null {
+    const user = this.getCurrentUserValue();
+    return user ? user.role : null;
+  }
+
+  /**
+   * Stores the auth token in a cookie.
+   * @param data The auth data containing the token.
+   * @param rememberMe If true, sets a persistent cookie (7 days). If false, sets a session cookie.
+   */
+  setAuthData(data: { token: string; refreshToken: string | null }, rememberMe: boolean = false): void {
+    if (!data?.token) return;
+    if (rememberMe) {
+      this.setCookie('token', data.token, 7); // Persistent for 7 days
+    } else {
+      this.setCookie('token', data.token); // Session cookie (no expires)
+    }
+  }
+
+  refreshToken(): Observable<{ token: string; refreshToken: string }> {
+    return this.http.post<{ token: string; refreshToken: string }>(`${this.apiUrl}/Auth/RefreshToken`, {}).pipe(
+      tap(res => {
+        if (res?.token) {
+          this.setCookie('token', res.token);
+        }
+      })
+    );
+  }
+
+  private loadUserFromToken(): void {
+    if (this.getToken()) {
+      this.fetchAndSetUser();
+    }
+  }
+
+  private clearAuthData(): void {
+    this.deleteCookie('token');
+    this.currentUserSubject.next(null);
+  }
+
+  // Cookie Helpers
+  private setCookie(name: string, value: string, days?: number) {
+    let expires = "";
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure";
+  }
+
+  private getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  private deleteCookie(name: string) {
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+  }
+}

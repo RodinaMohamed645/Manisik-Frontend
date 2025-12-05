@@ -1,0 +1,53 @@
+﻿import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { map, take, switchMap, of, catchError } from 'rxjs';
+
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  // If user already loaded, allow immediately
+  if (authService.getCurrentUserValue()) {
+    return true;
+  }
+
+  // If we have an access token, wait for currentUser$ (fetch may be in progress)
+  if (authService.isAuthenticated()) {
+    return authService.currentUser$.pipe(
+      take(1),
+      map(user => {
+        if (user) return true;
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        return false;
+      })
+    );
+  }
+
+  // No access token: try silent refresh using stored refresh token
+  let refreshToken: string | null = null;
+  try { refreshToken = localStorage.getItem('refreshToken'); } catch { refreshToken = null; }
+
+  if (refreshToken) {
+    return authService.refreshToken().pipe(
+      switchMap(() => {
+        return authService.currentUser$.pipe(
+          take(1),
+          map(u => {
+            if (u) return true;
+            router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+            return false;
+          })
+        );
+      }),
+      catchError(() => {
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        return of(false);
+      })
+    );
+  }
+
+  // No refresh token: redirect to login
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  return false;
+};

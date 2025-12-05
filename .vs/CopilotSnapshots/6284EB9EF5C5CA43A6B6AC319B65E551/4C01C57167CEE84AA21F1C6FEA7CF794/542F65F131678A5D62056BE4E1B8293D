@@ -1,0 +1,107 @@
+﻿<div class="min-h-screen bg-[var(--background)]">
+  <!-- Header -->
+  <header class="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="bg-[var(--primary)] text-white px-3 py-2 rounded-lg">🕋</div>
+      <span class="font-bold text-xl text-[var(--text-primary)]">Manisik</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="relative p-2 rounded hover:bg-gray-200">
+        🔔
+        <span class="absolute -top-1 -right-1 bg-[var(--error)] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
+      </button>
+      <button class="p-2 rounded hover:bg-gray-200">🌙</button>
+      <!-- Profile dropdown can be a separate component -->
+    </div>
+  </header>
+
+  <div class="max-w-[1440px] mx-auto px-4 py-8 flex gap-8">
+    <!-- Sidebar -->
+    <aside class="w-64 hidden lg:block">
+      <nav class="space-y-1">
+        <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[var(--primary)] text-white">{{ i18n.t('dashboard.menu.dashboard') }}</a>
+        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.book') }}</a>
+        <a *ngIf="role()==='User'||role()==='HotelManager'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.hotels') }}</a>
+        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.transport') }}</a>
+        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.myBookings') }}</a>
+        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.payments') }}</a>
+        <a *ngIf="role()==='Admin'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.manageUsers') }}</a>
+        <a *ngIf="role()==='HotelManager'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.manageHotels') }}</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 space-y-6">
+      <!-- Welcome Banner -->
+      <div class="p-6 mb-8 bg-gradient-to-r from-[var(--primary)] to-[#0a5c2d] rounded-lg text-white">
+        <h2 class="text-xl font-bold mb-2">{{ i18n.t('dashboard.greeting') }}, {{ currentUser()?.firstName || 'User' }}! 👋</h2>
+        <p *ngIf="role() === 'User'">{{ i18n.t('dashboard.welcome.user') }}</p>
+        <p *ngIf="role() === 'Admin'">{{ i18n.t('dashboard.welcome.admin') }}</p>
+        <p *ngIf="role() === 'HotelManager'">{{ i18n.t('dashboard.welcome.hotelManager') }}</p>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="p-6 border rounded-lg bg-[var(--background)]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.upcomingTrips') }}</span>
+          </div>
+          <div class="text-3xl text-[var(--text-primary)] mb-1">1</div>
+          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.nextTripDate') }}</p>
+        </div>
+
+        <div class="p-6 border rounded-lg bg-[var(--background)]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.totalBookings') }}</span>
+          </div>
+          <div class="text-3xl text-[var(--text-primary)] mb-1">3</div>
+          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.allTime') }}</p>
+        </div>
+
+        <div class="p-6 border rounded-lg bg-[var(--background)]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.savedItems') }}</span>
+          </div>
+          <div class="text-3xl text-[var(--text-primary)] mb-1">7</div>
+          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.hotelsPackages') }}</p>
+        </div>
+
+        <div class="p-6 border rounded-lg bg-[var(--background)]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.loyaltyPoints') }}</span>
+          </div>
+          <div class="text-3xl text-[var(--text-primary)] mb-1">2,450</div>
+          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.earnMore') }}</p>
+        </div>
+      </div>
+
+      <!-- Upcoming Trips -->
+      <div>
+        <h3 class="text-[var(--text-primary)] mb-4">{{ i18n.t('dashboard.upcomingTrips') }}</h3>
+        <div *ngFor="let trip of upcomingTrips()" class="p-6 border rounded-lg mb-4 bg-[var(--background)]">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <strong>{{ trip.type }}</strong> - {{ trip.destination }} <br />
+              Hotel: {{ trip.hotel }} <br />
+              Status: {{ trip.status }}
+            </div>
+            <div class="text-right">
+              <div class="text-2xl text-[var(--primary)]">{{ trip.daysLeft }}</div>
+              <div class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.trips.daysLeft') }}</div>
+            </div>
+          </div>
+          <button class="bg-[var(--primary)] text-white px-4 py-2 rounded mr-2">{{ i18n.t('dashboard.trips.viewDetails') }}</button>
+          <button class="border px-4 py-2 rounded">{{ i18n.t('dashboard.trips.downloadDocs') }}</button>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div>
+        <h3 class="text-[var(--text-primary)] mb-4">{{ i18n.t('dashboard.recentActivity') }}</h3>
+        <div *ngFor="let activity of recentActivity()" class="p-4 border rounded-lg mb-2 bg-[var(--background)]">
+          {{ activity.action }} - {{ activity.item }} ({{ activity.time }})
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

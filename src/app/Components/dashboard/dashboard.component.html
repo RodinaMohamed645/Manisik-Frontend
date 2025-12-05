@@ -1,107 +1,725 @@
-<div class="min-h-screen bg-[var(--background)]">
+<div class="min-h-screen bg-[var(--color-bg)]">
   <!-- Header -->
-  <header class="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-2">
-      <div class="bg-[var(--primary)] text-white px-3 py-2 rounded-lg">🕋</div>
-      <span class="font-bold text-xl text-[var(--text-primary)]">Manisik</span>
-    </div>
-    <div class="flex items-center gap-3">
-      <button class="relative p-2 rounded hover:bg-gray-200">
-        🔔
-        <span class="absolute -top-1 -right-1 bg-[var(--error)] text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
-      </button>
-      <button class="p-2 rounded hover:bg-gray-200">🌙</button>
-      <!-- Profile dropdown can be a separate component -->
+  <header class="sticky top-0 z-40 bg-[var(--color-surface)] border-b border-[var(--border)] shadow-sm">
+    <div class="max-w-[1440px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary)] to-purple-600 flex items-center justify-center text-white text-xl shadow-lg">
+          🕋
+        </div>
+        <div class="flex flex-col">
+          <span class="text-lg font-semibold text-[var(--color-text)]">{{ i18n.t('dashboard.title') }}</span>
+          <span class="text-xs text-[var(--color-text-muted)]">{{ i18n.t('dashboard.subtitle.' + role()) }}</span>
+        </div>
+      </div>
+
+      <!-- User dropdown / actions -->
+      <div class="flex items-center gap-4 relative">
+        <div class="hidden sm:flex sm:items-center sm:gap-3">
+          <span class="text-sm text-[var(--color-text-muted)]">{{ currentUserName() }}</span>
+        </div>
+
+        <div class="relative">
+          <button (click)="toggleUserMenu()" aria-haspopup="true" [attr.aria-expanded]="showUserMenu()"
+            class="flex items-center gap-3 px-3 py-1 rounded-xl hover:bg-[var(--color-bg)] focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/30">
+            <div
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-purple-600 flex items-center justify-center text-white font-bold">
+              {{ getUserInitials() }}</div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          <div *ngIf="showUserMenu()"
+            class="absolute right-0 mt-2 w-72 bg-[var(--color-surface)] border border-[var(--border)] rounded-xl shadow-2xl p-3 z-50 dashboard-dropdown">
+            <div class="flex items-start gap-3 p-2 border-b border-[var(--border)]">
+              <div
+                class="w-12 h-12 rounded-full bg-[var(--color-surface)] flex items-center justify-center font-semibold text-lg text-[var(--color-text)]">
+                {{ getUserInitials() }}</div>
+              <div class="flex-1">
+                <div class="font-semibold text-[var(--color-text)]">{{ currentUserName() }}</div>
+                <div class="text-sm text-[var(--color-text-muted)]">{{ currentUserPhone() }}</div>
+              </div>
+            </div>
+            <div class="mt-2 space-y-2">
+              <button (click)="goToProfile()" class="w-full text-left px-3 py-2 rounded hover:bg-[var(--color-bg)]">{{
+                i18n.t('profile.editProfile') }}</button>
+              <button (click)="logout()"
+                class="w-full text-left px-3 py-2 rounded hover:bg-[var(--color-bg)] text-red-600">{{
+                i18n.t('nav.logout') }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
-  <div class="max-w-[1440px] mx-auto px-4 py-8 flex gap-8">
-    <!-- Sidebar -->
-    <aside class="w-64 hidden lg:block">
-      <nav class="space-y-1">
-        <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[var(--primary)] text-white">{{ i18n.t('dashboard.menu.dashboard') }}</a>
-        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.book') }}</a>
-        <a *ngIf="role()==='User'||role()==='HotelManager'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.hotels') }}</a>
-        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.transport') }}</a>
-        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.myBookings') }}</a>
-        <a *ngIf="role()==='User'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.payments') }}</a>
-        <a *ngIf="role()==='Admin'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.manageUsers') }}</a>
-        <a *ngIf="role()==='HotelManager'" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[var(--surface)] hover:text-[var(--text-primary)]">{{ i18n.t('dashboard.menu.manageHotels') }}</a>
-      </nav>
-    </aside>
+  <!-- Backdrop to close dropdown when clicking outside -->
+  <div *ngIf="showUserMenu()" class="fixed inset-0 z-40" (click)="closeUserMenu()"></div>
 
-    <!-- Main Content -->
-    <main class="flex-1 space-y-6">
-      <!-- Welcome Banner -->
-      <div class="p-6 mb-8 bg-gradient-to-r from-[var(--primary)] to-[#0a5c2d] rounded-lg text-white">
-        <h2 class="text-xl font-bold mb-2">{{ i18n.t('dashboard.greeting') }}, {{ currentUser()?.firstName || 'User' }}! 👋</h2>
-        <p *ngIf="role() === 'User'">{{ i18n.t('dashboard.welcome.user') }}</p>
-        <p *ngIf="role() === 'Admin'">{{ i18n.t('dashboard.welcome.admin') }}</p>
-        <p *ngIf="role() === 'HotelManager'">{{ i18n.t('dashboard.welcome.hotelManager') }}</p>
-      </div>
+  <div class="max-w-[1440px] mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Sidebar -->
+      <aside class="lg:col-span-3">
+        <nav
+          class="bg-[var(--color-surface)] rounded-2xl p-4 border border-[var(--border)] shadow-sm space-y-2 sticky top-24">
+          <button (click)="setActiveView('overview')" [class.active]="activeView() === 'overview'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'overview' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>📊</span> {{ i18n.t('dashboard.menu.overview') }}
+          </button>
+          <button (click)="setActiveView('bookings')" [class.active]="activeView() === 'bookings'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'bookings' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>📋</span> {{ getBookingsMenuLabel() }}
+          </button>
+          <button *ngIf="role() === 'Admin'" (click)="setActiveView('users')" [class.active]="activeView() === 'users'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'users' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>👥</span> {{ i18n.t('dashboard.menu.users') }}
+          </button>
+          <button *ngIf="role() === 'Admin' || role() === 'HotelManager'" (click)="setActiveView('hotels')"
+            [class.active]="activeView() === 'hotels'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'hotels' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>🏨</span> {{ i18n.t('dashboard.menu.hotels') }}
+          </button>
+          <button *ngIf="role() === 'Admin'" (click)="setActiveView('international-transport')"
+            [class.active]="activeView() === 'international-transport'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'international-transport' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>✈️</span> {{ i18n.t('dashboard.menu.internationalTransport') }}
+          </button>
+          <button *ngIf="role() === 'Admin'" (click)="setActiveView('ground-transport')"
+            [class.active]="activeView() === 'ground-transport'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200"
+            [ngClass]="activeView() === 'ground-transport' ? 'bg-[var(--primary)] text-white shadow-md' : 'hover:bg-[var(--color-bg)] text-[var(--color-text-muted)]'">
+            <span>🚌</span> {{ i18n.t('dashboard.menu.groundTransport') }}
+          </button>
+        </nav>
+      </aside>
 
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="p-6 border rounded-lg bg-[var(--background)]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.upcomingTrips') }}</span>
-          </div>
-          <div class="text-3xl text-[var(--text-primary)] mb-1">1</div>
-          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.nextTripDate') }}</p>
-        </div>
+      <main class="lg:col-span-9">
 
-        <div class="p-6 border rounded-lg bg-[var(--background)]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.totalBookings') }}</span>
-          </div>
-          <div class="text-3xl text-[var(--text-primary)] mb-1">3</div>
-          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.allTime') }}</p>
-        </div>
-
-        <div class="p-6 border rounded-lg bg-[var(--background)]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.savedItems') }}</span>
-          </div>
-          <div class="text-3xl text-[var(--text-primary)] mb-1">7</div>
-          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.hotelsPackages') }}</p>
-        </div>
-
-        <div class="p-6 border rounded-lg bg-[var(--background)]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.loyaltyPoints') }}</span>
-          </div>
-          <div class="text-3xl text-[var(--text-primary)] mb-1">2,450</div>
-          <p class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.stats.earnMore') }}</p>
-        </div>
-      </div>
-
-      <!-- Upcoming Trips -->
-      <div>
-        <h3 class="text-[var(--text-primary)] mb-4">{{ i18n.t('dashboard.upcomingTrips') }}</h3>
-        <div *ngFor="let trip of upcomingTrips()" class="p-6 border rounded-lg mb-4 bg-[var(--background)]">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <strong>{{ trip.type }}</strong> - {{ trip.destination }} <br />
-              Hotel: {{ trip.hotel }} <br />
-              Status: {{ trip.status }}
+        <!-- Overview -->
+        <div *ngIf="activeView() === 'overview'" class="space-y-6 animate-fadeIn">
+          <div
+            class="bg-gradient-to-r from-[var(--primary)] to-purple-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--color-bg)]/10 rounded-full -mr-16 -mt-16 blur-3xl">
             </div>
-            <div class="text-right">
-              <div class="text-2xl text-[var(--primary)]">{{ trip.daysLeft }}</div>
-              <div class="text-[var(--text-secondary)]">{{ i18n.t('dashboard.trips.daysLeft') }}</div>
+            <div class="relative z-10">
+              <h2 class="text-3xl font-bold mb-2">{{ i18n.t('dashboard.welcome') }} 👋</h2>
+              <p class="text-white/90 text-lg">{{ getWelcomeMessage() }}</p>
             </div>
           </div>
-          <button class="bg-[var(--primary)] text-white px-4 py-2 rounded mr-2">{{ i18n.t('dashboard.trips.viewDetails') }}</button>
-          <button class="border px-4 py-2 rounded">{{ i18n.t('dashboard.trips.downloadDocs') }}</button>
-        </div>
-      </div>
 
-      <!-- Recent Activity -->
-      <div>
-        <h3 class="text-[var(--text-primary)] mb-4">{{ i18n.t('dashboard.recentActivity') }}</h3>
-        <div *ngFor="let activity of recentActivity()" class="p-4 border rounded-lg mb-2 bg-[var(--background)]">
-          {{ activity.action }} - {{ activity.item }} ({{ activity.time }})
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                📊</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().total }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">{{ i18n.t('dashboard.totalBookings') }}
+              </div>
+            </div>
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                ✅</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().confirmed }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">{{ i18n.t('dashboard.status') }}:
+                Confirmed
+              </div>
+            </div>
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                ⏳</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().pending }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">{{ i18n.t('dashboard.status') }}: Pending
+              </div>
+            </div>
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                {{ role() === 'Admin' ? '👥' : '❌' }}</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ role() === 'Admin' ? stats().users :
+                stats().cancelled }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">{{ role() === 'Admin' ? 'Total Users' :
+                'Cancelled' }}</div>
+            </div>
+          </div>
+
+          <!-- Admin-only Resource Stats -->
+          <div *ngIf="role() === 'Admin'" class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                🏨</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().hotels }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">Total Hotels</div>
+            </div>
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                ✈️</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().internationalTransports }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">Flights / Ships</div>
+            </div>
+            <div
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow duration-200 group">
+              <div
+                class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                🚌</div>
+              <div class="text-4xl font-bold mb-1 text-[var(--color-text)]">{{ stats().groundTransports }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] font-medium">Ground Transport</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings -->
+        <div *ngIf="activeView() === 'bookings'" class="space-y-6 animate-fadeIn">
+          <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ getBookingsMenuLabel() }}</h2>
+          <div class="bg-[var(--color-surface)] rounded-2xl p-5 border border-[var(--border)] shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{{
+                  i18n.t('dashboard.status')
+                  }}</label>
+                <select (change)="updateBookingStatusFilter($event)"
+                  class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)] transition-all">
+                  <option value="all" class="bg-[var(--color-bg)] text-[var(--color-text)]">All</option>
+                  <option value="Pending" class="bg-[var(--color-bg)] text-[var(--color-text)]">Pending</option>
+                  <option value="Confirmed" class="bg-[var(--color-bg)] text-[var(--color-text)]">Confirmed</option>
+                  <option value="Cancelled" class="bg-[var(--color-bg)] text-[var(--color-text)]">Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{{ i18n.t('common.search')
+                  }}</label>
+                <input type="text" (input)="updateSearchQuery($event)" [placeholder]="i18n.t('dashboard.search')"
+                  class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)] transition-all">
+              </div>
+              <div class="flex items-end">
+                <button (click)="role() === 'Admin' ? loadAllBookings() : loadMyBookings()"
+                  class="w-full px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity shadow-md">
+                  🔄 {{ i18n.t('dashboard.refresh') }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="bookingsLoading()" class="space-y-3">
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+          </div>
+          <div *ngIf="!bookingsLoading() && filteredBookings().length === 0"
+            class="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--border)] border-dashed">
+            <div class="text-6xl mb-4 opacity-50">📭</div>
+            <h3 class="text-xl font-semibold text-[var(--color-text)] mb-2">{{ i18n.t('dashboard.noBookings') }}</h3>
+            <p class="text-[var(--color-text-muted)]">{{ i18n.t('dashboard.adjustFilters') }}</p>
+          </div>
+          <div *ngIf="!bookingsLoading()" class="space-y-4">
+            <div *ngFor="let booking of filteredBookings()"
+              class="bg-[var(--color-surface)] rounded-2xl p-5 border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-14 h-14 rounded-xl bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] font-bold text-lg">
+                    #{{ booking.id }}</div>
+                  <div>
+                    <div class="flex items-center gap-3 mb-1">
+                      <h4 class="font-bold text-lg text-[var(--color-text)]">{{ getBookingType(booking) }}</h4>
+                      <span class="px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="{
+                        'bg-green-50 text-green-700 border-green-200': booking.status === 'Confirmed',
+                        'bg-yellow-50 text-yellow-700 border-yellow-200': booking.status === 'Pending',
+                        'bg-red-50 text-red-700 border-red-200': booking.status === 'Cancelled'
+                      }">{{ booking.status }}</span>
+                    </div>
+                    <div class="text-sm text-[var(--color-text-muted)]">📅 {{ i18n.t('dashboard.created') }}: {{
+                      formatDate(booking.createdAt) }}</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button *ngIf="role() === 'Admin' && booking.status === 'Pending'"
+                    (click)="updateBookingStatus((booking.id), 'Confirmed')"
+                    class="px-4 py-2 rounded-xl bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 text-sm font-medium transition-colors">✅
+                    {{ i18n.t('dashboard.confirm') }}</button>
+                  <button *ngIf="role() === 'Admin' && booking.status !== 'Cancelled'"
+                    (click)="updateBookingStatus((booking.id), 'Cancelled')"
+                    class="px-4 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-sm font-medium transition-colors">❌
+                    {{ i18n.t('common.cancel') }}</button>
+                  <button *ngIf="canCancelBooking(booking)" (click)="cancelBooking(booking)"
+                    class="px-4 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 text-sm font-medium transition-colors">❌
+                    {{ i18n.t('dashboard.cancelBooking') }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Users -->
+        <div *ngIf="activeView() === 'users' && role() === 'Admin'" class="space-y-6 animate-fadeIn">
+          <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ i18n.t('dashboard.manageUsers') }}</h2>
+          <div class="bg-[var(--color-surface)] rounded-2xl p-5 border border-[var(--border)] shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{{ i18n.t('dashboard.role')
+                  }}</label>
+                <select (change)="updateUserRoleFilter($event)"
+                  class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)] transition-all">
+                  <option value="all" class="bg-[var(--color-bg)] text-[var(--color-text)]">{{
+                    i18n.t('dashboard.allRoles') }}</option>
+                  <option value="User" class="bg-[var(--color-bg)] text-[var(--color-text)]">User</option>
+                  <option value="Admin" class="bg-[var(--color-bg)] text-[var(--color-text)]">Admin</option>
+                  <option value="HotelManager" class="bg-[var(--color-bg)] text-[var(--color-text)]">Hotel Manager
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-1">{{ i18n.t('common.search')
+                  }}</label>
+                <input type="text" [value]="searchQuery()" (input)="updateSearchQuery($event)"
+                  [placeholder]="i18n.t('dashboard.search')"
+                  class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)] transition-all">
+              </div>
+              <div class="flex items-end">
+                <button (click)="loadAllUsers()"
+                  class="w-full px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity shadow-md">
+                  🔄 {{ i18n.t('dashboard.refresh') }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="usersLoading()" class="space-y-4">
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+          </div>
+          <div *ngIf="!usersLoading()" class="space-y-4">
+            <div *ngFor="let user of filteredUsers()"
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-lg text-[var(--color-text)] mb-1">{{ user.fullName }}</h4>
+                    <div class="text-sm text-[var(--color-text-muted)] mb-2">📧 {{ user.email }}</div>
+                    <div class="flex flex-wrap gap-2">
+                      <span *ngFor="let userRole of user.roles"
+                        class="px-3 py-1 rounded-full text-xs font-medium bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20">{{
+                        userRole }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button (click)="openRoleModal(user)"
+                    class="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-medium text-sm transition-colors">➕
+                    {{ i18n.t('dashboard.assignRole') }}</button>
+                  <button *ngFor="let userRole of user.roles" (click)="removeRole(user, userRole)"
+                    class="px-4 py-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 font-medium text-sm transition-colors">❌
+                    {{ userRole }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hotels -->
+        <div *ngIf="activeView() === 'hotels'" class="space-y-6 animate-fadeIn">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ i18n.t('dashboard.manageHotels') }}</h2>
+            <button (click)="openHotelModal()"
+              class="px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
+              <span>➕</span> {{ i18n.t('dashboard.addHotel') }}
+            </button>
+          </div>
+
+          <div *ngIf="hotelsLoading()" class="space-y-4">
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+          </div>
+
+          <div *ngIf="!hotelsLoading() && displayedHotels().length === 0"
+            class="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--border)] border-dashed">
+            <div class="text-6xl mb-4 opacity-50">🏨</div>
+            <h3 class="text-xl font-semibold text-[var(--color-text)] mb-2">{{ i18n.t('dashboard.noHotels') }}</h3>
+            <p class="text-[var(--color-text-muted)]">{{ i18n.t('dashboard.noHotelsMessage') }}</p>
+          </div>
+
+          <div *ngIf="!hotelsLoading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let hotel of displayedHotels()"
+              class="bg-[var(--color-surface)] rounded-2xl border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+              <div class="aspect-video bg-[var(--color-surface)] relative">
+                <img [src]="getHotelImage(hotel)" [alt]="hotel.name" (error)="handleImageError($event)"
+                  class="w-full h-full object-cover">
+              </div>
+              <div class="p-5">
+                <div class="mb-3">
+                  <h3 class="font-bold text-lg text-[var(--color-text)] mb-1">{{ hotel.name }}</h3>
+                  <p class="text-sm text-[var(--color-text-muted)]">📍 {{ hotel.city }}</p>
+                </div>
+                <div class="flex items-center gap-4 mb-3 text-sm text-[var(--color-text)]">
+                  <span>⭐ {{ hotel.starRating }}/5</span>
+                  <span>🕌 {{ hotel.distanceToHaram }}km</span>
+                  <span>🛏️ {{ hotel.availableRooms }} {{ i18n.t('dashboard.rooms') }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-xl text-[var(--primary)]">{{ hotel.pricePerNight }} SAR</div>
+                    <div class="text-xs text-[var(--color-text-muted)]">{{ i18n.t('dashboard.perNight') }}</div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button (click)="openHotelModal(hotel)"
+                      class="p-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors">✏️</button>
+                    <button (click)="deleteHotel(hotel.id!)"
+                      class="p-2 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors">🗑️</button>
+                    <button (click)="viewHotelDetails(hotel)"
+                      class="p-2 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface)] border border-[var(--border)] transition-colors">🔍</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- International Transport -->
+        <div *ngIf="activeView() === 'international-transport'" class="space-y-6 animate-fadeIn">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ i18n.t('dashboard.intlTransport') }}</h2>
+            <button (click)="openInternationalTransportModal()"
+              class="px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
+              <span>➕</span> {{ i18n.t('dashboard.addTransport') }}
+            </button>
+          </div>
+
+          <div *ngIf="internationalTransportsLoading()" class="space-y-4">
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+          </div>
+
+          <div *ngIf="!internationalTransportsLoading() && allInternationalTransports().length === 0"
+            class="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--border)] border-dashed">
+            <div class="text-6xl mb-4 opacity-50">✈️</div>
+            <h3 class="text-xl font-semibold text-[var(--color-text)] mb-2">{{ i18n.t('dashboard.noTransports') }}</h3>
+            <p class="text-[var(--color-text-muted)]">{{ i18n.t('dashboard.noTransportMessage') }}</p>
+          </div>
+
+          <div *ngIf="!internationalTransportsLoading()" class="space-y-4">
+            <div *ngFor="let transport of allInternationalTransports()"
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="font-bold text-lg text-[var(--color-text)]">{{ transport.carrierName }}</h3>
+                    <span
+                      class="px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                      {{ transport.internationalTransportType }}
+                    </span>
+                  </div>
+                  <div class="text-sm text-[var(--color-text-muted)] space-y-1">
+                    <div>🛫 {{ transport.departureAirport }} → 🛬 {{ transport.arrivalAirport }}</div>
+                    <div>📅 {{ formatDate(transport.departureDate) }} - {{ formatDate(transport.arrivalDate) }}</div>
+                    <div>💺 {{ transport.availableSeats }} {{ i18n.t('dashboard.seatsLeft') }}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold text-2xl text-[var(--primary)]">{{ transport.price }} SAR</div>
+                  <div class="text-xs text-[var(--color-text-muted)]">{{ i18n.t('dashboard.perPerson') }}</div>
+                </div>
+                <div class="flex gap-2">
+                  <button (click)="openInternationalTransportModal(transport)"
+                    class="p-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface)] border border-[var(--border)] transition-colors">✏️</button>
+                  <button (click)="deleteInternationalTransport(transport.id!)"
+                    class="p-3 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ground Transport -->
+        <div *ngIf="activeView() === 'ground-transport'" class="space-y-6 animate-fadeIn">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-[var(--color-text)]">{{ i18n.t('dashboard.groundTransport') }}</h2>
+            <button (click)="openGroundTransportModal()"
+              class="px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
+              <span>➕</span> {{ i18n.t('dashboard.addTransport') }}
+            </button>
+          </div>
+
+          <div *ngIf="groundTransportsLoading()" class="space-y-4">
+            <div class="h-24 bg-[var(--color-surface)] rounded-2xl animate-pulse"></div>
+          </div>
+
+          <div *ngIf="!groundTransportsLoading() && allGroundTransports().length === 0"
+            class="bg-[var(--color-surface)] rounded-2xl p-12 text-center border border-[var(--border)] border-dashed">
+            <div class="text-6xl mb-4 opacity-50">🚌</div>
+            <h3 class="text-xl font-semibold text-[var(--color-text)] mb-2">{{ i18n.t('dashboard.noTransports') }}</h3>
+            <p class="text-[var(--color-text-muted)]">{{ i18n.t('dashboard.noTransportMessage') }}</p>
+          </div>
+
+          <div *ngIf="!groundTransportsLoading()" class="space-y-4">
+            <div *ngFor="let transport of allGroundTransports()"
+              class="bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="font-bold text-lg text-[var(--color-text)]">{{ transport.serviceName }}</h3>
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                    {{ getTransportTypeName(transport.type, false) }}
+                  </span>
+                </div>
+                <div class="text-sm text-[var(--color-text-muted)]">
+                  {{ i18n.t('dashboard.capacity') }}: {{ transport.capacity }} {{ i18n.t('dashboard.person') }}
+                </div>
+              </div>
+              <div class="text-right min-w-[120px]">
+                <div class="font-bold text-2xl text-[var(--primary)]">{{ transport.pricePerPerson }} SAR</div>
+                <div class="text-xs text-[var(--color-text-muted)]">{{ i18n.t('common.perPerson') }}</div>
+              </div>
+              <div class="flex gap-2">
+                <button (click)="openGroundTransportModal(transport)"
+                  class="p-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface)] border border-[var(--border)] transition-colors">✏️</button>
+                <button (click)="deleteGroundTransport(transport.id!)"
+                  class="p-3 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition-colors">🗑️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Role Modal -->
+  <div *ngIf="showRoleModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn"
+    (click)="showRoleModal.set(false)">
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl p-8 max-w-md w-full shadow-2xl border border-[var(--border)] transform transition-all scale-100"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-2xl font-bold mb-6">{{ i18n.t('dashboard.assignRole') }}</h3>
+      <div class="mb-6">
+        <p class="text-sm text-[var(--color-text-muted)] mb-4">{{ i18n.t('dashboard.assignRole') }} to <span
+            class="font-semibold text-[var(--color-text)]">{{ selectedUser()?.fullName }}</span></p>
+        <label class="block text-sm font-medium text-[var(--color-text-muted)] mb-2">{{ i18n.t('dashboard.selectRole')
+          }}</label>
+        <select (change)="updateRoleToAssign($event)"
+          class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+          <option value="User" class="bg-[var(--color-bg)] text-[var(--color-text)]">User</option>
+          <option value="Admin" class="bg-[var(--color-bg)] text-[var(--color-text)]">Admin</option>
+          <option value="HotelManager" class="bg-[var(--color-bg)] text-[var(--color-text)]">Hotel Manager</option>
+        </select>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="assignRole()"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity">{{
+          i18n.t('dashboard.confirm') }}</button>
+        <button (click)="showRoleModal.set(false)"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)] font-medium hover:bg-[var(--color-surface)] transition-colors">{{
+          i18n.t('common.cancel') }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hotel Modal -->
+  <div *ngIf="showHotelModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn"
+    (click)="showHotelModal.set(false)">
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl p-8 max-w-2xl w-full shadow-2xl border border-[var(--border)] my-8 transform transition-all scale-100"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-2xl font-bold mb-6">{{ selectedHotel() ? i18n.t('dashboard.editHotel') :
+        i18n.t('dashboard.addHotel') }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.hotelName') }}</label>
+          <input type="text" [(ngModel)]="hotelFormData.name"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.city') }}</label>
+          <select [(ngModel)]="hotelFormData.city"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+            <option value="Makkah">{{ i18n.t('hotel.city.makkah') }}</option>
+            <option value="Madinah">{{ i18n.t('hotel.city.madinah') }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.starRating') }} (1-5)</label>
+          <input type="number" min="1" max="5" [(ngModel)]="hotelFormData.starRating"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.address') }}</label>
+          <input type="text" [(ngModel)]="hotelFormData.address"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.pricePerNight') }} (SAR)</label>
+          <input type="number" [(ngModel)]="hotelFormData.pricePerNight"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.availableRooms') }}</label>
+          <input type="number" [(ngModel)]="hotelFormData.availableRooms"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.distanceToHaram') }} (km)</label>
+          <input type="number" step="0.1" [(ngModel)]="hotelFormData.distanceToHaram"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+
+        <!-- Image Upload -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.hotelImage') }}</label>
+          <div class="flex items-center gap-4">
+            <label class="flex-1 cursor-pointer">
+              <div
+                class="w-full px-4 py-3 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[var(--primary)] bg-[var(--color-bg)] transition-colors text-center">
+                <span class="text-sm text-[var(--color-text-muted)]">{{ selectedFile ? selectedFile.name :
+                  i18n.t('dashboard.imageUpload') }}</span>
+                <input type="file" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.webp" class="hidden">
+              </div>
+            </label>
+          </div>
+          <p class="text-xs text-[var(--color-text-muted)] mt-1.5">{{ i18n.t('dashboard.imageTypes') }}</p>
         </div>
       </div>
-    </main>
+      <div class="flex gap-3">
+        <button (click)="saveHotel()"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity">{{
+          i18n.t('common.save') }}</button>
+        <button (click)="showHotelModal.set(false)"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)] font-medium hover:bg-[var(--color-surface)] transition-colors">{{
+          i18n.t('common.cancel') }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- International Transport Modal -->
+  <div *ngIf="showInternationalTransportModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn"
+    (click)="showInternationalTransportModal.set(false)">
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl p-8 max-w-2xl w-full shadow-2xl border border-[var(--border)] my-8 transform transition-all scale-100"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-2xl font-bold mb-6">{{ selectedInternationalTransport() ? i18n.t('dashboard.editTransport') :
+        i18n.t('dashboard.addTransport') }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.carrierName') }}</label>
+          <input type="text" [(ngModel)]="internationalTransportFormData.carrierName"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.transportType') }}</label>
+          <select [(ngModel)]="internationalTransportFormData.internationalTransportType"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+            <option value="Flight">Flight</option>
+            <option value="Ship">Ship</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.pricePerNight') }} (SAR)</label>
+          <input type="number" [(ngModel)]="internationalTransportFormData.price"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.departureAirport') }}</label>
+          <input type="text" [(ngModel)]="internationalTransportFormData.departureAirport"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.arrivalAirport') }}</label>
+          <input type="text" [(ngModel)]="internationalTransportFormData.arrivalAirport"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.departureDate') }}</label>
+          <input type="datetime-local" [(ngModel)]="internationalTransportFormData.departureDate"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.arrivalDate') }}</label>
+          <input type="datetime-local" [(ngModel)]="internationalTransportFormData.arrivalDate"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.availableSeats') }}</label>
+          <input type="number" [(ngModel)]="internationalTransportFormData.availableSeats"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="saveInternationalTransport()"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity">{{
+          i18n.t('common.save') }}</button>
+        <button (click)="showInternationalTransportModal.set(false)"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)] font-medium hover:bg-[var(--color-surface)] transition-colors">{{
+          i18n.t('common.cancel') }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ground Transport Modal -->
+  <div *ngIf="showGroundTransportModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn"
+    (click)="showGroundTransportModal.set(false)">
+    <div
+      class="bg-[var(--color-surface)] rounded-2xl p-8 max-w-2xl w-full shadow-2xl border border-[var(--border)] my-8 transform transition-all scale-100"
+      (click)="$event.stopPropagation()">
+      <h3 class="text-2xl font-bold mb-6">{{ selectedGroundTransport() ? i18n.t('dashboard.editTransport') :
+        i18n.t('dashboard.addTransport') }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.serviceName') }}</label>
+          <input type="text" [(ngModel)]="groundTransportFormData.serviceName"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.transportType') }}</label>
+          <select [(ngModel)]="groundTransportFormData.type"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+            <option [value]="0">Private Car</option>
+            <option [value]="1">Shared Bus</option>
+            <option [value]="2">Taxi</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.capacity') }}</label>
+          <input type="number" [(ngModel)]="groundTransportFormData.capacity"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.pricePerNight') }} (SAR)</label>
+          <input type="number" [(ngModel)]="groundTransportFormData.pricePerPerson"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1.5">{{ i18n.t('dashboard.description') }}</label>
+          <textarea [(ngModel)]="groundTransportFormData.description" rows="3"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none text-[var(--color-text)]"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="saveGroundTransport()"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition-opacity">{{
+          i18n.t('common.save') }}</button>
+        <button (click)="showGroundTransportModal.set(false)"
+          class="flex-1 px-4 py-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)] font-medium hover:bg-[var(--color-surface)] transition-colors">{{
+          i18n.t('common.cancel') }}</button>
+      </div>
+    </div>
   </div>
 </div>

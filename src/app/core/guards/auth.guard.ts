@@ -3,27 +3,34 @@ import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { map, take } from 'rxjs';
 
+/**
+ * Auth Guard for protecting routes
+ * Works with httpOnly cookie authentication
+ * Redirects to login if user is not authenticated
+ */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Check if token exists
-  if (!authService.isAuthenticated()) {
-    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-    return false;
+  // If user is already loaded in memory, allow immediately
+  const currentUser = authService.getCurrentUserValue();
+  if (currentUser) {
+    return true;
   }
 
-  // Wait for user to load (or confirm it's already loaded)
-  return authService.currentUser$.pipe(
+  // User not in memory - check with backend via /Auth/Me
+  // This verifies the httpOnly cookie is valid
+  return authService.checkAuth().pipe(
     take(1),
     map(user => {
-      // If user is loaded or token exists, allow access
-      if (user || authService.isAuthenticated()) {
+      if (user) {
         return true;
       }
       
-      // Otherwise redirect to login
-      router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      // No valid session - redirect to login
+      router.navigate(['/login'], { 
+        queryParams: { returnUrl: state.url } 
+      });
       return false;
     })
   );

@@ -1,0 +1,213 @@
+﻿<section class="min-h-[60vh] flex flex-col items-center justify-center p-6">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center space-y-4">
+    <div class="text-6xl">⏳</div>
+    <h1 class="text-2xl font-bold">Loading Booking Details...</h1>
+  </div>
+
+  <!-- Payment Complete State -->
+  <div *ngIf="paymentComplete && !isLoading" class="text-center space-y-6">
+    <div class="text-6xl">🎉</div>
+    <h1 class="text-3xl font-bold text-green-600">Payment Confirmed!</h1>
+    <p class="text-gray-600 max-w-xl">
+      Your booking has been confirmed successfully. A confirmation email will be
+      sent shortly with all the details.
+    </p>
+    <div class="space-y-2 text-sm text-gray-500">
+      <p *ngIf="bookingId">Booking ID: <span class="font-semibold">{{ bookingId }}</span></p>
+    </div>
+    <div class="flex flex-col md:flex-row gap-3">
+      <button
+        class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+        (click)="goToDashboard()"
+      >
+        View Dashboard
+      </button>
+      <button
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+        (click)="goHome()"
+      >
+        Back to Home
+      </button>
+    </div>
+  </div>
+
+  <!-- Booking Summary & Payment Button -->
+  <div *ngIf="booking && !paymentComplete && !isLoading" class="max-w-4xl w-full space-y-6">
+    <div class="text-center">
+      <div class="text-6xl mb-4">📋</div>
+      <h1 class="text-3xl font-bold">Booking Summary</h1>
+      <p class="text-gray-600 mt-2">Review your booking and proceed to payment</p>
+    </div>
+
+    <!-- Booking Details Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
+      <!-- Booking Information -->
+      <div class="border-b pb-4 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">📋 Booking Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500 dark:text-gray-400">Booking Number:</span>
+            <span class="font-semibold dark:text-white">{{ bookingId }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500 dark:text-gray-400">Number of Travelers:</span>
+            <span class="font-semibold dark:text-white">{{ booking.numberOfTravelers || 1 }}</span>
+          </div>
+          <div class="flex justify-between" *ngIf="booking.travelStartDate">
+            <span class="text-gray-500 dark:text-gray-400">Travel Start:</span>
+            <span class="font-semibold dark:text-white">{{ booking.travelStartDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="flex justify-between" *ngIf="booking.travelEndDate">
+            <span class="text-gray-500 dark:text-gray-400">Travel End:</span>
+            <span class="font-semibold dark:text-white">{{ booking.travelEndDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Traveler Information -->
+      <div class="border-b pb-4 dark:border-gray-700" *ngIf="payerName || payerEmail || payerPhone">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">👤 Main Traveler Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div class="flex items-center gap-3" *ngIf="payerName">
+            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span class="text-blue-600 dark:text-blue-300 font-semibold">{{ payerName.charAt(0).toUpperCase() }}</span>
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-xs">Full Name</p>
+              <p class="font-semibold dark:text-white">{{ payerName }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3" *ngIf="payerEmail">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <span class="text-green-600 dark:text-green-300">✉️</span>
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-xs">Email Address</p>
+              <p class="font-semibold dark:text-white">{{ payerEmail }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 md:col-span-2" *ngIf="payerPhone">
+            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <span class="text-purple-600 dark:text-purple-300">📱</span>
+            </div>
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-xs">Phone Number</p>
+              <p class="font-semibold dark:text-white">{{ payerPhone }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Breakdown -->
+      <div class="border-b pb-4 dark:border-gray-700">
+        <h2 class="text-xl font-semibold mb-4 dark:text-white">💰 Price Breakdown</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Package Price</span>
+            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.70).toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Hotels & Accommodation</span>
+            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.20).toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Transportation</span>
+            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.08).toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Service Fee</span>
+            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.02).toFixed(2) }}</span>
+          </div>
+          <div class="border-t pt-3 dark:border-gray-600">
+            <div class="flex justify-between items-center text-xl font-bold">
+              <span class="dark:text-white">Total Amount</span>
+              <span class="text-green-600 dark:text-green-400">${{ booking.totalPrice || 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Button -->
+      <!-- Customer Information Form -->
+      <div class="border-t pt-6" *ngIf="payerName || payerEmail">
+        <h3 class="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wide">Customer Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-500 uppercase">Full Name</label>
+            <input 
+              type="text" 
+              [(ngModel)]="payerName" 
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
+              placeholder="Enter full name"
+            >
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-medium text-gray-500 uppercase">Email Address</label>
+            <input 
+              type="email" 
+              [(ngModel)]="payerEmail" 
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
+              placeholder="Enter email address"
+            >
+          </div>
+          <div class="space-y-1 md:col-span-2">
+            <label class="text-xs font-medium text-gray-500 uppercase">Phone Number</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="payerPhone" 
+              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
+              placeholder="Enter phone number"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Button & Form -->
+      <div class="pt-6 space-y-4">
+        <!-- Step 1: Initialize Payment -->
+        <button
+          *ngIf="!clientSecret && !isPaymentProcessing"
+          (click)="initiatePayment()"
+          class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg flex items-center justify-center gap-2"
+        >
+          <span>💳</span> Proceed to Payment
+        </button>
+
+        <!-- Step 2: Stripe Payment Element Form -->
+        <div [class.hidden]="!clientSecret" class="space-y-4 animate-fade-in">
+          <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div id="payment-element" class="min-h-[200px]">
+              <!-- Stripe Payment Element will be mounted here -->
+            </div>
+          </div>
+          
+          <button
+            *ngIf="clientSecret"
+            (click)="confirmPayment()"
+            [disabled]="isPaymentProcessing"
+            class="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <span *ngIf="isPaymentProcessing" class="animate-spin">↻</span>
+            {{ isPaymentProcessing ? 'Processing Payment...' : 'Confirm Payment' }}
+          </button>
+        </div>
+        
+        <!-- Error Message -->
+        <p *ngIf="paymentError" class="text-red-500 text-center font-medium bg-red-50 p-2 rounded border border-red-200">
+          {{ paymentError }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center">
+      <button
+        (click)="goHome()"
+        class="text-blue-600 hover:text-blue-700 font-semibold"
+      >
+        ← Back to Home
+      </button>
+    </div>
+  </div>
+</section>

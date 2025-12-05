@@ -1,1 +1,481 @@
-<p>booking-package works!</p>
+<div class="container mx-auto p-6 space-y-10 max-w-5xl">
+
+  <!-- Trip Type Selection -->
+  <section>
+    <h2 class="text-2xl font-bold mb-6 text-[var(--color-text)]">{{ i18nService.t('home.trending') }}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div
+        class="border border-[var(--border)] rounded-2xl shadow-sm p-1 cursor-pointer hover:scale-[1.02] transition-all duration-300 bg-[var(--color-surface)] group"
+        (click)="chooseTrip('umrah')" [class.ring-2]="selectedTripType === 'umrah'"
+        [class.ring-[var(--primary)]]="selectedTripType === 'umrah'" role="button" tabindex="0"
+        (keydown.enter)="chooseTrip('umrah')" (keydown.space)="chooseTrip('umrah')"
+        [attr.aria-pressed]="selectedTripType === 'umrah'">
+        <div class="relative h-48 rounded-xl overflow-hidden mb-3">
+          <img src="assets/images/umrah.jpg"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            alt="Umrah pilgrimage"
+            onerror="this.src='https://images.unsplash.com/photo-1565552629477-ff9785a277d1?q=80&w=1000&auto=format&fit=crop'" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+            <h3 class="text-xl font-bold text-white">🕋 {{ i18nService.t('docs.umrah.title') }}</h3>
+          </div>
+          <div *ngIf="selectedTripType === 'umrah'"
+            class="absolute top-3 right-3 bg-[var(--primary)] text-white p-1 rounded-full shadow-lg">
+            <lucide-icon name="check" class="w-5 h-5"></lucide-icon>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="border border-[var(--border)] rounded-2xl shadow-sm p-1 cursor-pointer hover:scale-[1.02] transition-all duration-300 bg-[var(--color-surface)] group"
+        (click)="chooseTrip('hajj')" [class.ring-2]="selectedTripType === 'hajj'"
+        [class.ring-[var(--primary)]]="selectedTripType === 'hajj'" role="button" tabindex="0"
+        (keydown.enter)="chooseTrip('hajj')" (keydown.space)="chooseTrip('hajj')"
+        [attr.aria-pressed]="selectedTripType === 'hajj'">
+        <div class="relative h-48 rounded-xl overflow-hidden mb-3">
+          <img src="assets/images/hajj.jpg"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            alt="Hajj pilgrimage"
+            onerror="this.src='https://images.unsplash.com/photo-1537181534458-45d61194285d?q=80&w=1000&auto=format&fit=crop'" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+            <h3 class="text-xl font-bold text-white">✈ {{ i18nService.t('docs.hajj.title') }}</h3>
+          </div>
+          <div *ngIf="selectedTripType === 'hajj'"
+            class="absolute top-3 right-3 bg-[var(--primary)] text-white p-1 rounded-full shadow-lg">
+            <lucide-icon name="check" class="w-5 h-5"></lucide-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Document Requirements Section (New) -->
+  <section class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between cursor-pointer select-none"
+      (click)="showDocumentRequirements = !showDocumentRequirements" role="button" tabindex="0"
+      (keydown.enter)="showDocumentRequirements = !showDocumentRequirements"
+      [attr.aria-expanded]="showDocumentRequirements">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <lucide-icon name="file-text" class="w-6 h-6"></lucide-icon>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-[var(--color-text)]">{{ i18nService.t('docs.title') }}</h2>
+          <p class="text-sm text-[var(--color-text-muted)]">{{ selectedTripType === 'umrah' ?
+            i18nService.t('docs.umrah.title') : i18nService.t('docs.hajj.title') }}</p>
+        </div>
+      </div>
+      <div
+        class="w-8 h-8 rounded-full bg-[var(--color-bg)] flex items-center justify-center border border-[var(--border)] transition-transform duration-300"
+        [class.rotate-180]="showDocumentRequirements">
+        <lucide-icon name="chevron-down" class="w-5 h-5 text-[var(--color-text-muted)]"></lucide-icon>
+      </div>
+    </div>
+
+    <div *ngIf="showDocumentRequirements"
+      class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn border-t border-[var(--border)] pt-6">
+      <!-- Requirements List -->
+      <div class="lg:col-span-2">
+        <div *ngIf="selectedTripType === 'umrah'" class="space-y-4">
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.umrah.passport') }}</span>
+          </div>
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.umrah.photos') }}</span>
+          </div>
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.umrah.health') }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="selectedTripType === 'hajj'" class="space-y-4">
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.hajj.passport') }}</span>
+          </div>
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.hajj.nationalId') }}</span>
+          </div>
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.hajj.photos') }}</span>
+          </div>
+          <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-[var(--color-bg)] transition-colors">
+            <div class="mt-1"><lucide-icon name="check-circle" class="w-5 h-5 text-green-500"></lucide-icon></div>
+            <span class="text-[var(--color-text)] font-medium">{{ i18nService.t('docs.hajj.vaccination') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Notes Box -->
+      <div
+        class="bg-yellow-50 dark:bg-yellow-900/10 p-5 rounded-2xl border border-yellow-200 dark:border-yellow-800/30">
+        <h3 class="font-bold text-lg mb-4 text-yellow-800 dark:text-yellow-500 flex items-center gap-2">
+          <lucide-icon name="alert-circle" class="w-5 h-5"></lucide-icon>
+          {{ i18nService.t('docs.notes.title') }}
+        </h3>
+        <ul class="space-y-3 text-sm text-yellow-700 dark:text-yellow-400">
+          <li class="flex gap-2">
+            <span class="font-bold">•</span>
+            {{ i18nService.t('docs.notes.mahram') }}
+          </li>
+          <li class="flex gap-2">
+            <span class="font-bold">•</span>
+            {{ i18nService.t('docs.notes.health') }}
+          </li>
+          <li class="flex gap-2">
+            <span class="font-bold">•</span>
+            {{ i18nService.t('docs.notes.visa') }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Requirements Status -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Hotel Status -->
+    <div class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-[var(--color-text)]">Hotel Requirements</h2>
+        <span
+          class="text-xs font-medium px-2 py-1 rounded-full bg-[var(--color-bg)] text-[var(--color-text-muted)]">Makkah
+          + Madinah</span>
+      </div>
+
+      <div class="space-y-4">
+        <div
+          class="flex items-center justify-between p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)]">
+          <div class="flex items-center gap-3">
+            <lucide-icon name="building-2" class="w-5 h-5 text-[var(--color-text-muted)]"></lucide-icon>
+            <span class="font-medium text-[var(--color-text)]">Makkah Hotel</span>
+          </div>
+          <span class="text-sm font-bold px-3 py-1 rounded-lg"
+            [class.bg-green-100]="hotelBookedMessage.includes('مكة') || hotelBookedMessage.includes('الفنادق')"
+            [class.text-green-700]="hotelBookedMessage.includes('مكة') || hotelBookedMessage.includes('الفنادق')"
+            [class.bg-yellow-100]="!(hotelBookedMessage.includes('مكة') || hotelBookedMessage.includes('الفنادق'))"
+            [class.text-yellow-700]="!(hotelBookedMessage.includes('مكة') || hotelBookedMessage.includes('الفنادق'))">
+            {{ (hotelBookedMessage.includes('مكة') || hotelBookedMessage.includes('الفنادق')) ? 'Completed' : 'Pending'
+            }}
+          </span>
+        </div>
+        <button
+          class="w-full py-2.5 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
+          (click)="goToHotelsPage('Makkah')">
+          Select Makkah Hotel
+        </button>
+
+        <div
+          class="flex items-center justify-between p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)]">
+          <div class="flex items-center gap-3">
+            <lucide-icon name="building" class="w-5 h-5 text-[var(--color-text-muted)]"></lucide-icon>
+            <span class="font-medium text-[var(--color-text)]">Madinah Hotel</span>
+          </div>
+          <span class="text-sm font-bold px-3 py-1 rounded-lg"
+            [class.bg-green-100]="hotelBookedMessage.includes('المدينة') || hotelBookedMessage.includes('الفنادق')"
+            [class.text-green-700]="hotelBookedMessage.includes('المدينة') || hotelBookedMessage.includes('الفنادق')"
+            [class.bg-yellow-100]="!(hotelBookedMessage.includes('المدينة') || hotelBookedMessage.includes('الفنادق'))"
+            [class.text-yellow-700]="!(hotelBookedMessage.includes('المدينة') || hotelBookedMessage.includes('الفنادق'))">
+            {{ (hotelBookedMessage.includes('المدينة') || hotelBookedMessage.includes('الفنادق')) ? 'Completed' :
+            'Pending' }}
+          </span>
+        </div>
+        <button
+          class="w-full py-2.5 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
+          (click)="goToHotelsPage('Madinah')">
+          Select Madinah Hotel
+        </button>
+      </div>
+    </div>
+
+    <!-- Transport Status -->
+    <div class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-[var(--color-text)]">Transport Requirements</h2>
+        <span
+          class="text-xs font-medium px-2 py-1 rounded-full bg-[var(--color-bg)] text-[var(--color-text-muted)]">International
+          + Ground</span>
+      </div>
+
+      <div class="space-y-4">
+        <div
+          class="flex items-center justify-between p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)]">
+          <div class="flex items-center gap-3">
+            <lucide-icon name="plane" class="w-5 h-5 text-[var(--color-text-muted)]"></lucide-icon>
+            <span class="font-medium text-[var(--color-text)]">International</span>
+          </div>
+          <span class="text-sm font-bold px-3 py-1 rounded-lg" [class.bg-green-100]="transportBookedMessage"
+            [class.text-green-700]="transportBookedMessage" [class.bg-yellow-100]="!transportBookedMessage"
+            [class.text-yellow-700]="!transportBookedMessage">
+            {{ transportBookedMessage ? 'Completed' : 'Pending' }}
+          </span>
+        </div>
+        <button
+          class="w-full py-2.5 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
+          (click)="goToTransportPage('international')">
+          Book International Transport
+        </button>
+
+        <div
+          class="flex items-center justify-between p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--border)]">
+          <div class="flex items-center gap-3">
+            <lucide-icon name="bus" class="w-5 h-5 text-[var(--color-text-muted)]"></lucide-icon>
+            <span class="font-medium text-[var(--color-text)]">Ground</span>
+          </div>
+          <span class="text-sm font-bold px-3 py-1 rounded-lg" [class.bg-green-100]="groundBookedMessage"
+            [class.text-green-700]="groundBookedMessage" [class.bg-yellow-100]="!groundBookedMessage"
+            [class.text-yellow-700]="!groundBookedMessage">
+            {{ groundBookedMessage ? 'Completed' : 'Pending' }}
+          </span>
+        </div>
+        <button
+          class="w-full py-2.5 rounded-xl border border-[var(--primary)] text-[var(--primary)] font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
+          (click)="goToTransportPage('ground')">
+          Book Ground Transport
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Passenger Information Form -->
+  <section class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+    <h2 class="text-xl font-bold mb-6 text-[var(--color-text)] flex items-center gap-2">
+      <lucide-icon name="user" class="w-6 h-6 text-[var(--primary)]"></lucide-icon>
+      Passenger Information
+    </h2>
+
+    <form class="grid grid-cols-1 md:grid-cols-2 gap-6" autocomplete="on">
+      <!-- First Name -->
+      <div>
+        <label for="firstName" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.firstName') }} *</label>
+        <div class="relative">
+          <input id="firstName" name="firstName" autocomplete="given-name"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            [placeholder]="i18nService.t('booking.form.firstName')" [(ngModel)]="passenger.firstName"
+            (ngModelChange)="savePassengerData()" />
+          <lucide-icon name="user"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Last Name -->
+      <div>
+        <label for="lastName" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.lastName')
+          }} *</label>
+        <div class="relative">
+          <input id="lastName" name="lastName" autocomplete="family-name"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            [placeholder]="i18nService.t('booking.form.lastName')" [(ngModel)]="passenger.lastName"
+            (ngModelChange)="savePassengerData()" />
+          <lucide-icon name="user"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Date of Birth -->
+      <div>
+        <label for="dateOfBirth" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.dateOfBirth') }} *</label>
+        <div class="relative">
+          <input id="dateOfBirth" name="dateOfBirth" autocomplete="bday"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            type="date" [(ngModel)]="passenger.dateOfBirth" (ngModelChange)="savePassengerData()" />
+        </div>
+      </div>
+
+      <!-- Gender -->
+      <div>
+        <label for="gender" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.gender')
+          }} *</label>
+        <div class="relative">
+          <select id="gender" name="gender" autocomplete="sex"
+            class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all appearance-none"
+            [(ngModel)]="passenger.gender" (ngModelChange)="savePassengerData()">
+            <option [value]="0">{{ i18nService.t('booking.form.male') }}</option>
+            <option [value]="1">{{ i18nService.t('booking.form.female') }}</option>
+          </select>
+          <lucide-icon name="chevron-down"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Nationality (Enhanced) -->
+      <div>
+        <label for="nationality" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.nationality') }} *</label>
+        <div class="relative">
+          <select id="nationality" name="nationality" autocomplete="country-name"
+            class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all appearance-none"
+            [(ngModel)]="passenger.nationality" (ngModelChange)="savePassengerData()">
+            <option value="" disabled>{{ i18nService.t('booking.form.selectCountry') }}</option>
+            <option *ngFor="let country of countries" [value]="country.name">
+              {{ country.flag }} {{ i18nService.language() === 'ar' ? country.nameAr : country.name }}
+            </option>
+          </select>
+          <lucide-icon name="flag"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Phone Number (Enhanced) -->
+      <div>
+        <label for="phone" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.phoneNumber') }} *</label>
+        <div class="flex gap-2">
+          <div class="relative w-1/3">
+            <select id="phoneCountryCode" name="phoneCountryCode" autocomplete="tel-country-code"
+              class="w-full px-2 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all appearance-none text-sm"
+              [(ngModel)]="selectedPhoneCountry" (ngModelChange)="savePassengerData()">
+              <option [ngValue]="null" disabled>{{ i18nService.t('booking.form.phoneCode') }}</option>
+              <option *ngFor="let country of countries" [ngValue]="country">
+                {{ country.flag }} {{ country.dialCode }}
+              </option>
+            </select>
+            <lucide-icon name="chevron-down"
+              class="absolute end-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+          </div>
+          <input id="phone" name="phone" autocomplete="tel-national"
+            class="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            placeholder="123456789" [(ngModel)]="passenger.phone" (ngModelChange)="savePassengerData()" />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="md:col-span-2">
+        <label for="email" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.email') }}
+          *</label>
+        <div class="relative">
+          <input id="email" name="email" type="email" autocomplete="email"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            [placeholder]="i18nService.t('booking.form.email')" [(ngModel)]="passenger.email"
+            (ngModelChange)="savePassengerData()" />
+          <lucide-icon name="mail"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Passport Number -->
+      <div>
+        <label for="passport" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.passport')
+          }} *</label>
+        <div class="relative">
+          <input id="passport" name="passport" autocomplete="off"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            placeholder="e.g., ABC123456" [(ngModel)]="passenger.passport" (ngModelChange)="savePassengerData()"
+            pattern="[A-Z0-9]{6,9}" title="6-9 uppercase letters and numbers only" maxlength="9" />
+          <lucide-icon name="file-text"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+
+      <!-- Passport Expiry -->
+      <div>
+        <label for="passportExpiry" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.passportExpiry') }} *</label>
+        <div class="relative">
+          <input id="passportExpiry" name="passportExpiry" type="date" autocomplete="off"
+            class="w-full ps-4 pe-10 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all"
+            [(ngModel)]="passenger.passportExpiry" (ngModelChange)="savePassengerData()" />
+
+        </div>
+      </div>
+
+      <!-- Passport Country -->
+      <div class="md:col-span-2">
+        <label for="passportIssuingCountry" class="block text-sm font-medium mb-2 text-[var(--color-text)]">{{
+          i18nService.t('booking.form.passportCountry') }} *</label>
+        <div class="relative">
+          <select id="passportIssuingCountry" name="passportIssuingCountry" autocomplete="country-name"
+            class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all appearance-none"
+            [(ngModel)]="passenger.passportIssuingCountry" (ngModelChange)="savePassengerData()">
+            <option value="" disabled>{{ i18nService.t('booking.form.selectCountry') }}</option>
+            <option *ngFor="let country of countries" [value]="country.name">
+              {{ country.flag }} {{ i18nService.language() === 'ar' ? country.nameAr : country.name }}
+            </option>
+          </select>
+          <lucide-icon name="globe"
+            class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Payment Section -->
+  <section class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+    <h2 class="text-xl font-bold mb-6 text-[var(--color-text)] flex items-center gap-2">
+      <lucide-icon name="credit-card" class="w-6 h-6 text-[var(--primary)]"></lucide-icon>
+      Payment
+    </h2>
+
+    <div class="space-y-4 mb-6">
+      <p class="text-sm text-[var(--color-text-muted)]">Secure payment via Stripe is required to confirm your booking.
+      </p>
+      <div class="relative">
+        <label for="paymentMethod" class="sr-only">Payment Method</label>
+        <select id="paymentMethod" name="paymentMethod" autocomplete="off"
+          class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--color-bg)] text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all appearance-none"
+          [(ngModel)]="paymentMethod">
+          <option value="stripe">Stripe (Credit / Debit Card)</option>
+          <option value="cash" disabled>Cash (Coming Soon)</option>
+        </select>
+        <lucide-icon name="chevron-down"
+          class="absolute end-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)] pointer-events-none"></lucide-icon>
+      </div>
+    </div>
+
+    <div
+      class="bg-[var(--color-bg)] border border-[var(--border)] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="text-sm uppercase tracking-wide text-[var(--color-text-muted)] font-bold mb-1">Total Package Cost</p>
+        <p class="text-3xl font-bold text-[var(--primary)]">${{ totalAmount }}</p>
+      </div>
+      <button
+        class="w-full md:w-auto px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        (click)="finalizeBooking()" [disabled]="isFinalizing">
+        <lucide-icon *ngIf="!isFinalizing" name="check-circle" class="w-5 h-5"></lucide-icon>
+        <div *ngIf="isFinalizing" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
+        </div>
+        {{ isFinalizing ? 'Processing...' : 'Confirm & Pay' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Stripe Element -->
+  <section *ngIf="clientSecret"
+    class="bg-[var(--color-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-sm animate-fadeIn">
+    <h2 class="text-xl font-bold mb-4 text-[var(--color-text)]">Enter Card Details</h2>
+    <div class="border border-[var(--border)] rounded-xl p-4 bg-[var(--color-bg)] mb-4">
+      <div #cardElement class="stripe-card-element" aria-label="Credit card input"></div>
+    </div>
+
+    <div *ngIf="paymentError"
+      class="p-4 mb-4 bg-red-50 text-red-700 rounded-xl border border-red-200 flex items-center gap-2" role="alert">
+      <lucide-icon name="alert-circle" class="w-5 h-5"></lucide-icon>
+      {{ paymentError }}
+    </div>
+
+    <div *ngIf="paymentSuccess"
+      class="p-4 mb-4 bg-green-50 text-green-700 rounded-xl border border-green-200 flex items-center gap-2"
+      role="status">
+      <lucide-icon name="check-circle" class="w-5 h-5"></lucide-icon>
+      {{ paymentSuccess }}
+    </div>
+
+    <button
+      class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+      (click)="confirmStripePayment()" [disabled]="isPaymentProcessing">
+      <div *ngIf="isPaymentProcessing"
+        class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      {{ isPaymentProcessing ? 'Processing Payment...' : 'Pay Now' }}
+    </button>
+  </section>
+</div>

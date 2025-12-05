@@ -14,56 +14,9 @@ import { LucideAngularModule } from 'lucide-angular';
 import { HeroSliderComponent } from './hero-slider/hero-slider.component';
 import { AIChatComponent } from './ai-chat/ai-chat.component';
 import { I18nService } from 'src/app/core/services/i18n.service';
+import { QuickAction, HomePackage, Step, Statistic, Testimonial, FAQ } from 'src/app/interfaces';
 
-/* ----------  INTERFACES – KEYS ONLY  ---------- */
-export interface QuickAction {
-  icon: string;
-  color: string;
-  route?: string;
-  titleKey: string;
-  descriptionKey: string;
-}
-
-export interface Package {
-  id: number;
-  titleKey: string;
-  image: string;
-  price: number;
-  duration: number; // days (number)
-  rating: number;
-  reviews: number;
-  category: string;
-  includedKeys: string[]; // translation keys
-}
-
-export interface Step {
-  icon: string;
-  step: string;
-  titleKey: string;
-  descriptionKey: string;
-}
-
-export interface Statistic {
-  icon: string;
-  value: number;
-  suffix: string;
-  label: string; // translation key
-}
-
-export interface Testimonial {
-  id: number;
-  name: string;
-  avatar: string;
-  rating: number;
-  textKey: string;
-  verified: boolean;
-}
-
-export interface FAQ {
-  questionKey: string;
-  answerKey: string;
-}
-
+/* ----------  INTERFACES imported from src/app/interfaces  ---------- */
 /* ----------  COMPONENT  ---------- */
 @Component({
   selector: 'app-home',
@@ -121,7 +74,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
   ];
 
-  readonly packages: Package[] = [
+  readonly packages: HomePackage[] = [
     {
       id: 1,
       titleKey: 'home.packages.title.premium',

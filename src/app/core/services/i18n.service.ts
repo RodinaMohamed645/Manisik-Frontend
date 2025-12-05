@@ -300,6 +300,7 @@ export class I18nService {
     'dashboard.menu.book': { en: 'Book Umrah', ar: 'حجز العمرة' },
     'dashboard.menu.hotels': { en: 'Hotels', ar: 'الفنادق' },
     'dashboard.menu.transport': { en: 'Transport', ar: 'النقل' },
+    'dashboard.menu.users': { en: 'Users', ar: 'المستخدمون' },
     'dashboard.welcome': {
       en: 'Welcome back, John!',
       ar: 'مرحبًا بعودتك، جون!',
@@ -331,6 +332,92 @@ export class I18nService {
     'dashboard.trips.daysLeft': { en: 'days left', ar: 'أيام متبقية' },
     'dashboard.trips.viewDetails': { en: 'View Details', ar: 'عرض التفاصيل' },
     'dashboard.trips.downloadDocs': { en: 'Download Docs', ar: 'تحميل المستندات' },
+    
+    // New Dashboard Keys
+    'dashboard.manageHotels': { en: 'Manage Hotels', ar: 'إدارة الفنادق' },
+    'dashboard.manageUsers': { en: 'Manage Users', ar: 'إدارة المستخدمين' },
+    'dashboard.intlTransport': { en: 'International Transport', ar: 'النقل الدولي' },
+    'dashboard.groundTransport': { en: 'Ground Transport', ar: 'النقل البري' },
+    'dashboard.addHotel': { en: 'Add Hotel', ar: 'إضافة فندق' },
+    'dashboard.editHotel': { en: 'Edit Hotel', ar: 'تعديل الفندق' },
+    'dashboard.addTransport': { en: 'Add Transport', ar: 'إضافة نقل' },
+    'dashboard.editTransport': { en: 'Edit Transport', ar: 'تعديل النقل' },
+    'dashboard.hotelName': { en: 'Hotel Name', ar: 'اسم الفندق' },
+    'dashboard.city': { en: 'City', ar: 'المدينة' },
+    'dashboard.starRating': { en: 'Star Rating', ar: 'التقييم' },
+    'dashboard.address': { en: 'Address', ar: 'العنوان' },
+    'dashboard.pricePerNight': { en: 'Price Per Night', ar: 'السعر لليلة' },
+    'dashboard.availableRooms': { en: 'Available Rooms', ar: 'الغرف المتاحة' },
+    'dashboard.distanceToHaram': { en: 'Distance to Haram', ar: 'المسافة للحرم' },
+    'dashboard.hotelImage': { en: 'Hotel Image', ar: 'صورة الفندق' },
+    'dashboard.carrierName': { en: 'Carrier Name', ar: 'اسم الناقل' },
+    'dashboard.transportType': { en: 'Type', ar: 'النوع' },
+    'dashboard.departureAirport': { en: 'Departure Airport', ar: 'مطار المغادرة' },
+    'dashboard.arrivalAirport': { en: 'Arrival Airport', ar: 'مطار الوصول' },
+    'dashboard.departureDate': { en: 'Departure Date', ar: 'تاريخ المغادرة' },
+    'dashboard.arrivalDate': { en: 'Arrival Date', ar: 'تاريخ الوصول' },
+    'dashboard.availableSeats': { en: 'Available Seats', ar: 'المقاعد المتاحة' },
+    'dashboard.serviceName': { en: 'Service Name', ar: 'اسم الخدمة' },
+    'dashboard.capacity': { en: 'Capacity', ar: 'السعة' },
+    'dashboard.assignRole': { en: 'Assign Role', ar: 'تعيين دور' },
+    'dashboard.selectRole': { en: 'Select Role', ar: 'اختر الدور' },
+    'dashboard.confirmDelete': { en: 'Are you sure you want to delete this?', ar: 'هل أنت متأكد أنك تريد حذف هذا؟' },
+    'dashboard.confirmCancel': { en: 'Are you sure you want to cancel this booking?', ar: 'هل أنت متأكد أنك تريد إلغاء هذا الحجز؟' },
+    'dashboard.noBookings': { en: 'No bookings found', ar: 'لا توجد حجوزات' },
+    'dashboard.adjustFilters': { en: 'Try adjusting your filters', ar: 'حاول تعديل المرشحات' },
+    'dashboard.status': { en: 'Status', ar: 'الحالة' },
+    'dashboard.search': { en: 'Search...', ar: 'بحث...' },
+    'dashboard.refresh': { en: 'Refresh', ar: 'تحديث' },
+    'dashboard.created': { en: 'Created', ar: 'تم الإنشاء' },
+    'dashboard.confirm': { en: 'Confirm', ar: 'تأكيد' },
+    'dashboard.cancelBooking': { en: 'Cancel Booking', ar: 'إلغاء الحجز' },
+    'dashboard.seatsLeft': { en: 'seats left', ar: 'مقاعد متبقية' },
+    'dashboard.person': { en: 'person', ar: 'شخص' },
+    'dashboard.noHotels': { en: 'No hotels found', ar: 'لا توجد فنادق' },
+    'dashboard.noTransports': { en: 'No transport options found', ar: 'لا توجد خيارات نقل' },
+    
+    // Additional Dashboard Keys
+    'dashboard.title': { en: 'Manisik Dashboard', ar: 'لوحة تحكم مناسك' },
+    'dashboard.subtitle.User': { en: 'User panel • Manage your bookings', ar: 'لوحة المستخدم • إدارة حجوزاتك' },
+    'dashboard.subtitle.Admin': { en: 'Admin panel • Manage bookings & content', ar: 'لوحة المسؤول • إدارة الحجوزات والمحتوى' },
+    'dashboard.subtitle.HotelManager': { en: 'Hotel Manager • Manage your properties', ar: 'مدير الفندق • إدارة ممتلكاتك' },
+    'dashboard.menu.overview': { en: 'Overview', ar: 'نظرة عامة' },
+    'dashboard.menu.bookings': { en: 'Bookings', ar: 'الحجوزات' },
+    'dashboard.menu.allBookings': { en: 'All Bookings', ar: 'جميع الحجوزات' },
+    'dashboard.menu.internationalTransport': { en: 'International Transport', ar: 'النقل الدولي' },
+    'dashboard.menu.groundTransport': { en: 'Ground Transport', ar: 'النقل البري' },
+    'dashboard.noHotelsMessage': { en: 'Click "Add Hotel" to create your first hotel', ar: 'انقر على "إضافة فندق" لإنشاء فندقك الأول' },
+    'dashboard.noTransportMessage': { en: 'Click "Add Transport" to create transport options', ar: 'انقر على "إضافة نقل" لإنشاء خيارات النقل' },
+    'dashboard.perNight': { en: 'per night', ar: 'لليلة' },
+    'dashboard.perPerson': { en: 'per person', ar: 'لكل شخص' },
+    'dashboard.rooms': { en: 'rooms', ar: 'غرف'},
+    'dashboard.allRoles': { en: 'All Roles', ar: 'جميع الأدوار' },
+    'dashboard.role': { en: 'Role', ar: 'الدور' },
+    'dashboard.description': { en: 'Description', ar: 'الوصف' },
+    'dashboard.allowed': { en: 'Allowed', ar: 'مسموح' },
+    'dashboard.imageUpload': { en: 'Click to upload image', ar: 'انقر لتحميل الصورة' },
+    'dashboard.imageTypes': { en: 'Allowed: JPG, PNG, WEBP', ar: 'مسموح: JPG, PNG, WEBP' },
+
+    // Profile Component Keys
+    'profile.myProfile': { en: 'My Profile', ar: 'ملفي الشخصي' },
+    'profile.editProfile': { en: 'Edit Profile', ar: 'تعديل الملف الشخصي' },
+    'profile.viewMode': { en: 'View Profile', ar: 'عرض الملف الشخصي' },
+    'profile.uploadPhoto': { en: 'Upload Photo', ar: 'تحميل صورة' },
+    'profile.changePhoto': { en: 'Change Photo', ar: 'تغيير الصورة' },
+    'profile.firstName': { en: 'First Name', ar: 'الاسم الأول' },
+    'profile.lastName': { en: 'Last Name', ar: 'اسم العائلة' },
+    'profile.email': { en: 'Email Address', ar: 'البريد الإلكتروني' },
+    'profile.phone': { en: 'Phone Number', ar: 'رقم الهاتف' },
+    'profile.country': { en: 'Country', ar: 'البلد' },
+    'profile.saveChanges': { en: 'Save Changes', ar: 'حفظ التغييرات' },
+    'profile.cancel': { en: 'Cancel', ar: 'إلغاء' },
+    'profile.personalInfo': { en: 'Personal Information', ar: 'المعلومات الشخصية' },
+    'profile.contactInfo': { en: 'Contact Information', ar: 'معلومات الاتصال' },
+    'profile.accountInfo': { en: 'Account Information', ar: 'معلومات الحساب' },
+    'profile.updateSuccess': { en: 'Profile updated successfully', ar: 'تم تحديث الملف الشخصي بنجاح' },
+    'profile.updateError': { en: 'Failed to update profile', ar: 'فشل تحديث الملف الشخصي' },
+    'profile.editNotImplemented': { en: 'Profile editing is not implemented yet.', ar: 'لم يتم تنفيذ تعديل الملف الشخصي بعد.' },
+
 
     // Footer translations (a subset)
     'footer.aboutTitle': { en: 'About Manisik', ar: 'حول منـاسك' },
@@ -369,6 +456,7 @@ export class I18nService {
     'common.perPerson': { en: '/person', ar: '/شخص' },
     'hotel.fromHaram': { en: 'km from Haram', ar: 'كم من الحرم' },
     'nav.home': { en: 'Home', ar: 'الرئيسية' },
+    'nav.bookingTrip': { en: 'Booking Trip', ar: 'حجز رحلة' },
     'nav.packages': { en: 'Packages', ar: 'الباقات' },
     'nav.hotels': { en: 'Hotels', ar: 'الفنادق' },
     'nav.transport': { en: 'Transport', ar: 'النقل' },
@@ -377,6 +465,7 @@ export class I18nService {
     'nav.users': { en: 'Users', ar: 'المستخدمون' },
     'nav.login': { en: 'Login', ar: 'تسجيل الدخول' },
     'nav.logout': { en: 'Logout', ar: 'تسجيل الخروج' },
+    'nav.logoutSuccess': { en: 'Logged out successfully', ar: 'تم تسجيل الخروج بنجاح' },
     'auth.login': { en: 'Login', ar: 'تسجيل الدخول' },
     'auth.register': { en: 'Register', ar: 'إنشاء حساب' },
     'auth.signIn': { en: 'Sign In', ar: 'تسجيل الدخول' },
@@ -488,6 +577,106 @@ export class I18nService {
     'booking.error.dateOrder': { en: 'Check-in date must be before check-out date.', ar: 'يجب أن يكون تاريخ الوصول قبل تاريخ المغادرة.' },
     'booking.roomType': { en: 'Room Type', ar: 'نوع الغرفة' },
     'booking.pricePerNight': { en: 'Price per night', ar: 'السعر لليلة' },
+    'booking.success': { en: 'Booking successful! Your reservation has been confirmed.', ar: 'تم الحجز بنجاح! تم تأكيد حجزك.' },
+    'booking.error.failed': { en: 'Booking failed. Please try again.', ar: 'فشل الحجز. يرجى المحاولة مرة أخرى.' },
+    'booking.error.invalidForm': { en: 'Please fill in all required fields correctly.', ar: 'يرجى ملء جميع الحقول المطلوبة بشكل صحيح.' },
+    'booking.error.invalidParams': { en: 'Invalid booking parameters. Redirecting...', ar: 'معاملات حجز غير صالحة. جاري إعادة التوجيه...' },
+    'booking.error.roomNotFound': { en: 'Selected room not found. Redirecting...', ar: 'الغرفة المحددة غير موجودة. جاري إعادة التوجيه...' },
+    'booking.error.loadFailed': { en: 'Failed to load hotel details. Redirecting...', ar: 'فشل تحميل تفاصيل الفندق. جاري إعادة التوجيه...' },
+    'success': { en: 'Success', ar: 'نجاح' },
+    'error': { en: 'Error', ar: 'خطأ' },
+    'warning': { en: 'Warning', ar: 'تحذير' },
+    
+    // Additional UI Elements
+    'profile.settings': { en: 'Profile Settings', ar: 'إعدادات الملف الشخصي' },
+    'nav.language': { en: 'Language', ar: 'اللغة' },
+    'nav.changeLanguage': { en: 'Change Language', ar: 'تغيير اللغة' },
+    'theme.light': { en: 'Light', ar: 'فاتح' },
+    'theme.dark': { en: 'Dark', ar: 'داكن' },
+    'theme.toggle': { en: 'Toggle Theme', ar: 'تبديل المظهر' },
+    'common.userDataNotAvailable': { en: 'User data not available', ar: 'بيانات المستخدم غير متاحة' },
+    'nav.signUp': { en: 'Sign Up', ar: 'إنشاء حساب' },
+    'nav.dashboard': { en: 'Dashboard', ar: 'لوحة التحكم' },
+    'nav.toggleMenu': { en: 'Toggle Mobile Menu', ar: 'قائمة الجوال' },
+    'nav.mainNavigation': { en: 'Main navigation', ar: 'القائمة الرئيسية' },
+    
+    // Document Requirements - Umrah
+    'docs.title': { en: 'Required Documents', ar: 'المستندات المطلوبة' },
+    'docs.umrah.title': { en: 'For Umrah', ar: 'للعمرة' },
+    'docs.umrah.passport': { 
+      en: 'Valid passport (minimum 6 months validity)', 
+      ar: 'جواز سفر ساري المفعول (لا تقل صلاحيته عن 6 أشهر)' 
+    },
+    'docs.umrah.photos': { 
+      en: '2 personal photos with white background (women must wear hijab)', 
+      ar: 'صورتين شخصية بخلفية بيضاء (يُشترط للسيدات الحجاب في الصورة)' 
+    },
+    'docs.umrah.health': { 
+      en: 'Health certificate from government health office', 
+      ar: 'شهادة صحية معتمدة من مكتب صحة حكومي' 
+    },
+    
+    // Document Requirements - Hajj
+    'docs.hajj.title': { en: 'For Hajj', ar: 'للحج' },
+    'docs.hajj.passport': { 
+      en: 'Machine-readable passport (minimum 1 year validity)', 
+      ar: 'جواز سفر مميكن (صلاحيته لا تقل عن سنة من تاريخ السفر)' 
+    },
+    'docs.hajj.nationalId': { 
+      en: 'Copy of National ID card', 
+      ar: 'صورة/نسخة من بطاقة الرقم القومي' 
+    },
+    'docs.hajj.photos': { 
+      en: '4 personal photos (4×6) with white background', 
+      ar: 'عدد من الصور الشخصية بخلفية بيضاء (4×6)' 
+    },
+    'docs.hajj.vaccination': { 
+      en: 'Meningitis vaccination certificate (ACYW-135) - must be valid', 
+      ar: 'شهادة تطعيم ضد السحائي (ACYW-135) سارية المفعول' 
+    },
+    'docs.hajj.companion': { 
+      en: 'For companions: marriage certificate or birth certificate for children', 
+      ar: 'للمرافقين: عقد زواج أو شهادة ميلاد للأطفال' 
+    },
+    'docs.hajj.criminal': { 
+      en: 'Criminal record clearance (for some Hajj types)', 
+      ar: 'فيش جنائي مميكن (لبعض أنواع الحج)' 
+    },
+    'docs.hajj.form': { 
+      en: 'Completed Hajj/Umrah registration form', 
+      ar: 'استمارة/طلب حج أو عمرة مكتملة البيانات' 
+    },
+    
+    // Additional Notes
+    'docs.notes.title': { en: 'Important Notes', ar: 'ملاحظات هامة' },
+    'docs.notes.mahram': { 
+      en: 'Women under 45 must travel with a Mahram (male guardian)', 
+      ar: 'يجب على النساء تحت 45 عامًا السفر مع محرم' 
+    },
+    'docs.notes.health': { 
+      en: 'Elderly travelers may need additional health clearance', 
+      ar: 'قد يحتاج كبار السن إلى تصريح صحي إضافي' 
+    },
+    'docs.notes.visa': { 
+      en: 'Visa processing may take 2-4 weeks', 
+      ar: 'قد يستغرق استخراج التأشيرة من 2-4 أسابيع' 
+    },
+    
+    // Booking Form Labels
+    'booking.form.nationality': { en: 'Nationality', ar: 'الجنسية' },
+    'booking.form.selectCountry': { en: 'Select Country', ar: 'اختر الدولة' },
+    'booking.form.phoneCode': { en: 'Phone Code', ar: 'رمز الهاتف' },
+    'booking.form.phoneNumber': { en: 'Phone Number', ar: 'رقم الهاتف' },
+    'booking.form.firstName': { en: 'First Name', ar: 'الاسم الأول' },
+    'booking.form.lastName': { en: 'Last Name', ar: 'اسم العائلة' },
+    'booking.form.dateOfBirth': { en: 'Date of Birth', ar: 'تاريخ الميلاد' },
+    'booking.form.gender': { en: 'Gender', ar: 'الجنس' },
+    'booking.form.male': { en: 'Male', ar: 'ذكر' },
+    'booking.form.female': { en: 'Female', ar: 'أنثى' },
+    'booking.form.email': { en: 'Email', ar: 'البريد الإلكتروني' },
+    'booking.form.passport': { en: 'Passport Number', ar: 'رقم جواز السفر' },
+    'booking.form.passportExpiry': { en: 'Passport Expiry Date', ar: 'تاريخ انتهاء الجواز' },
+    'booking.form.passportCountry': { en: 'Passport Issuing Country', ar: 'دولة إصدار الجواز' },
   };
 
   constructor() {

@@ -5,17 +5,20 @@ export enum UserRole {
 }
 
 export interface User {
-  id: string;
+  id: string | number;  // Backend returns number in some cases, string in others
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
   role: UserRole;
-  createdAt: string;
+  createdAt?: string;  //Optional - not always included
   preferredLanguage?: string;
   isActive?: boolean;
   fullName?: string;
-  updatedAt: string;
+  updatedAt?: string;  // Optional - not always included
+  phoneNumber?: string;  // Alias for phone
+  country?: string;
+  roles?: string[];  // Array of role names
 }
 
 export interface LoginRequest {
@@ -42,16 +45,25 @@ export interface AuthResponse {
   success: boolean;
   message: string;
   data: {
-    token: string;
+    token: string | null;
     refreshToken: string | null;
     expiresAt: string;
+    expiresIn?: number;
+    tokenType?: string;
     user: {
-      id: number;
+      id: number | string;  // Backend returns number, User uses string
       email: string;
-      password: string | null;
+      password?: string | null;
       firstName: string;
       lastName: string;
       role: UserRole;
+      phoneNumber?: string;
+      country?: string;
+      roles?: string[];
+      isActive?: boolean;
+      createdAt?: string;
+      updatedAt?: string;
+      fullName?: string;
     };
   };
   errors: any;

@@ -45,7 +45,7 @@ export class HotelsService {
     }
 
     return this.http
-      .get<ApiResponse<Hotel[]>>(`${this.apiUrl}/Hotel/getallFiltered`, {
+      .get<ApiResponse<Hotel[]>>(`${this.apiUrl}/Hotel/GetAllFiltered`, {
         params: httpParams,
       })
       .pipe(

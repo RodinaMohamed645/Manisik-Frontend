@@ -1,0 +1,26 @@
+﻿export enum PaymentStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  REFUNDED = 'refunded'
+}
+
+export enum PaymentMethod {
+  CREDIT_CARD = 'credit_card',
+  DEBIT_CARD = 'debit_card',
+  BANK_TRANSFER = 'bank_transfer',
+  CASH = 'cash'
+}
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  transactionId?: string;
+  paidAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

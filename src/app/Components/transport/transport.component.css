@@ -46,7 +46,7 @@
 .international-Transport {
   font-size: 32px;
   font-weight: 700;
-/*   color: #1a1a1a;
+/*   color: var(--color-text);
  */  margin-bottom: 10px;
    color: var(--text-background);
 
@@ -57,6 +57,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
+  margin-top: 30px;
 }
 
 .tab-button {
@@ -66,26 +67,30 @@
   padding: 12px 24px;
   border: none;
   border-radius: 4px;
-  background: white;
+  background: var(--color-surface);
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   transition: all 0.3s;
 }
 
 .tab-button.active {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--primary);
+  color: white;
 }
 
 .tab-button:hover {
-  background: #f5f5f5;
+  background: var(--color-bg);
+}
+
+.tab-button.active:hover {
+  background: var(--primary);
 }
 
 .search-form {
-  background: white;
+  background: var(--color-surface);
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -106,7 +111,7 @@
 
 .form-group label {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-muted);
   margin-bottom: 8px;
   font-weight: 500;
 }
@@ -114,7 +119,7 @@
 .form-group input,
 .form-group select {
   padding: 12px 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 14px;
   font-family: "Roboto", sans-serif;
@@ -124,7 +129,7 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #1e7e34;
+  border-color: var(--color-text);
 }
 
 /* Fix Date Picker Icon in Dark Mode */
@@ -135,7 +140,7 @@
 
 .search-button {
   padding: 12px 32px;
-  background: #1e7e34;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -151,7 +156,7 @@
 }
 
 .flight-card {
-  background: white;
+  background: var(--color-surface);
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -165,14 +170,14 @@
 .airline-logo {
   width: 60px;
   height: 60px;
-  background: #f5f5f5;
+  background: var(--color-bg);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: var(--color-text);
 }
 
 .airline-info {
@@ -186,7 +191,7 @@
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 5px;
-  color: #1a1a1a;
+  color: var(--color-text);
 }
 
 .rating {
@@ -194,11 +199,11 @@
   align-items: center;
   gap: 5px;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .star-icon {
-  color: #ffa726;
+  color: var(--color-text);
   font-size: 16px;
 }
 
@@ -210,33 +215,37 @@
 
 .detail-label {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   font-weight: 500;
 }
 
 .detail-value {
   font-size: 14px;
-  color: #333;
+  color: var(--color-text);
   font-weight: 500;
 }
 
 .price-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
   text-align: right;
 }
 
 .price {
   font-size: 32px;
   font-weight: 700;
-  color: #1e7e34;
-  margin-bottom: 10px;
+  color: var(--primary);
+  margin-bottom: 4px;
 }
 
 .amenities {
   list-style: none;
   margin-bottom: 15px;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .amenities li {
@@ -247,13 +256,13 @@
 }
 
 .check-icon {
-  color: #1e7e34;
+  color: var(--color-text);
   font-size: 16px;
 }
 
 .book-button {
   padding: 10px 32px;
-  background: #1e7e34;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 4px;
@@ -261,6 +270,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.3s;
+  margin-top: 8px;
 }
 
 .book-button:hover {
@@ -269,7 +279,7 @@
 
 .direct-badge {
   background: #e8f5e9;
-  color: #2e7d32;
+  color: var(--color-text);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -278,7 +288,7 @@
 
 .stop-badge {
   background: #fff3e0;
-  color: #e65100;
+  color: var(--color-text);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -301,8 +311,12 @@
   }
 
   .price-section {
-    text-align: left;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  text-align: right;
+}
 }
 .header {
   margin-bottom: 40px;
@@ -312,20 +326,20 @@
 .header h1 {
   font-size: 34px;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--color-text);
   margin-bottom: 8px;
   letter-spacing: 0.25px;
 }
 
 .header p {
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--color-text-muted);
   line-height: 20px;
 }
 
 /* Tabs Styles */
 .mat-tabs {
-  background: white;
+  background: var(--color-surface);
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 32px;
@@ -351,7 +365,7 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-/*   color: rgba(0, 0, 0, 0.6);
+/*   color: var(--color-text-muted);
  */  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
  color: var(--text-background);
   text-decoration: none;
@@ -364,7 +378,7 @@
 
 .mat-tab-link.active {
   background-color: rgba(0, 0, 0, 0.08);
-/*   color: rgba(0, 0, 0, 0.87);
+/*   color: var(--color-text);
  */
  color: var(--text-background);
 }
@@ -382,7 +396,7 @@
 
 /* Card Styles */
 .mat-card {
-  background: white;
+  background: var(--color-surface);
   border-radius: 4px;
   padding: 24px;
   box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
@@ -413,7 +427,7 @@
 .mat-card-title {
   font-size: 20px;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--color-text);
   margin-bottom: 8px;
   line-height: 28px;
 }
@@ -425,13 +439,13 @@
 }
 
 .rating-container .material-icons {
-  color: #ffa726;
+  color: var(--color-text);
   font-size: 18px;
 }
 
 .rating-value {
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--color-text);
   font-size: 14px;
 }
 
@@ -452,7 +466,7 @@
 
 .mat-caption {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--color-text-muted);
   margin-bottom: 4px;
   letter-spacing: 0.4px;
 }
@@ -460,7 +474,7 @@
 .info-value {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--color-text);
   line-height: 20px;
 }
 
@@ -474,13 +488,13 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 20px;
 }
 
 .amenity-item .material-icons {
-/*   color: #66bb6a;
+/*   color: var(--color-text);
  */  font-size: 18px;
   color: var(--primary) !important;
 }
@@ -502,19 +516,19 @@
 
 .price-label {
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--color-text-muted);
 }
 
 .price-value {
   font-size: 32px;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--color-text);
   line-height: 1;
 }
 
 /* Button Styles */
 .mat-raised-button {
-  background-color: #2e7d32;
+  background-color: var(--color-text);
   color: white;
   border: none;
   padding: 10px 24px;
@@ -530,7 +544,7 @@
 }
 
 .mat-raised-button:hover {
-  background-color: #1b5e20;
+  background-color: var(--color-text);
   box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12),
     0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }

@@ -1,57 +1,112 @@
 @import "tailwindcss";
 
-
 /* For ngx Toastr  */
 @import 'ngx-toastr/toastr';
-
 
 /* Manasik Design System Variables and Styles */
 @layer base {
   :root {
-    /* Light Mode - Manisik Design System */
-    --primary: #0e7c3b;
+    /* New Standardized Color Variables - Light Mode */
+    --color-bg: #ffffff;
+    --color-surface: #fafafa;
+    --color-text: #1a1a1a;
+    --color-text-muted: #6b7280;
+    --color-primary: #0e7c3b;
+    --color-primary-hover: #0a5a2a;
+    --color-secondary: #f5f5f5;
+    --color-border: #e5e7eb;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-accent: #8b5cf6;
+    --color-warning: #f59e0b;
+    --color-success: #10b981;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* Backward Compatibility Aliases */
+    --primary: var(--color-primary);
     --primary-rgb: 14, 124, 59;
-    --secondary: #f5f5f5;
-    --background: #ffffff;
-    --surface: #fafafa;
-    --text-primary: #1a1a1a;
-    --text-secondary: #6b7280;
-    --success: #10b981;
-    --error: #ef4444;
-    --warning: #f59e0b;
-    --border: #e5e7eb;
+    --primary-hover: var(--color-primary-hover);
+    --secondary: var(--color-secondary);
+    --background: var(--color-bg);
+    --surface: var(--color-surface);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted);
+    --success: var(--color-success);
+    --error: var(--color-error);
+    --warning: var(--color-warning);
+    --info: var(--color-info);
+    --accent: var(--color-accent);
+    --border: var(--color-border);
+    --disabled: #d1d5db;
+    --disabled-text: #9ca3af;
 
     /* Shadows */
-    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-light: 0 1px 3px var(--color-shadow);
+    --shadow-medium: 0 4px 6px var(--color-shadow);
     --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.15);
 
     /* Radius */
     --radius-card: 12px;
     --radius-button: 8px;
     --radius-pill: 24px;
+
+    /* Transitions */
+    --transition-fast: 150ms;
+    --transition-normal: 250ms;
+    --transition-slow: 350ms;
+    --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Z-index Scale */
+    --z-base: 1;
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-modal: 1050;
+    --z-toast: 1070;
+    --z-tooltip: 1090;
   }
 
   .dark {
-    /* Dark Mode - Manisik Design System */
-    --primary: #d4af37;
-    --primary-rgb: 212, 175, 55;
-    --secondary: #1f1f1f;
-    --background: #000000;
-    --surface: #121212;
-    --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --success: #34d399;
-    --error: #f87171;
-    --warning: #f59e0b;
-    --border: #2d2d2d;
+    /* New Standardized Color Variables - Dark Mode */
+    --color-bg: #000000;
+    --color-surface: #121212;
+    --color-text: #ffffff;
+    --color-text-muted: #9ca3af;
+    --color-primary: #d4af37;
+    --color-primary-hover: #f0c848;
+    --color-secondary: #1f1f1f;
+    --color-border: #2d2d2d;
+    --color-shadow: rgba(255, 255, 255, 0.1);
+    --color-accent: #a78bfa;
+    --color-warning: #fbbf24;
+    --color-success: #34d399;
+    --color-error: #f87171;
+    --color-info: #60a5fa;
 
-    --shadow-light: 0 1px 3px rgba(255, 255, 255, 0.05);
-    --shadow-medium: 0 4px 6px rgba(255, 255, 255, 0.1);
+    /* Backward Compatibility Aliases */
+    --primary: var(--color-primary);
+    --primary-rgb: 212, 175, 55;
+    --primary-hover: var(--color-primary-hover);
+    --secondary: var(--color-secondary);
+    --background: var(--color-bg);
+    --surface: var(--color-surface);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted);
+    --success: var(--color-success);
+    --error: var(--color-error);
+    --warning: var(--color-warning);
+    --info: var(--color-info);
+    --accent: var(--color-accent);
+    --border: var(--color-border);
+    --disabled: #374151;
+    --disabled-text: #6b7280;
+
+    /* Dark mode shadows */
+    --shadow-light: 0 1px 3px var(--color-shadow);
+    --shadow-medium: 0 4px 6px var(--color-shadow);
     --shadow-heavy: 0 10px 25px rgba(255, 255, 255, 0.15);
   }
 
-  /* Remove global transition - this was causing the delay */
+  /* Typography */
   h1 {
     font-size: 48px;
     line-height: 56px;
@@ -111,15 +166,6 @@
     }
   }
 
-  /* Islamic Pattern Background */
-  .islamic-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 15-15 15-15-15L30 0zm0 30l15 15-15 15-15-15 15-15z' fill='%23000000' fill-opacity='0.02'/%3E%3C/svg%3E");
-  }
-
-  .dark .islamic-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 15-15 15-15-15L30 0zm0 30l15 15-15 15-15-15 15-15z' fill='%23FFFFFF' fill-opacity='0.02'/%3E%3C/svg%3E");
-  }
-
   /* Scrollbar Styling */
   ::-webkit-scrollbar {
     width: 8px;
@@ -127,15 +173,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-[var(--surface)];
+    @apply bg-[var(--color-surface)];
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-[var(--text-secondary)] rounded-full;
+    @apply bg-[var(--color-text-muted)] rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-[var(--primary)];
+    @apply bg-[var(--color-primary)];
   }
 
   /* Specific transition classes for navbar and interactive elements */
@@ -146,6 +192,17 @@
   .nav-link-transition {
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   }
+}
+
+/* Tailwind CSS v4 Spacing Scale Configuration */
+@theme {
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 24px;
+  --spacing-6: 32px;
 }
 
 @keyframes fadeIn {
@@ -166,4 +223,130 @@
 /* Ensure clickable controls show pointer cursor for better affordance */
 button, a, .btn-primary, .btn-outline, .nav-icon-btn {
   cursor: pointer;
+}
+/* Global Dark Mode Form Styles */
+select, input, textarea {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--border);
+}
+
+select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* Dashboard Dropdown Fix */
+.dashboard-dropdown {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+[dir="rtl"] .dashboard-dropdown {
+  left: 0;
+  right: auto;
+}
+
+/* Standard Spacing Classes */
+.section-spacing {
+  padding: 2rem 1rem;
+}
+
+.card-spacing {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-spacing > * {
+  margin-bottom: 1rem;
+}
+
+/* Button Margins */
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+/* Date Input Dark Mode Fix */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Primary Button Style */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Secondary Button Style */
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg);
+}
+
+/* Standard Card Spacing */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Price and Badge Spacing */
+.price-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Transport Card Spacing Fix */
+.price-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* Ensure all text inherits theme color */
+body {
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+}
+
+p {
+  color: var(--color-text);
+}
+
+label {
+  color: var(--color-text);
 }

@@ -7,7 +7,7 @@
 }
 
 .login-card {
-  background: white;
+  background: var(--color-surface);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   padding: 3rem 2.5rem;
@@ -19,7 +19,7 @@
 /* Form Styles */
 .form-label {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -33,7 +33,7 @@
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: var(--color-text);
   z-index: 10;
   pointer-events: none;
   display: flex;
@@ -57,13 +57,13 @@
 }
 
 .input-group .form-control:focus {
-  background: white;
-  border-color: #2D6A4F;
+  background: var(--color-surface);
+  border-color: var(--color-text);
   box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
 }
 
 .input-group .form-control::placeholder {
-  color: #9ca3af;
+  color: var(--color-text);
 }
 
 .input-group .btn-password-toggle {
@@ -73,7 +73,7 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #6c757d;
+  color: var(--color-text);
   cursor: pointer;
   padding: 0;
   z-index: 10;
@@ -88,7 +88,7 @@
 }
 
 .input-group .btn-password-toggle:hover {
-  color: #2D6A4F;
+  color: var(--color-text);
 }
 
 .input-group .btn-password-toggle:focus {
@@ -104,8 +104,8 @@
 }
 
 .form-check .form-check-input:checked {
-  background-color: #2D6A4F;
-  border-color: #2D6A4F;
+  background-color: var(--color-text);
+  border-color: var(--color-text);
 }
 
 .form-check .form-check-input:focus {
@@ -113,7 +113,7 @@
 }
 
 .login-btn {
-  background-color: #0e7c3b;
+  background-color: var(--color-text);
   border: none;
   height: 48px;
   font-weight: 600;
@@ -123,7 +123,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  background-color: #425047;
+  background-color: var(--color-text);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(79, 97, 89, 0.3);
 }
@@ -133,7 +133,7 @@
 }
 
 .login-btn:disabled {
-  background-color: #9ca3af;
+  background-color: var(--color-text);
   cursor: not-allowed;
 }
 

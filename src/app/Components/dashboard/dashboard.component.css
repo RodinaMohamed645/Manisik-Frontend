@@ -1,0 +1,32 @@
+/* This file intentionally left minimal - using global styles.css and Tailwind CSS */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Small enhancements for dashboard header and dropdown */
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* ensure dropdowns have smooth appearance */
+.dashboard-dropdown {
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+/* subtle shadow and rounded corners for cards */
+.card-surface {
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(12, 18, 32, 0.06);
+}

@@ -15,6 +15,11 @@ export enum BookingType {
   PACKAGE = 'package',
 }
 
+export enum TripType {
+  Umrah = 0,
+  Hajj = 1,
+}
+
 export interface HotelBooking {
   hotelId: number;
   hotelName?: string;
@@ -61,6 +66,10 @@ export interface TransportBooking {
   updatedAt: string;
 }
 
+// Backwards-compatible aliases used by some services
+export type InternationalTransportBooking = TransportBooking;
+export type GroundTransportBooking = TransportBooking;
+
 export interface Booking {
   id: string;
   userId: string;
@@ -74,7 +83,16 @@ export interface Booking {
 }
 
 export interface CreateBookingRequest {
-  type: BookingType;
+  type: TripType;
+  travelStartDate: string;
+  travelEndDate?: string;
+  numberOfTravelers: number;
+  makkahHotel?: any; // Should be HotelBookingDto but using any for now to match component usage or define proper type
+  madinahHotel?: any;
+  internationalTransport?: any;
+  groundTransport?: any;
+  travelers?: any[];
+  totalPrice?: number;
   hotelBooking?: {
     hotelId: string;
     roomId: string;
