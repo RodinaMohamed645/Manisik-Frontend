@@ -29,7 +29,16 @@ export class TransportService {
   getAllGroundTransports(): Observable<{ success: boolean; message: string; data: any[] }> {
     return this.http.get<{ success: boolean; message: string; data: any[] }>(`${this.apiUrl}/GroundTransport/GetAllGroundTransports`);
   }
+ searchByRoute(departure: string, arrival: string): Observable<TransportOption[]> {
+  const params = new HttpParams()
+    .set('departureAirport', departure)
+    .set('arrivalAirport', arrival);
 
+  return this.http.get<TransportOption[]>(
+    `${this.apiUrl}/InternationalTransport/SearchByRoute`,
+    { params }
+  );
+}
   getTransportOptionById(id: string): Observable<TransportOption> {
     return this.http.get<TransportOption>(`${this.apiUrl}/transport/${id}`);
   }
