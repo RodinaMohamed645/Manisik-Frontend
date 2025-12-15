@@ -1,26 +1,43 @@
-<section class="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6 p-6">
-  <div class="text-6xl">⚠️</div>
-  <h1 class="text-3xl font-bold text-red-600">Payment Cancelled</h1>
-  <p class="text-gray-600 max-w-xl">
-    Your payment was cancelled or timed out. You can retry the payment process
-    or return to the home page.
-  </p>
-  <p class="text-sm text-gray-500" *ngIf="bookingId">
-    Booking ID: <span class="font-semibold">{{ bookingId }}</span>
-  </p>
-  <div class="flex flex-col md:flex-row gap-3">
-    <button
-      class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-      (click)="retryPayment()"
-    >
-      Retry Payment
-    </button>
-    <button
-      class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
-      (click)="goHome()"
-    >
-      Back to Home
-    </button>
-  </div>
-</section>
+<div class="min-h-screen flex flex-col items-center justify-center p-6 animate-fadeIn"
+  style="background-color: var(--color-bg); color: var(--color-text);">
 
+  <div class="max-w-md w-full shadow-2xl rounded-3xl overflow-hidden text-center p-8 border border-[var(--border)]"
+    style="background-color: var(--color-surface); color: var(--color-text);">
+
+    <!-- Error Icon -->
+    <div
+      class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-md ring-4 ring-red-100 dark:ring-red-900/30"
+      style="background-color: #fef2f2; color: #dc2626;">
+      <lucide-icon name="x-circle" class="w-10 h-10"></lucide-icon>
+    </div>
+
+    <!-- Title & Description -->
+    <h1 class="text-3xl font-bold mb-3 text-[var(--color-text)]">{{ i18n.t('payment.failed') }}</h1>
+    <p class="mb-8 leading-relaxed text-[var(--color-text-muted)]">
+      {{ i18n.t('payment.failedMessage') }}
+    </p>
+
+    <!-- Actions -->
+    <div class="space-y-4 flex flex-col gap-4">
+      <button (click)="retryPayment()"
+        class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
+        <lucide-icon name="refresh-cw" class="w-5 h-5"></lucide-icon>
+        <span>{{ i18n.t('payment.tryAgain') }}</span>
+      </button>
+
+      <button (click)="goHome()"
+        class="w-full py-4 bg-[var(--color-bg)] hover:bg-[var(--color-surface)] border border-[var(--border)] text-[var(--color-text)] font-semibold rounded-xl transition-all active:scale-[0.98]">
+        {{ i18n.t('payment.goToDashboard') }}
+      </button>
+    </div>
+
+    <!-- Support Link -->
+    <div class="mt-8 pt-6 border-t border-[var(--border)]">
+      <p class="text-sm text-[var(--color-text-muted)]">
+        {{ i18n.t('payment.needHelp') }} <a href="mailto:support@manasik.com"
+          class="text-red-600 font-medium hover:underline">{{ i18n.t('payment.contactSupport') }}</a>
+      </p>
+    </div>
+
+  </div>
+</div>

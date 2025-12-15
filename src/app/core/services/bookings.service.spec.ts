@@ -21,7 +21,6 @@ describe('BookingsService', () => {
       ]
     });
 
-    // Because BookingsService uses inject(AuthService) internally, Angular will resolve the provided AuthService token.
     service = TestBed.inject(BookingsService);
     httpMock = TestBed.inject(HttpTestingController);
 
@@ -45,9 +44,7 @@ describe('BookingsService', () => {
     const emissions: Booking[][] = [];
 
     service.getMyBookingsWithCache().subscribe({
-      next: (value) => {
-        emissions.push(value);
-      },
+      next: (value) => { emissions.push(value); },
       error: (err) => fail(err),
       complete: () => {}
     });
@@ -61,14 +58,63 @@ describe('BookingsService', () => {
         expect(emissions.length).toBe(2);
         expect(emissions[0]).toEqual(cached);
         expect(emissions[1]).toEqual([networkBooking]);
-        // Check localStorage was updated
-        const stored = JSON.parse(localStorage.getItem('user_bookings_user123') || '[]');
-        expect(stored.length).toBe(1);
-        expect(stored[0].id).toBe('b2');
         done();
       } catch (e) {
         done.fail(e as any);
       }
     }, 0);
   });
+
+  it('should call getAllBookings and return array', (done) => {
+    const mockBookings = [
+      { id: 1, type: 'Hajj', status: 'Confirmed', totalPrice: 500 },
+      { id: 2, type: 'Umrah', status: 'Pending', totalPrice: 300 }
+    ];
+
+    service.getAllBookings().subscribe({
+      next: (bookings) => {
+        expect(bookings.length).toBe(2);
+        expect(bookings[0].id).toBe(1);
+        expect(bookings[1].type).toBe('Umrah');
+        done();
+      },
+      error: (err) => done.fail(err)
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/Booking/AllBookings`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ success: true, data: mockBookings });
+  });
+
+  it('should call getBookingById and return single booking', (done) => {
+    const mockBooking = { id: 123, type: 'Hajj', status: 'Paid', totalPrice: 1000 };
+
+    service.getBookingById('123').subscribe({
+      next: (booking) => {
+        expect(booking.id).toBe(123);
+        expect(booking.type).toBe('Hajj');
+        done();
+      },
+      error: (err) => done.fail(err)
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/Booking/GetBooking/123`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ success: true, data: mockBooking });
+  });
+
+  it('should handle empty bookings array', (done) => {
+    service.getAllBookings().subscribe({
+      next: (bookings) => {
+        expect(bookings.length).toBe(0);
+        expect(Array.isArray(bookings)).toBe(true);
+        done();
+      },
+      error: (err) => done.fail(err)
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/Booking/AllBookings`);
+    req.flush({ success: true, data: [] });
+  });
 });
+

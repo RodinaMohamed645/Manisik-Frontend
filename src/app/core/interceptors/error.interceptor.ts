@@ -6,6 +6,19 @@ import { catchError, throwError } from 'rxjs';
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toastr = inject(ToastrService);
 
+  // Endpoints that should NOT show error toasters (background/silent requests)
+  const silentEndpoints = [
+    '/Auth/Me',
+    '/MyPendingHotelBookings',
+    '/MyPendingGroundBookings',
+    '/MyPendingTransportBookings',
+    '/MyBookings',
+    '/AllBookings',
+    '/Documents/',  // Suppress errors for visa/ticket PDF downloads
+    '/Hotel/GetAllFiltered',  // Suppress errors when loading hotels
+    '/Hotel/GetMyHotels'      // Suppress errors when loading user's hotels
+  ];
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       let errorMessage = 'An unknown error occurred!';
@@ -28,11 +41,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         }
       }
 
-      // Show error toast
-      toastr.error(errorMessage, 'Error');
+      // Only show toast for user-initiated actions, skip background requests
+      const shouldSkipToast = silentEndpoints.some(ep => req.url.includes(ep));
+      if (!shouldSkipToast) {
+        toastr.error(errorMessage, 'Error');
+      }
 
       // Re-throw error so components can handle it if needed
       return throwError(() => error);
     })
   );
 };
+

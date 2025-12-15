@@ -21,3 +21,20 @@ button:focus {
   margin-right: 0.25rem;
 }
 
+/* Ensure hero images have consistent bright appearance in both themes */
+:host img {
+  filter: brightness(1.1) contrast(1.05);
+}
+
+:host-context(.dark) img,
+:host-context([data-theme="dark"]) img {
+  filter: brightness(1.15) contrast(1.1);
+}
+
+/* Enforce white text in hero content overlay for BOTH themes */
+:host .text-white,
+:host h1,
+:host p,
+:host span {
+  color: #ffffff !important;
+}

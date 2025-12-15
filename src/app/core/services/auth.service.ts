@@ -18,8 +18,7 @@ export class AuthService {
   public readonly currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    // Check authentication status on service initialization
-    this.checkAuth().subscribe();
+    // Service initialization
   }
 
   // Merged from remote/local: Helper methods
@@ -119,7 +118,12 @@ export class AuthService {
         }
         return null;
       }),
-      tap(user => this.currentUserSubject.next(user)),
+      tap(user => {
+        this.currentUserSubject.next(user);
+        if (user) {
+          this.syncPendingBookings();
+        }
+      }),
       catchError(() => {
         this.currentUserSubject.next(null);
         return of(null);
@@ -241,6 +245,20 @@ export class AuthService {
     }
   }
 
+  removeBookingData(keysToRemove: string[]): void {
+    try {
+      const data = this.getBookingData() || {};
+      keysToRemove.forEach(key => {
+        delete data[key];
+      });
+      // specific check: if only bookingId remains, or data is empty, maybe clear it? 
+      // primarily just save the modified object back
+      this.saveBookingData(data);
+    } catch (e) {
+
+    }
+  }
+
   clearUserBookingData(): void {
     try {
       const user = this.getCurrentUserValue();
@@ -263,9 +281,9 @@ export class AuthService {
       // Clear completed bookings tracking (server handles status now)
       localStorage.removeItem('completed_bookings');
       
-      console.log('🧹 Cleared all booking data from localStorage for user:', userId);
+
     } catch (e) {
-      console.warn('Failed to clear booking data:', e);
+
     }
   }
 
@@ -275,7 +293,58 @@ export class AuthService {
 
   // ============ Pending Booking Sync ============
   
+  /**
+   * Syncs pending booking data from server to localStorage
+   * Called on login/checkAuth to ensure UI state matches database
+   */
+  private syncPendingBookings(): void {
+    // We use direct HTTP calls here to avoid circular dependency with BookingsService
+    const pendingGround$ = this.http.get<ApiResponse<any[]>>(
+      `${this.apiUrl}/GroundTransportBooking/MyPendingGroundBookings`, 
+      { withCredentials: true }
+    );
+    
+    const pendingTransport$ = this.http.get<ApiResponse<any[]>>(
+      `${this.apiUrl}/InternationalTransportBooking/MyPendingTransportBookings`, 
+      { withCredentials: true }
+    );
 
+    // Use forkJoin to run both in parallel
+    import('rxjs').then(({ forkJoin, catchError, of: rxOf }) => {
+      forkJoin({
+        ground: pendingGround$.pipe(catchError(() => rxOf({ data: [] }))),
+        transport: pendingTransport$.pipe(catchError(() => rxOf({ data: [] })))
+      }).subscribe(({ ground, transport }) => {
+        try {
+          const groundData = ground?.data || [];
+          const transportData = transport?.data || [];
+          
+          if (groundData.length > 0 || transportData.length > 0) {
+            const current = this.getBookingData() || {};
+            
+            // Sync ground
+            if (groundData.length > 0) {
+              const latest = groundData[groundData.length - 1];
+              current.groundData = latest;
+              if (latest.bookingId) current.bookingId = latest.bookingId;
+            }
+            
+            // Sync transport
+            if (transportData.length > 0) {
+              const latest = transportData[transportData.length - 1];
+              current.transportData = latest;
+              if (latest.bookingId) current.bookingId = latest.bookingId;
+            }
+            
+            this.saveBookingData(current);
+            // console.log('Synced pending bookings from server to localStorage', { ground: groundData.length, transport: transportData.length });
+          }
+        } catch (e) {
+
+        }
+      });
+    });
+  }
 
   // ============ CLEANUP ON INIT ============
   // Remove any legacy localStorage items from old auth implementation

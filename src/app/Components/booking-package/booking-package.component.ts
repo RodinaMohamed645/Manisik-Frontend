@@ -27,52 +27,57 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { BookingsService } from '../../core/services/bookings.service';
 import { CreateBookingRequest, TripType } from '../../interfaces/booking.interface';
+import { UploadService } from '../../core/services/upload.service';
 
 type BookingSnapshot = {
   makkahHotel: any;
   madinahHotel: any;
   internationalTransport: any;
   groundTransport: any;
+  type?: string;
+  tripType?: string;
 };
 
 import { I18nService } from '../../core/services/i18n.service';
 import { CountriesService, Country } from '../../core/services/countries.service';
 
-import { 
-  LucideAngularModule, 
-  Check, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
-  Users, 
-  Building2, 
-  MapPin, 
-  Star, 
-  Navigation, 
-  Bed, 
-  Mail, 
-  FileText, 
-  ChevronDown, 
-  AlertCircle, 
-  User, 
-  Flag, 
-  Globe, 
-  CreditCard, 
-  Plane, 
-  Bus, 
+import {
+  LucideAngularModule,
+  Check,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Users,
+  Building2,
+  MapPin,
+  Star,
+  Navigation,
+  Bed,
+  Mail,
+  FileText,
+  ChevronDown,
+  AlertCircle,
+  User,
+  Flag,
+  Globe,
+  CreditCard,
+  Plane,
+  Bus,
   Building,
   RefreshCw,
-  Trash2
+  Trash2,
+  Camera
 } from 'lucide-angular';
 
 @Component({
   selector: 'app-booking-package',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
+    CommonModule,
+    FormsModule,
     LucideAngularModule
   ],
+  providers: [],
   templateUrl: './booking-package.component.html',
   styleUrls: ['./booking-package.component.css'],
 })
@@ -97,22 +102,57 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
   bookingId = 0;
   totalAmount = 0;
 
+
   // Country & Phone
   countries: Country[] = [];
+  countrySearch: string = '';
   selectedPhoneCountry: Country | null = null;
 
-  passenger = {
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    email: '',
-    phone: '',
-    passport: '',
-    passportExpiry: '',
-    passportIssuingCountry: '',
-    nationality: '',
-    gender: 0, // 0 = Male, 1 = Female
-  };
+  /**
+   * Get filtered countries list based on search input
+   */
+  get filteredCountries(): Country[] {
+    if (!this.countrySearch || this.countrySearch.trim() === '') {
+      return this.countries;
+    }
+    const search = this.countrySearch.toLowerCase().trim();
+    return this.countries.filter(c =>
+      c.name.toLowerCase().includes(search) ||
+      c.nameAr.includes(search) ||
+      c.code.toLowerCase().includes(search)
+    );
+  }
+
+  passenger: {
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    email: string;
+    phone: string;
+    passport: string;
+    passportExpiry: string;
+    passportIssuingCountry: string;
+    nationality: string;
+    gender: number;
+    photoPreview: string | null;
+    photoUrl: string | null;
+  } = {
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      email: '',
+      phone: '',
+      passport: '',
+      passportExpiry: '',
+      passportIssuingCountry: '',
+      nationality: '',
+      gender: 0, // 0 = Male, 1 = Female
+      photoPreview: null,
+      photoUrl: null,
+    };
+
+  // File to be uploaded
+  selectedPhotoFile: File | null = null;
 
   paymentMethod: 'stripe' | 'cash' = 'stripe';
 
@@ -138,12 +178,13 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private auth: AuthService,
     public i18nService: I18nService,
-    private countriesService: CountriesService
+    private countriesService: CountriesService,
+    private uploadService: UploadService
   ) {
     // Register icons (if using a version that requires manual registry, otherwise the module import is enough for standalone if icons are provided in providers or imports)
     // For lucide-angular 0.553.0 with standalone components, we usually import the icons directly in the imports array or use a provider.
     // Let's check how it was done in other components or just add them to the imports array which is the standard way for standalone.
-    
+
     // Initialize countries
     this.countries = this.countriesService.getCountries();
     // Add "None" option as requested
@@ -165,16 +206,16 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
 
     // CRITICAL FIX: storage depends on user ID, so we must wait for auth check
     this.auth.currentUser$.subscribe(user => {
-       // Only run initialization logic once we have a definitive user state (null or Object)
-       // Note: currentUser$ starts as null, so we might want to skip the very first emission if it's default value
-       // But auth service checkAuth() emits quickly. 
-       
-       this.ensureBookingId();
-       this.loadPassengerData();
-       this.checkBookingStatus();
-       
-       // If local draft is missing or partial, try load pending pieces from server
-       this.loadPendingFromServerIfMissing();
+      // Only run initialization logic once we have a definitive user state (null or Object)
+      // Note: currentUser$ starts as null, so we might want to skip the very first emission if it's default value
+      // But auth service checkAuth() emits quickly. 
+
+      this.ensureBookingId();
+      this.loadPassengerData();
+      this.checkBookingStatus();
+
+      // If local draft is missing or partial, try load pending pieces from server
+      this.loadPendingFromServerIfMissing();
     });
   }
 
@@ -186,7 +227,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
   private loadHotels() {
     this.hotelApi.getHotels().subscribe({
       next: (data) => (this.hotels = data),
-      error: (err) => console.error('Error loading hotels', err),
+      error: (err) => { },
     });
   }
 
@@ -199,7 +240,10 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
         firstValueFrom(this.bookingsService.getMyPendingTransportBookings())
       ]);
 
-      const draft: any = {};
+      // Initialize draft with CURRENT local data to prevent overwriting with empty object
+      const currentLocal = this.auth.getBookingData() || {};
+      const draft: any = { ...currentLocal };
+
       let hasServerData = false;
       let serverBookingId: number | null = null;
 
@@ -290,18 +334,14 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
           this.bookingId = serverBookingId;
         }
         this.auth.saveBookingData(draft);
-        console.log('📦 Synced pending bookings from server:', {
-          bookingId: serverBookingId,
-          makkah: !!draft.makkahHotelData,
-          madinah: !!draft.madinahHotelData,
-          ground: !!draft.groundData,
-          transport: !!draft.transportData
-        });
+
       } else {
-        // Server has no pending data - clear local storage to stay in sync
-        console.log('🧹 Server reported no pending bookings. Clearing local storage.');
-        this.auth.clearUserBookingData();
-        this.bookingId = 0;
+        // Server has no pending data - DO NOT Clear local storage blindly as it might be ahead of server (race condition)
+
+        // this.auth.clearUserBookingData(); // DISABLED to fix data loss bug
+        if (draft.bookingId) {
+          this.bookingId = draft.bookingId;
+        }
       }
 
       // Re-evaluate status
@@ -357,7 +397,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
     this.groundBookedMessage = '';
     this.totalAmount = 0;
     this.bookingId = 0;
-    
+
     // Reset passenger form to defaults
     this.passenger = {
       firstName: '',
@@ -370,30 +410,33 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
       passportIssuingCountry: '',
       nationality: '',
       gender: 0,
+      photoPreview: null,
+      photoUrl: null,
     };
-    
-    console.log('🔄 Booking status reset for new booking');
+    this.selectedPhotoFile = null;
+
+
   }
 
   /**
    * Public manual reset for user "Start Fresh"
    */
   async resetBooking() {
-     const confirm = window.confirm(this.i18nService.t('Are you sure you want to clear all booking data and start fresh?'));
-     if(!confirm) return;
+    const confirm = window.confirm(this.i18nService.t('Are you sure you want to clear all booking data and start fresh?'));
+    if (!confirm) return;
 
-     this.auth.clearUserBookingData();
-     this.resetBookingStatus();
-     
-     // Generate new ID immediately
-     this.ensureBookingId();
-     
-     this.toastr.info('Booking form has been reset.', 'Cleared');
-     
-     // Force reload to ensure no lingering state provided by services
-     // window.location.reload(); 
-     // OR just re-init checks
-     this.checkBookingStatus();
+    this.auth.clearUserBookingData();
+    this.resetBookingStatus();
+
+    // Generate new ID immediately
+    this.ensureBookingId();
+
+    this.toastr.info('Booking form has been reset.', 'Cleared');
+
+    // Force reload to ensure no lingering state provided by services
+    // window.location.reload(); 
+    // OR just re-init checks
+    this.checkBookingStatus();
   }
 
   // ---------------- Booking Actions ----------------
@@ -440,7 +483,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
       // Create booking and get id
       const savedBookingId = await this.saveBooking(snapshot);
 
-      console.log('🎯 Booking saved with ID:', savedBookingId);
+
 
       if (!savedBookingId) {
         throw new Error('No booking ID returned from server');
@@ -459,108 +502,121 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
 
       this.isFinalizing = false;
     } catch (err) {
-      console.error('❌ Finalize booking error', err);
+
       this.toastr.error('فشل في حفظ الحجز. الرجاء المحاولة مرة أخرى.', 'خطأ');
       this.isFinalizing = false;
     }
   }
 
   private async saveBooking(snapshot: BookingSnapshot): Promise<number | string> {
-  const makkahCheckIn = snapshot.makkahHotel?.checkInDate;
-  const madinahCheckOut = snapshot.madinahHotel?.checkOutDate;
+    const makkahCheckIn = snapshot.makkahHotel?.checkInDate;
+    const madinahCheckOut = snapshot.madinahHotel?.checkOutDate;
 
-  // ✅ Clean payload - only send what backend needs for CREATE
-  const payload: CreateBookingRequest = {
-    type: this.selectedTripType === 'umrah' ? TripType.Umrah : TripType.Hajj,
-    travelStartDate: makkahCheckIn || new Date().toISOString(),
-    travelEndDate: madinahCheckOut || new Date().toISOString(),
-    numberOfTravelers: 1,
-    
-    // ✅ Only send essential hotel data (not bookingId or bookingHotelId)
-    makkahHotel: {
-      hotelId: snapshot.makkahHotel?.hotelId,
-      roomId: snapshot.makkahHotel?.roomId,
-      city: 'Makkah', // ✅ Required by backend HotelBookingDto
-      checkInDate: snapshot.makkahHotel?.checkInDate,
-      checkOutDate: snapshot.makkahHotel?.checkOutDate,
-      numberOfRooms: snapshot.makkahHotel?.numberOfRooms || 1,
-      totalPrice: snapshot.makkahHotel?.totalPrice
-    },
-    
-    madinahHotel: {
-      hotelId: snapshot.madinahHotel?.hotelId,
-      roomId: snapshot.madinahHotel?.roomId,
-      city: 'Madinah', // ✅ Required by backend HotelBookingDto
-      checkInDate: snapshot.madinahHotel?.checkInDate,
-      checkOutDate: snapshot.madinahHotel?.checkOutDate,
-      numberOfRooms: snapshot.madinahHotel?.numberOfRooms || 1,
-      totalPrice: snapshot.madinahHotel?.totalPrice
-    },
-    
-    // ✅ Only send transportId and numberOfSeats
-    internationalTransport: {
-      transportId: snapshot.internationalTransport?.transportId,
-      numberOfSeats: snapshot.internationalTransport?.numberOfSeats,
-      totalPrice: snapshot.internationalTransport?.totalPrice
-    },
-    
-    // ✅ Send all required ground transport fields
-    groundTransport: {
-      groundTransportId: snapshot.groundTransport?.groundTransportId,
-      serviceDate: snapshot.groundTransport?.serviceDate || new Date().toISOString(),
-      pickupLocation: snapshot.groundTransport?.pickupLocation,
-      dropoffLocation: snapshot.groundTransport?.dropoffLocation,
-      numberOfPassengers: snapshot.groundTransport?.numberOfPassengers || 1,
-      totalPrice: snapshot.groundTransport?.totalPrice
-    },
-    
-    travelers: [
-      {
-        firstName: this.passenger.firstName,
-        lastName: this.passenger.lastName,
-        dateOfBirth: this.passenger.dateOfBirth,
-        passportNumber: this.passenger.passport,
-        passportExpiryDate: this.passenger.passportExpiry,
-        passportIssuingCountry: this.passenger.passportIssuingCountry,
-        nationality: this.passenger.nationality,
-        gender: this.passenger.gender,
-        phoneNumber: `${this.selectedPhoneCountry?.dialCode || ''}${this.passenger.phone}`,
-        email: this.passenger.email,
-        isMainTraveler: true,
+    // ✅ Clean payload - only send what backend needs for CREATE
+    const tripTypeStr = (snapshot.type || snapshot.tripType || this.selectedTripType || 'Umrah').toString().toLowerCase();
+
+    const payload: CreateBookingRequest = {
+      type: tripTypeStr === 'hajj' ? TripType.Hajj : TripType.Umrah,
+      status: 'Pending',
+      travelStartDate: makkahCheckIn || new Date().toISOString(),
+      travelEndDate: madinahCheckOut || new Date().toISOString(),
+      numberOfTravelers: 1,
+
+      // ✅ Only send essential hotel data (not bookingId or bookingHotelId)
+      makkahHotel: {
+        hotelId: snapshot.makkahHotel?.hotelId,
+        roomId: snapshot.makkahHotel?.roomId,
+        city: 'Makkah', // ✅ Required by backend HotelBookingDto
+        checkInDate: snapshot.makkahHotel?.checkInDate,
+        checkOutDate: snapshot.makkahHotel?.checkOutDate,
+        numberOfRooms: snapshot.makkahHotel?.numberOfRooms || 1,
+        totalPrice: snapshot.makkahHotel?.totalPrice,
+        Status: 'Pending',
       },
-    ],
-    
-    totalPrice: this.totalAmount,
-  };
 
-  console.log('📤 Clean Payload:', JSON.stringify(payload, null, 2));
+      madinahHotel: {
+        hotelId: snapshot.madinahHotel?.hotelId,
+        roomId: snapshot.madinahHotel?.roomId,
+        city: 'Madinah', // ✅ Required by backend HotelBookingDto
+        checkInDate: snapshot.madinahHotel?.checkInDate,
+        checkOutDate: snapshot.madinahHotel?.checkOutDate,
+        numberOfRooms: snapshot.madinahHotel?.numberOfRooms || 1,
+        totalPrice: snapshot.madinahHotel?.totalPrice,
+        Status: 'Pending',
+      },
 
-  try {
-    const response = await firstValueFrom(this.bookingsService.createBooking(payload));
-    console.log('✅ Response:', response);
+      // ✅ Only send transportId and numberOfSeats
+      internationalTransport: {
+        transportId: snapshot.internationalTransport?.transportId,
+        numberOfSeats: snapshot.internationalTransport?.numberOfSeats,
+        totalPrice: snapshot.internationalTransport?.totalPrice,
+        Status: 'Pending',
+      },
 
-    this.toastr.success('تم إنشاء الحجز بنجاح!', 'نجاح');
+      // ✅ Send all required ground transport fields
+      groundTransport: {
+        groundTransportId: snapshot.groundTransport?.groundTransportId,
+        serviceDate: snapshot.groundTransport?.serviceDate || new Date().toISOString(),
+        pickupLocation: snapshot.groundTransport?.pickupLocation,
+        dropoffLocation: snapshot.groundTransport?.dropoffLocation,
+        numberOfPassengers: snapshot.groundTransport?.numberOfPassengers || 1,
+        totalPrice: snapshot.groundTransport?.totalPrice,
+        Status: 'Pending',
+      },
 
-    // Extract ID
-    const bookingId = (response as any).data?.id || (response as any).data?.bookingId || (response as any).id;
+      travelers: [
+        {
+          firstName: this.passenger.firstName,
+          lastName: this.passenger.lastName,
+          dateOfBirth: this.passenger.dateOfBirth,
+          passportNumber: this.passenger.passport,
+          passportExpiryDate: this.passenger.passportExpiry,
+          passportIssuingCountry: this.passenger.passportIssuingCountry,
+          nationality: this.passenger.nationality,
+          gender: this.passenger.gender,
+          phoneNumber: `${this.selectedPhoneCountry?.dialCode || ''}${this.passenger.phone}`,
+          email: this.passenger.email,
+          isMainTraveler: true,
+          photoUrl: this.passenger.photoUrl, // ✅ Send photo URL to backend
+        },
+      ],
 
-    if (!bookingId) {
-      throw new Error('Booking ID not found in response');
+      totalPrice: this.totalAmount,
+    };
+
+    // Payload ready for submission
+
+    try {
+      const response = await firstValueFrom(this.bookingsService.createBooking(payload));
+      // Booking created successfully
+
+      this.toastr.success('تم إنشاء الحجز بنجاح!', 'نجاح');
+
+      // Extract ID
+      const bookingId = (response as any).data?.id || (response as any).data?.bookingId || (response as any).id;
+
+      if (!bookingId) {
+        throw new Error('Booking ID not found in response');
+      }
+
+      // Booking saved, proceeding to payment
+      // Data will be cleared after successful payment in confirmStripePayment
+
+      return bookingId;
+    } catch (error: any) {
+
+
+      const errorMsg = error?.error?.message || error?.error?.title || 'فشل إنشاء الحجز';
+
+      // Check for specific error about pending/existing booking
+      if (errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('pending')) {
+        this.toastr.warning('Please complete payment for your pending booking in the dashboard', 'Pending Booking');
+      } else {
+        this.toastr.error(errorMsg);
+      }
+      throw error;
     }
-
-    // Booking saved, proceeding to payment
-    // Data will be cleared after successful payment in confirmStripePayment
-    
-    return bookingId;
-  } catch (error: any) {
-    console.error('❌ Error:', error);
-    console.error('❌ Error Response:', error?.error);
-    
-    const errorMsg = error?.error?.message || error?.error?.title || 'فشل إنشاء الحجز';
-    this.toastr.error(errorMsg);
-    throw error;
   }
-}
 
 
   private async initStripePayment() {
@@ -569,6 +625,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
     try {
       const payload: CreatePaymentRequest = {
         bookingId: this.bookingId,
+        amount: this.totalAmount || 0,
         currency: (this.stripeConfig?.currency || 'usd').toLowerCase(),
         idempotencyKey: `booking-${this.bookingId}-${Date.now()}`,
       };
@@ -584,7 +641,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
 
       this.toastr.info('برجاء إدخال بيانات البطاقة لإتمام الدفع.', 'Stripe');
     } catch (error: any) {
-      console.error('Stripe init error', error);
+
 
       if (error.status === 404) {
         this.toastr.error('نقطة نهاية الدفع غير موجودة. يرجى الاتصال بالدعم.');
@@ -616,11 +673,13 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
             phone: this.passenger.phone || undefined,
           },
         },
+        return_url: `${window.location.origin}/booking-confirmation/${this.bookingId}`
       });
 
       if (result.error) {
         this.paymentError = result.error.message || 'فشل الدفع.';
         this.toastr.error(this.paymentError);
+        this.router.navigate(['/booking-cancellation']);
         return;
       }
 
@@ -628,37 +687,26 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
         // IMPORTANT: Call backend to confirm payment and update booking status
         // This ensures the booking is marked as Confirmed before we clear localStorage
         try {
-          const confirmResponse = await fetch(`${environment.apiUrl}/Stripe/ConfirmPayment`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({ paymentIntentId: result.paymentIntent.id })
-          });
-          
-          if (!confirmResponse.ok) {
-            console.warn('Failed to confirm payment on backend, webhook will handle it');
-          } else {
-            console.log('Payment confirmed on backend successfully');
-          }
-        } catch (confirmErr) {
-          console.warn('Error confirming payment on backend:', confirmErr);
-          // Don't block - webhook will handle it as fallback
+          // Use Angular HttpClient (via PaymentService) to ensure Auth Token is attached
+          await firstValueFrom(this.paymentService.confirmStripePayment(result.paymentIntent.id));
+          // console.log('Payment confirmed on backend successfully');
+        } catch (confirmErr: any) {
+          const errorMsg = confirmErr?.error?.message || confirmErr?.message || 'Payment confirmation failed on backend.';
+          this.toastr.error(`Warning: Payment successful but verification failed: ${errorMsg}. Please contact support.`);
         }
 
         this.paymentSuccess = 'تم الدفع بنجاح!';
         this.toastr.success(this.paymentSuccess, 'Stripe');
-        
+
         // Save ID before reset
         const completedBookingId = this.bookingId;
 
         // Clear all booking data from localStorage (server has confirmed status now)
         this.auth.clearUserBookingData();
-        
+
         // Reset component status for fresh booking
         this.resetBookingStatus();
-        
+
         // Navigate to confirmation with booking id and payment intent
         this.router.navigate(['/booking-confirmation', completedBookingId], {
           queryParams: {
@@ -667,9 +715,10 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
         });
       }
     } catch (err) {
-      console.error('Stripe confirmation error', err);
+
       this.paymentError = err instanceof Error ? err.message : 'حدث خطأ أثناء الدفع.';
       this.toastr.error(this.paymentError);
+      this.router.navigate(['/booking-cancellation']);
     } finally {
       this.isPaymentProcessing = false;
     }
@@ -788,7 +837,7 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
       ...current,
       passengerData: this.passenger,
     });
-    
+
   }
 
   private async ensureStripeInstance() {
@@ -809,7 +858,30 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
     if (this.cardElement) this.cardElement.destroy();
 
     this.elements = this.stripe.elements();
-    this.cardElement = this.elements.create('card', { hidePostalCode: true });
+
+    // Get current theme colors from CSS variables
+    const computedStyle = getComputedStyle(document.documentElement);
+    const textColor = computedStyle.getPropertyValue('--color-text').trim() || '#32325d';
+    const placeholderColor = computedStyle.getPropertyValue('--color-text-muted').trim() || '#aab7c4';
+
+    this.cardElement = this.elements.create('card', {
+      hidePostalCode: true,
+      style: {
+        base: {
+          color: textColor,
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize: '16px',
+          fontSmoothing: 'antialiased',
+          '::placeholder': {
+            color: placeholderColor
+          }
+        },
+        invalid: {
+          color: '#ef4444', // red-500
+          iconColor: '#ef4444'
+        }
+      }
+    });
     this.cardElement.mount(this.cardElementHost.nativeElement);
   }
 
@@ -826,17 +898,129 @@ export class BookingPackageComponent implements OnInit, OnDestroy {
 
   private isPassengerInfoValid(): boolean {
     const p = this.passenger;
-    if (!p.firstName || !p.lastName || !p.email || !p.phone || !p.passport || !p.passportExpiry || !p.nationality) {
-      this.toastr.warning('Please complete all passenger information', 'Missing Data');
+
+    // First Name validation
+    if (!p.firstName?.trim()) {
+      this.toastr.warning('Please enter your first name', 'Missing Data');
       return false;
     }
 
-    if (!p.passportIssuingCountry) {
-      this.toastr.warning('Please select a passport issuing country', 'Missing Data');
+    // Last Name validation
+    if (!p.lastName?.trim()) {
+      this.toastr.warning('Please enter your last name', 'Missing Data');
       return false;
     }
-    
+
+    // Date of Birth validation
+    if (!p.dateOfBirth) {
+      this.toastr.warning('Please enter your date of birth', 'Missing Data');
+      return false;
+    }
+
+    // Email validation with format check
+    if (!p.email?.trim()) {
+      this.toastr.warning('Please enter your email address', 'Missing Data');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(p.email)) {
+      this.toastr.warning('Please enter a valid email address', 'Invalid Email');
+      return false;
+    }
+
+    // Phone validation
+    if (!p.phone?.trim()) {
+      this.toastr.warning('Please enter your phone number', 'Missing Data');
+      return false;
+    }
+    const phoneRegex = /^[0-9]{7,15}$/;
+    if (!phoneRegex.test(p.phone.replace(/\s/g, ''))) {
+      this.toastr.warning('Please enter a valid phone number (7-15 digits)', 'Invalid Phone');
+      return false;
+    }
+
+    // Nationality validation
+    if (!p.nationality || p.nationality === 'None') {
+      this.toastr.warning('Please select your nationality', 'Missing Data');
+      return false;
+    }
+
+    // Passport number validation with format check
+    if (!p.passport?.trim()) {
+      this.toastr.warning('Please enter your passport number', 'Missing Data');
+      return false;
+    }
+    const passportRegex = /^[A-Z0-9]{6,9}$/i;
+    if (!passportRegex.test(p.passport)) {
+      this.toastr.warning('Passport number must be 6-9 alphanumeric characters', 'Invalid Passport');
+      return false;
+    }
+
+    // Passport expiry validation
+    if (!p.passportExpiry) {
+      this.toastr.warning('Please enter passport expiry date', 'Missing Data');
+      return false;
+    }
+
+    // Passport issuing country validation
+    if (!p.passportIssuingCountry || p.passportIssuingCountry === 'None') {
+      this.toastr.warning('Please select passport issuing country', 'Missing Data');
+      return false;
+    }
+
     return true;
   }
 
+  /**
+   * Handle photo file selection for visa document
+   */
+  onPhotoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      this.toastr.error('Please select a JPEG or PNG image', 'Invalid File Type');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.toastr.error('Image must be less than 5MB', 'File Too Large');
+      return;
+    }
+
+    // Store the file
+    this.selectedPhotoFile = file;
+
+    // Create local preview using FileReader
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.passenger.photoPreview = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    this.toastr.info('Uploading photo...', 'Please wait');
+    this.uploadService.uploadTravelerPhoto(file).subscribe({
+      next: (photoUrl) => {
+        this.passenger.photoUrl = photoUrl;
+        this.savePassengerData();
+        this.toastr.success('Photo uploaded successfully', 'Photo Added');
+      },
+      error: (err) => {
+        console.error('Photo upload failed:', err);
+        this.toastr.error('Failed to upload photo. Please try again.', 'Upload Error');
+        this.passenger.photoUrl = null;
+      }
+    });
+  }
+
 }
+

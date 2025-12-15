@@ -11,20 +11,18 @@
   <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       @for (action of actions; track $index) {
-        <button type="button"
-                (click)="onActionClick(action)"
-                class="group p-8 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 hover:-translate-y-2 cursor-pointer text-left w-full"
-                style="border-radius: var(--radius-card)"
-                [attr.aria-label]="t(action.titleKey) + ' - ' + t(action.descriptionKey)">
-          <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
-               [style.background-color]="action.color">
-            <lucide-icon [name]="action.icon"
-                         class="h-8 w-8 text-[var(--primary)]"
-                         aria-hidden="true"></lucide-icon>
-          </div>
-          <h4 class="text-[var(--color-text)] mb-2 font-semibold">{{ t(action.titleKey) }}</h4>
-          <p class="text-[var(--color-text-muted)]">{{ t(action.descriptionKey) }}</p>
-        </button>
+      <button type="button" (click)="onActionClick(action)"
+        class="group p-8 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300 hover:-translate-y-2 cursor-pointer text-left w-full"
+        style="border-radius: var(--radius-card)"
+        [attr.aria-label]="t(action.titleKey) + ' - ' + t(action.descriptionKey)">
+        <div
+          class="w-16 h-16 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+          [style.background-color]="action.color">
+          <lucide-icon [name]="action.icon" class="h-8 w-8 text-[var(--primary)]" aria-hidden="true"></lucide-icon>
+        </div>
+        <h4 class="text-[var(--color-text)] mb-2 font-semibold">{{ t(action.titleKey) }}</h4>
+        <p class="text-[var(--color-text-muted)]">{{ t(action.descriptionKey) }}</p>
+      </button>
       }
     </div>
   </section>
@@ -40,121 +38,119 @@
     <!-- category filter -->
     <div class="flex flex-wrap justify-center gap-3 mb-12">
       @for (cat of categories; track $index) {
-        <button (click)="setCategory(cat)"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all"
-                [ngClass]="selectedCategory() === cat
+      <button (click)="setCategory(cat)" class="px-4 py-2 rounded-full text-sm font-medium transition-all"
+        [ngClass]="selectedCategory() === cat
                   ? 'bg-[var(--primary)] text-white border-transparent'
-                  : 'border border-[var(--border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text)]'"
-                style="border-radius: var(--radius-pill)">
-          {{ t('home.packages.category.'+cat) }}
-        </button>
+                  : 'border border-[var(--border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text)]'" style="border-radius: var(--radius-pill)">
+        {{ t('home.packages.category.'+cat) }}
+      </button>
       }
     </div>
 
     <!-- grid – identical card structure -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       @for (pkg of filteredPackages(); track $index) {
-        <div class="flex flex-col group overflow-hidden border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
-             style="border-radius: var(--radius-card)">
-          <!-- image + badge -->
-          <div class="relative h-48 overflow-hidden">
-            <img [src]="pkg.image"
-                 [alt]="t(pkg.titleKey)"
-                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-            <div class="absolute top-3 right-3 bg-[var(--primary)] text-white px-2 py-1 rounded text-xs border-0">
-              {{ t('home.packages.category.'+pkg.category) }}
-            </div>
-          </div>
-
-          <!-- content – flex column so bottom row always sits at end -->
-          <div class="p-5 flex flex-col flex-1">
-            <!-- rating -->
-            <div class="flex items-center gap-1 mb-2">
-              <lucide-icon name="star"
-                           class="h-4 w-4 fill-[var(--warning)] text-[var(--warning)]"></lucide-icon>
-              <span class="text-[var(--color-text)]">{{ pkg.rating }}</span>
-              <span class="text-[var(--color-text-muted)]">({{ pkg.reviews }})</span>
-            </div>
-
-            <h4 class="text-[var(--color-text)] mb-2">{{ t(pkg.titleKey) }}</h4>
-
-            <div class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]">
-              <div class="flex items-center gap-1">
-                <lucide-icon name="clock" class="h-4 w-4"></lucide-icon>
-                <span>{{ pkg.duration }} {{ t('home.packages.duration.days') }}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
-                <span>{{ t('nav.packages') }}</span>
-              </div>
-            </div>
-
-            <!-- included – keys only -->
-            <div class="space-y-1 mb-4">
-              @for (key of pkg.includedKeys.slice(0,3); track $index) {
-                <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
-                  <lucide-icon name="check"
-                               class="h-3 w-3 text-[var(--success)]"></lucide-icon>
-                  <span>{{ t('home.packages.included.'+key) }}</span>
-                </div>
-              }
-            </div>
-
-            <!-- bottom row – always at the bottom -->
-            <div class="mt-auto pt-4 flex items-end justify-between">
-              <div>
-                <span class="text-[var(--color-text-muted)]">{{ t('home.packages.from') }}</span>
-                <div class="text-[var(--color-text)]">
-                  <span class="text-2xl">${{ pkg.price }}</span>
-                  <span class="text-[var(--color-text-muted)]">{{ t('home.packages.perPerson') }}</span>
-                </div>
-              </div>
-              <button type="button"
-                      (click)="onViewPackageDetails(pkg.id)"
-                      class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
-                {{ t('common.viewDetails') }}
-              </button>
-            </div>
+      <div
+        class="flex flex-col group overflow-hidden border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
+        style="border-radius: var(--radius-card)">
+        <!-- image + badge -->
+        <div class="relative h-48 overflow-hidden">
+          <img [src]="pkg.image" [alt]="t(pkg.titleKey)"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-3 right-3 bg-[var(--primary)] text-white px-2 py-1 rounded text-xs border-0">
+            {{ t('home.packages.category.'+pkg.category) }}
           </div>
         </div>
+
+        <!-- content – flex column so bottom row always sits at end -->
+        <div class="p-5 flex flex-col flex-1">
+          <!-- rating -->
+          <div class="flex items-center gap-1 mb-2">
+            <lucide-icon name="star" class="h-4 w-4 fill-[var(--warning)] text-[var(--warning)]"></lucide-icon>
+            <span class="text-[var(--color-text)]">{{ pkg.rating }}</span>
+            <span class="text-[var(--color-text-muted)]">({{ pkg.reviews }})</span>
+          </div>
+
+          <h4 class="text-[var(--color-text)] mb-2">{{ t(pkg.titleKey) }}</h4>
+
+          <div class="flex items-center gap-4 mb-3 text-[var(--color-text-muted)]">
+            <div class="flex items-center gap-1">
+              <lucide-icon name="clock" class="h-4 w-4"></lucide-icon>
+              <span>{{ pkg.duration }} {{ t('home.packages.duration.days') }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
+              <span>{{ t('nav.packages') }}</span>
+            </div>
+          </div>
+
+          <!-- included – keys only -->
+          <div class="space-y-1 mb-4">
+            @for (key of pkg.includedKeys.slice(0,3); track $index) {
+            <div class="flex items-center gap-2 text-[var(--color-text-muted)]">
+              <lucide-icon name="check" class="h-3 w-3 text-[var(--success)]"></lucide-icon>
+              <span>{{ t('home.packages.included.'+key) }}</span>
+            </div>
+            }
+          </div>
+
+          <!-- bottom row – always at the bottom -->
+          <div class="mt-auto pt-4 flex items-end justify-between">
+            <div>
+              <span class="text-[var(--color-text-muted)]">{{ t('home.packages.from') }}</span>
+              <div class="text-[var(--color-text)]">
+                <span class="text-2xl">${{ pkg.price }}</span>
+                <span class="text-[var(--color-text-muted)]">{{ t('home.packages.perPerson') }}</span>
+              </div>
+            </div>
+            <button type="button" (click)="onViewPackageDetails(pkg.id)"
+              class="bg-[var(--primary)] text-white hover:opacity-90 px-4 py-2 rounded text-sm focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2">
+              {{ t('common.viewDetails') }}
+            </button>
+          </div>
+        </div>
+      </div>
       }
     </div>
 
     <!-- “View all” button -->
     <div class="text-center">
-      <button type="button"
-              (click)="onViewAllPackages()"
-              class="border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white px-6 py-2 rounded focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
-              style="border-radius: var(--radius-button)">
+      <button type="button" (click)="onViewAllPackages()"
+        class="border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white px-6 py-2 rounded focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2"
+        style="border-radius: var(--radius-button)">
         {{ t('home.viewAllPackages') }}
       </button>
     </div>
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <section class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-[var(--color-bg)]">
     <div class="text-center mb-16">
       <h2 class="text-[var(--color-text)] mb-4">{{ t('home.howItWorks') }}</h2>
       <p class="text-[var(--color-text-muted)] text-lg">{{ t('home.howItWorksDesc') }}</p>
     </div>
 
     <div class="relative">
-      <div class="hidden lg:block absolute top-20 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-[var(--primary)] via-[var(--primary)] to-[var(--primary)] opacity-20"></div>
+      <div
+        class="hidden lg:block absolute top-20 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-[var(--primary)] via-[var(--primary)] to-[var(--primary)] opacity-20">
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         @for (step of steps; track $index) {
-          <div class="relative text-center group">
-            <div class="relative inline-flex mb-6">
-              <div class="w-20 h-20 rounded-full bg-[var(--primary)] flex items-center justify-center text-white relative z-10 group-hover:scale-110 transition-transform">
-                <lucide-icon [name]="step.icon" class="h-10 w-10"></lucide-icon>
-              </div>
-              <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[var(--success)] flex items-center justify-center text-white z-20">
-                <span>{{ step.step }}</span>
-              </div>
+        <div class="relative text-center group">
+          <div class="relative inline-flex mb-6">
+            <div
+              class="w-20 h-20 rounded-full bg-[var(--primary)] flex items-center justify-center text-white relative z-10 group-hover:scale-110 transition-transform">
+              <lucide-icon [name]="step.icon" class="h-10 w-10"></lucide-icon>
             </div>
-
-            <h4 class="text-[var(--color-text)] mb-3">{{ t(step.titleKey) }}</h4>
-            <p class="text-[var(--color-text-muted)]">{{ t(step.descriptionKey) }}</p>
+            <div
+              class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[var(--success)] flex items-center justify-center text-white z-20">
+              <span>{{ step.step }}</span>
+            </div>
           </div>
+
+          <h4 class="text-[var(--color-text)] mb-3">{{ t(step.titleKey) }}</h4>
+          <p class="text-[var(--color-text-muted)]">{{ t(step.descriptionKey) }}</p>
+        </div>
         }
       </div>
     </div>
@@ -165,17 +161,17 @@
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
         @for (stat of stats; track $index) {
-          <div class="text-center">
-            <div class="flex justify-center mb-4">
-              <div class="w-16 h-16 rounded-full flex items-center justify-center bg-[var(--color-bg)]/10">
-                <lucide-icon [name]="stat.icon" class="h-8 w-8 text-white"></lucide-icon>
-              </div>
+        <div class="text-center">
+          <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center bg-[var(--color-bg)]/10">
+              <lucide-icon [name]="stat.icon" class="h-8 w-8 text-white"></lucide-icon>
             </div>
-            <div class="text-4xl text-white mb-2">
-              <span>{{ stat.value }}</span><span>{{ stat.suffix }}</span>
-            </div>
-            <div class="text-white/80">{{ t(stat.label) }}</div>
           </div>
+          <div class="text-4xl text-white mb-2">
+            <span>{{ stat.value }}</span><span>{{ stat.suffix }}</span>
+          </div>
+          <div class="text-white/80">{{ t(stat.label) }}</div>
+        </div>
         }
       </div>
     </div>
@@ -190,38 +186,37 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       @for (testimonial of testimonials; track $index) {
-        <div class="p-6 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
-             style="border-radius: var(--radius-card)">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full overflow-hidden bg-[var(--color-surface)] flex items-center justify-center">
-              <img [src]="testimonial.avatar"
-                   [alt]="testimonial.name"
-                   class="w-full h-full object-cover">
+      <div
+        class="p-6 border border-[var(--border)] bg-[var(--color-bg)] hover:shadow-[var(--shadow-heavy)] transition-all duration-300"
+        style="border-radius: var(--radius-card)">
+        <div class="flex items-center gap-3 mb-4">
+          <div
+            class="w-12 h-12 rounded-full overflow-hidden bg-[var(--color-surface)] flex items-center justify-center">
+            <img [src]="testimonial.avatar" [alt]="testimonial.name" class="w-full h-full object-cover">
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h4 class="text-[var(--color-text)]">{{ testimonial.name }}</h4>
+              @if (testimonial.verified) {
+              <div
+                class="bg-[var(--success)]/10 text-[var(--success)] border-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs">
+                <lucide-icon name="check-circle" class="h-3 w-3"></lucide-icon>
+                <span>{{ t('common.verified') }}</span>
+              </div>
+              }
             </div>
-            <div class="flex-1">
-              <div class="flex items-center gap-2">
-                <h4 class="text-[var(--color-text)]">{{ testimonial.name }}</h4>
-                @if (testimonial.verified) {
-                  <div class="bg-[var(--success)]/10 text-[var(--success)] border-0 flex items-center gap-1 px-2 py-0.5 rounded text-xs">
-                    <lucide-icon name="check-circle" class="h-3 w-3"></lucide-icon>
-                    <span>{{ t('common.verified') }}</span>
-                  </div>
-                }
-              </div>
-              <div class="flex gap-0.5 mt-1"
-                   [attr.aria-label]="testimonial.rating + ' out of 5 stars'">
-                @for (star of getStarArray(testimonial.rating); track $index) {
-                  <lucide-icon name="star"
-                               class="h-4 w-4 fill-[var(--warning)] text-[var(--warning)]"
-                               aria-hidden="true"></lucide-icon>
-                }
-              </div>
+            <div class="flex gap-0.5 mt-1" [attr.aria-label]="testimonial.rating + ' out of 5 stars'">
+              @for (star of getStarArray(testimonial.rating); track $index) {
+              <lucide-icon name="star" class="h-4 w-4 fill-[var(--warning)] text-[var(--warning)]"
+                aria-hidden="true"></lucide-icon>
+              }
             </div>
           </div>
-          <p class="text-[var(--color-text-muted)] italic">
-            “{{ t(testimonial.textKey) }}”
-          </p>
         </div>
+        <p class="text-[var(--color-text-muted)] italic">
+          “{{ t(testimonial.textKey) }}”
+        </p>
+      </div>
       }
     </div>
   </section>
@@ -235,30 +230,22 @@
         <h3 class="text-white mb-4">{{ t('home.newsletter.title') }}</h3>
         <p class="text-white/90 mb-8">{{ t('home.newsletter.desc') }}</p>
 
-        <form (ngSubmit)="onNewsletterSubmit()"
-              class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-4">
-          <input type="email"
-                 name="email"
-                 [ngModel]="newsletterEmail()"
-                 (ngModelChange)="newsletterEmail.set($event)"
-                 [placeholder]="t('home.newsletter.emailPlaceholder')"
-                 class="bg-[var(--color-bg)] border-0 h-12 flex-1 px-4 rounded outline-none text-[var(--color-text)]
+        <form (ngSubmit)="onNewsletterSubmit()" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-4">
+          <input type="email" name="email" [ngModel]="newsletterEmail()" (ngModelChange)="newsletterEmail.set($event)"
+            [placeholder]="t('home.newsletter.emailPlaceholder')" class="bg-[var(--color-bg)] border-0 h-12 flex-1 px-4 rounded outline-none text-[var(--color-text)]
                         focus:ring-2 focus:ring-white focus:ring-offset-2
-                        focus:ring-offset-[var(--primary)]"
-                 aria-label="Email address for newsletter subscription"
-                 required>
+                        focus:ring-offset-[var(--primary)]" aria-label="Email address for newsletter subscription"
+            required>
 
-          <button type="submit"
-                  [disabled]="isSubmittingNewsletter()"
-                  class="bg-[var(--color-bg)] text-[var(--primary)]
+          <button type="submit" [disabled]="isSubmittingNewsletter()" class="bg-[var(--color-bg)] text-[var(--primary)]
                          hover:bg-[var(--color-bg)] h-12 px-8 rounded
                          focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-white
                          focus:ring-offset-2 focus:ring-offset-[var(--primary)]
                          disabled:opacity-50 disabled:cursor-not-allowed">
             @if (isSubmittingNewsletter()) {
-              <span>{{ t('home.newsletter.subscribing') }}</span>
+            <span>{{ t('home.newsletter.subscribing') }}</span>
             } @else {
-              <span>{{ t('home.newsletter.subscribe') }}</span>
+            <span>{{ t('home.newsletter.subscribe') }}</span>
             }
           </button>
         </form>
@@ -277,9 +264,9 @@
       <!-- Image Side -->
       <div class="w-full lg:w-1/2 relative">
         <div class="relative rounded-2xl overflow-hidden shadow-xl group">
-          <img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&auto=format&fit=crop" 
-               [alt]="t('home.about.imageAlt')" 
-               class="w-full h-[400px] object-cover transform transition-transform duration-700 group-hover:scale-105">
+          <img src="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&auto=format&fit=crop"
+            [alt]="t('home.about.imageAlt')"
+            class="w-full h-[400px] object-cover transform transition-transform duration-700 group-hover:scale-105">
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div class="absolute bottom-6 left-6 right-6 text-white">
             <div class="flex items-center gap-2 mb-2">
@@ -290,21 +277,24 @@
           </div>
         </div>
         <!-- Decorative Element -->
-        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-[var(--primary)]/10 rounded-full blur-xl" style="z-index: -1;"></div>
-        <div class="absolute -top-6 -left-6 w-32 h-32 bg-[var(--secondary)]/10 rounded-full blur-xl" style="z-index: -1;"></div>
+        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-[var(--primary)]/10 rounded-full blur-xl"
+          style="z-index: -1;"></div>
+        <div class="absolute -top-6 -left-6 w-32 h-32 bg-[var(--secondary)]/10 rounded-full blur-xl"
+          style="z-index: -1;"></div>
       </div>
 
       <!-- Text Side -->
       <div class="w-full lg:w-1/2 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-sm font-medium">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-sm font-medium">
           <lucide-icon name="info" class="h-4 w-4"></lucide-icon>
           <span>{{ t('nav.about') }}</span>
         </div>
-        
+
         <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] leading-tight">
           {{ t('home.about.title') }}
         </h2>
-        
+
         <p class="text-[var(--color-text-muted)] text-lg leading-relaxed">
           {{ t('home.about.description') }}
         </p>
@@ -331,9 +321,11 @@
         </div>
 
         <div class="pt-6">
-          <button class="px-8 py-3 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-all shadow-lg shadow-[var(--primary)]/20 flex items-center gap-2 group">
+          <button
+            class="px-8 py-3 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-all shadow-lg shadow-[var(--primary)]/20 flex items-center gap-2 group">
             {{ t('home.about.cta') }}
-            <lucide-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" [class.rotate-180]="i18n.isRTL()"></lucide-icon>
+            <lucide-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1"
+              [class.rotate-180]="i18n.isRTL()"></lucide-icon>
           </button>
         </div>
       </div>
@@ -349,36 +341,30 @@
 
     <div class="max-w-3xl mx-auto space-y-4">
       @for (faq of faqs; track $index) {
-        <div class="border border-[var(--border)] bg-[var(--color-bg)] rounded-lg overflow-hidden">
-          <button type="button"
-                  class="w-full px-6 py-4 text-left flex items-center gap-4
+      <div class="border border-[var(--border)] bg-[var(--color-bg)] rounded-lg overflow-hidden">
+        <button type="button" class="w-full px-6 py-4 text-left flex items-center gap-4
                          text-[var(--color-text)] hover:text-[var(--primary)]
                          focus:outline-none text-[var(--color-text)] focus:ring-2 focus:ring-[var(--primary)]
-                         focus:ring-offset-2"
-                  (click)="toggleFAQ(faq.questionKey)"
-                  [attr.aria-expanded]="isFAQOpen(faq.questionKey)"
-                  [attr.aria-controls]="'faq-ans-'+$index">
-            <span class="font-medium flex-1">{{ t(faq.questionKey) }}</span>
-            <!-- fixed-size container keeps layout stable while icon rotates -->
-            <span class="w-6 h-6 flex items-center justify-center flex-none">
-              <lucide-icon name="chevron-down"
-                           class="h-5 w-5 transition-transform duration-200 origin-center"
-                           [ngClass]="{'rotate-180':isFAQOpen(faq.questionKey)}"
-                           aria-hidden="true"></lucide-icon>
-            </span>
-          </button>
+                         focus:ring-offset-2" (click)="toggleFAQ(faq.questionKey)"
+          [attr.aria-expanded]="isFAQOpen(faq.questionKey)" [attr.aria-controls]="'faq-ans-'+$index">
+          <span class="font-medium flex-1">{{ t(faq.questionKey) }}</span>
+          <!-- fixed-size container keeps layout stable while icon rotates -->
+          <span class="w-6 h-6 flex items-center justify-center flex-none">
+            <lucide-icon name="chevron-down" class="h-5 w-5 transition-transform duration-200 origin-center"
+              [ngClass]="{'rotate-180':isFAQOpen(faq.questionKey)}" aria-hidden="true"></lucide-icon>
+          </span>
+        </button>
 
-          @if (isFAQOpen(faq.questionKey)) {
-            <div [id]="'faq-ans-'+$index"
-                 class="px-6 py-4 text-[var(--color-text-muted)]" role="region">
-              {{ t(faq.answerKey) }}
-            </div>
-          }
+        @if (isFAQOpen(faq.questionKey)) {
+        <div [id]="'faq-ans-'+$index" class="px-6 py-4 text-[var(--color-text-muted)]" role="region">
+          {{ t(faq.answerKey) }}
         </div>
+        }
+      </div>
       }
     </div>
   </section>
 </main>
 
 <!-- Apper Dashboard Component -->
-    <router-outlet></router-outlet>  <!-- dynamic content goes here -->
+<router-outlet></router-outlet> <!-- dynamic content goes here -->

@@ -7,7 +7,7 @@
   // Stripe configuration (publishable key for client-side)
   stripe: {
     publishableKey: 'pk_test_51SXi6ADI8RwYwJs03fV0jNsfKfnYv3OSAhocTnzCqfWx3PFSHRPRKbPDuvkUplrfFTs4uaeD6NMZRdbkxvqIGR9k00BleztKHR',
-    currency: 'USD'
+    currency: 'SAR'
   }
 };
  */
@@ -20,7 +20,7 @@ export const environment = {
   version: '1.0.0',
   stripe: {
     publishableKey: 'pk_test_51SXi6ADI8RwYwJs03fV0jNsfKfnYv3OSAhocTnzCqfWx3PFSHRPRKbPDuvkUplrfFTs4uaeD6NMZRdbkxvqIGR9k00BleztKHR',
-    currency: 'usd',
+    currency: 'sar',
     successPath: '/booking-confirmation',
     cancelPath: '/booking-cancellation',
   },

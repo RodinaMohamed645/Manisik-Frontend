@@ -22,6 +22,7 @@ export const routes: Routes = [
     {path: 'dashboard', loadComponent: () => import('./Components/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [authGuard]},
     {path: 'profile', loadComponent: () => import('./Components/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard]},
 
+    {path: 'booking-cancellation', loadComponent: () => import('./Components/booking-cancellation/booking-cancellation.component').then(m => m.BookingCancellationComponent), canActivate: [authGuard]},
     {path: '**', redirectTo: ''}
      
 

@@ -47,7 +47,7 @@ export class HotelDetailsComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Failed to load hotel', err);
+
         this.loading = false;
       },
     });

@@ -15,6 +15,8 @@ export interface HotelBookingDto {
   numberOfNights?: number | null;
   pricePerNight?: number | null;
   totalPrice?: number | null;
+  Status?: string;
+  bookingId?: number | null; // Optional: used to add to an existing pending booking
 }
 
 // International Transport entity (matches backend)
@@ -66,6 +68,8 @@ export interface TransportBookingDto {
   numberOfSeats?: number | null;
   pricePerSeat?: number | null;
   totalPrice?: number | null;
+  Status?: string;
+  bookingId?: number | null; // Optional: used to add to an existing pending booking
 }
 
 export interface GroundTransportBookingDto {
@@ -80,6 +84,8 @@ export interface GroundTransportBookingDto {
   pricePerPerson?: number | null;
   capacity?: number | null;
   totalPrice?: number | null;
+  Status?: string;
+  bookingId?: number | null; // Optional: used to add to an existing pending booking
 }
 
 export interface TravelerDto {
@@ -98,6 +104,7 @@ export interface TravelerDto {
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
   isMainTraveler?: boolean;
+  photoUrl?: string | null; // Photo for visa document
 }
 
 export interface PaymentDto {
@@ -139,4 +146,15 @@ export interface BookingDto {
   notes?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  // UI Helper properties (flattened for easier access in templates)
+  makkahHotelId?: number | null;
+  makkahHotelPrice?: number | null;
+  madinahHotelId?: number | null;
+  madinahHotelPrice?: number | null;
+  internationalTransportId?: number | null;
+  internationalTransportPrice?: number | null;
+  groundTransportId?: number | null;
+  groundTransportPrice?: number | null;
+  paymentDate?: string | null;
+  paymentIntentId?: string | null;
 }

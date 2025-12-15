@@ -1,4 +1,19 @@
- a.link:hover {
-    background-color: var(--primary);
-    color: var(--text-surface) !important;        
-  }
+/* Navbar Performance Optimizations */
+
+/* Hardware-accelerated transitions for nav links */
+.nav-link-transition {
+  will-change: background-color, color;
+  contain: layout style;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+
+/* Reduce blur for performance - still looks good but less GPU intensive */
+.navbar-transition {
+  backdrop-filter: blur(8px);
+  will-change: backdrop-filter;
+}
+
+a.link:hover {
+  background-color: var(--primary);
+  color: var(--text-surface) !important;        
+}

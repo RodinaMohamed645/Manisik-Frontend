@@ -10,4 +10,6 @@ export interface BookingInternationalTransport {
   NumberOfSeats: number;
   PricePerSeat?: number;
   TotalPrice?: number;
+  Status?: number;
+  BookingId?: number | null; // Optional: used to add to an existing pending booking
 }

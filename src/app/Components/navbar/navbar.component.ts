@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { I18nService } from 'src/app/core/services/i18n.service';
@@ -17,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
   imports: [RouterLink, RouterLinkActive, LucideAngularModule, CommonModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
@@ -95,7 +96,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         // Navigation is handled by auth service
       },
       error: (err) => {
-        console.error('Logout failed:', err);
+
         this.toastr.error('Logout failed', 'Error');
         // Still clear local state on error
         this.closeMobileMenu();
@@ -123,7 +124,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   public handleSearch(): void {
-    this.router.navigate(['/search']).catch(err => console.error('Navigation error:', err));
+    this.router.navigate(['/search']).catch(() => {});
   }
 
   public handleLanguageChange(): void {
@@ -153,12 +154,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   public handleCartClick(): void {
-    this.router.navigate(['/cart']).catch(err => console.error('Navigation error:', err));
+    this.router.navigate(['/cart']).catch(() => {});
   }
 
   public handleUserClick(): void {
     if (!this.UserStatus()) {
-      this.router.navigate(['/login']).catch(err => console.error(err));
+      this.router.navigate(['/login']).catch(() => {});
       return;
     }
     this.openUserModel();
@@ -209,11 +210,11 @@ openUserModel(): void {
 
   navigateToDashboard(): void {
     this.closeUserDropdown();
-    this.router.navigate(['/dashboard']).catch(err => console.error('Navigation error:', err));
+    this.router.navigate(['/dashboard']).catch(() => {});
   }
 
   navigateToProfile(): void {
     this.closeUserDropdown();
-    this.router.navigate(['/profile']).catch(err => console.error('Navigation error:', err));
+    this.router.navigate(['/profile']).catch(() => {});
   }
 }

@@ -3,31 +3,31 @@
 
 <head>
   <meta charset="utf-8">
-  <title>ManasikClient</title>
+  <title>Manisik</title>
   <base href="/">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕋</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Manasik - Your trusted platform for Umrah and Hajj booking">
+  <meta name="description" content="Manisik - Your trusted platform for Umrah and Hajj booking">
 
   <!-- Content Security Policy for frontend -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.network;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: blob: https://images.unsplash.com https://*.stripe.com http://localhost:*;
-    frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
-    connect-src 'self' http://localhost:* ws://localhost:* https://api.stripe.com https://m.stripe.network;
-  ">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.network https://b.stripecdn.com https://q.stripe.com; worker-src 'self' blob: https://js.stripe.com https://m.stripe.network https://b.stripecdn.com; child-src 'self' blob: https://js.stripe.com https://m.stripe.network https://b.stripecdn.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://m.stripe.network; connect-src 'self' https://api.stripe.com https://m.stripe.network https://q.stripe.com https://r.stripe.com http://localhost:*; img-src 'self' data: https: blob: http://localhost:*; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;">
 
   <!-- Preconnect to external resources -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://js.stripe.com" crossorigin>
 
-  <!-- Google Fonts -->
+  <!-- Preload LCP image (first hero slide) for faster initial paint -->
+  <link rel="preload" as="image" href="/images/hero/makkah-kaaba.jpg" fetchpriority="high">
+
+  <!-- Google Fonts with font-display=swap for faster text rendering -->
   <link
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet">
+
+  <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 

@@ -49,15 +49,15 @@ export class LoginComponent {
           const name = response.data.user?.firstName ?? '';
           this.toastr.success(`Login successful! Welcome ${name}`, 'Success');
           const navigateTo = this.returnUrl || '/';
-          this.router.navigateByUrl(navigateTo).catch(err => console.error('Navigation error', err));
+          this.router.navigateByUrl(navigateTo).catch(() => {});
         } else {
           this.errorMessage = 'Login failed. Please try again.';
-          console.error('Login failed: No token received');
+
         }
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Login failed. Please try again.';
-        console.error('Login error:', error);
+
       }
     });
   }

@@ -5,7 +5,7 @@ export const environment = {
   version: '1.0.0',
   stripe: {
     publishableKey: '', // Replace with production publishable key
-    currency: 'USD'
+    currency: 'SAR'
   }
 };
 

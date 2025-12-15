@@ -6,8 +6,15 @@ import { withInterceptors } from '@angular/common/http';
 import { loadingInterceptor } from './app/core/interceptors/loading.interceptor';
 import { authInterceptorInterceptor } from './app/core/interceptors/auth-interceptor.interceptor';
 import {
+  Trash2,
+  RefreshCw,
+  FileText,
+  Lock,
+  Receipt,
+  XCircle,
   LucideAngularModule,
   Globe,
+
   Home,
   Menu,
   Moon,
@@ -46,6 +53,10 @@ import {
   TrendingUp,
   Phone,
   SquareUser,
+  Building,
+  Plane,
+  Flag,
+  AlertCircle
 } from 'lucide-angular';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -59,6 +70,12 @@ import { routes } from './app/app.routes'; // define your routes in a separate f
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 
 import { languageInterceptor } from './app/core/interceptors/language.interceptor';
+import { environment } from './environments/environment';
+import { enableProdMode } from '@angular/core';
+
+if (environment.production) {
+  enableProdMode();
+}
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
@@ -76,6 +93,32 @@ bootstrapApplication(AppComponent, {
     })),
     importProvidersFrom(
       LucideAngularModule.pick({
+        Trash2,
+        RefreshCw,
+        FileText,
+        Lock,
+        ShieldCheck,
+        Receipt,
+        XCircle,
+        CreditCard,
+        ChevronDown,
+        User,
+        Users,
+        Building2,
+        Headphones,
+        Star,
+        Clock,
+        Check,
+        CheckCircle,
+        ChevronLeft,
+        ChevronRight,
+        Calendar,
+        Package,
+        Bus,
+        Settings,
+        TrendingUp,
+        Phone,
+        SquareUser,
         Menu,
         Search,
         Globe,
@@ -83,7 +126,6 @@ bootstrapApplication(AppComponent, {
         Mail,
         MapPin,
         Shield,
-        ShieldCheck,
         Info,
         Award,
         ArrowRight,
@@ -94,27 +136,12 @@ bootstrapApplication(AppComponent, {
         Sun,
         Moon,
         ShoppingCart,
-        User,
         Home,
         X,
-        Users,
-        Building2,
-        Headphones,
-        Star,
-        Clock,
-        Check,
-        CheckCircle,
-        ChevronDown,
-        ChevronLeft,
-        ChevronRight,
-        Calendar,
-        Package,
-        Bus,
-        Settings,
-        CreditCard,
-        TrendingUp,
-        Phone,
-        SquareUser,
+        Building,
+        Plane,
+        Flag,
+        AlertCircle
       })
     ),
     provideHttpClient(

@@ -18,7 +18,7 @@
         <p class="text-[var(--color-text-muted)]">From: {{ transport.departureAirport }}</p>
         <p class="text-[var(--color-text-muted)]">To: {{ transport.arrivalAirport }}</p>
         <p class="text-[var(--color-text-muted)]">Date: {{ transport.departureDate || transport.date }}</p>
-        <p class="text-[var(--color-text-muted)]">Price per seat: {{ pricePerSeat | currency }}</p>
+        <p class="text-[var(--color-text-muted)]">Price per seat: {{ pricePerSeat | currency:'SAR' }}</p>
     </div>
 
     <!-- Booking Form -->
@@ -32,7 +32,7 @@
 
         <!-- Total Price -->
         <div class="text-lg font-semibold text-[var(--color-text)]">
-            Total Price: {{ total | currency }}
+            Total Price: {{ total | currency:'SAR' }}
         </div>
 
         <!-- Action Buttons -->

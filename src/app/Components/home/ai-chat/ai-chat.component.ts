@@ -49,8 +49,7 @@ export class AIChatComponent implements OnInit {
   newChat() {
     if (this.conversationId) {
       this.ai.clearSession(this.conversationId).subscribe({
-        next: () => console.log('Session cleared on backend'),
-        error: (err) => console.error('Error clearing session', err),
+
       });
     }
 
@@ -80,7 +79,7 @@ export class AIChatComponent implements OnInit {
 
     this.ai.sendMessage(this.conversationId, text).subscribe({
       next: (res) => {
-        console.log('AI response', res);
+
         // Update conversation ID if it was null (first message)
         if (!this.conversationId) this.conversationId = res.conversationId;
         
@@ -114,7 +113,7 @@ export class AIChatComponent implements OnInit {
 
   /** Helper: handle errors from AI service */
   private handleError(err: any) {
-    console.error('AI chat error', err);
+
     this.addMessage('assistant', 'An error occurred. Please try again later.', 'Assistant');
     this.loading.set(false);
   }
@@ -126,7 +125,7 @@ export class AIChatComponent implements OnInit {
         const el = this.messagesList?.nativeElement;
         if (el) el.scrollTop = el.scrollHeight;
       } catch (e) {
-        console.log('Scroll to bottom failed', e);
+
       }
     });
   }

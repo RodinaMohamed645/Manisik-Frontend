@@ -49,7 +49,7 @@ export class BookingTransportComponent implements OnInit {
           this.recalculateTotal();
         },
         error: (err) => {
-          console.error('Failed to load transport', err);
+
           this.toastr.error('Failed to load transport details', 'Error');
           this.router.navigate(['/transport']);
         }
@@ -95,20 +95,20 @@ export class BookingTransportComponent implements OnInit {
               }
               this.auth.saveBookingData(draft);
             } catch (e) {
-              console.warn('Failed to save pending transport to local draft', e);
+
             }
 
             // After booking transport redirect to booking package to complete passenger/payment
             this.router.navigate(['/booking-package']);
           },
           error: (err) => {
-            console.warn('Failed to refresh pending transports', err);
+
             this.router.navigate(['/booking-package']);
           }
         });
       },
       error: (err: any) => {
-        console.error('Booking transport failed', err);
+
         const msg = err?.error?.message || 'Failed to book transport';
         this.toastr.error(msg);
         this.isSubmitting = false;

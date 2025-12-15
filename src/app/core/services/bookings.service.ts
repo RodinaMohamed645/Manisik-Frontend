@@ -43,6 +43,17 @@ export class BookingsService {
       );
   }
 
+  // Clear user bookings cache
+  clearCache() {
+    try {
+      const user = this.auth.getCurrentUserValue();
+      const key = user && (user as any).id ? `user_bookings_${(user as any).id}` : 'user_bookings_anonymous';
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.warn('Failed to clear booking cache', e);
+    }
+  }
+
   /**
    * Returns cached bookings immediately (if present) then fetches from network and emits updated value.
    */
@@ -65,7 +76,7 @@ export class BookingsService {
         tap(bookings => {
           try {
             localStorage.setItem(key, JSON.stringify(bookings));
-          } catch (e) {}
+          } catch (e) { }
         })
       );
 
@@ -200,7 +211,10 @@ export class BookingsService {
   createBooking(booking: any): Observable<any> {
     return this.http
       .post<ApiResponse<BookingDto>>(`${this.apiUrl}/Booking/CreateBooking`, booking, { withCredentials: true })
-      .pipe(map(res => res as any));
+      .pipe(
+        tap(() => this.clearCache()),
+        map(res => res as any)
+      );
   }
 
   // Update booking status
@@ -208,7 +222,10 @@ export class BookingsService {
     const headers = { 'Content-Type': 'application/json' };
     return this.http
       .put<ApiResponse<BookingDto>>(`${this.apiUrl}/Booking/UpdateStatus/${id}`, JSON.stringify(status), { headers, withCredentials: true })
-      .pipe(map(res => res.data as any));
+      .pipe(
+        tap(() => this.clearCache())
+        // Return full response to access message property
+      );
   }
 
   // Update payment status
@@ -216,14 +233,38 @@ export class BookingsService {
     const headers = { 'Content-Type': 'application/json' };
     return this.http
       .put<ApiResponse<BookingDto>>(`${this.apiUrl}/Booking/UpdatePaymentStatus/${id}`, JSON.stringify(paymentStatus), { headers, withCredentials: true })
-      .pipe(map(res => res.data as any));
+      .pipe(
+        tap(() => this.clearCache()),
+        map(res => res.data as any)
+      );
   }
 
   // Cancel booking (DELETE)
   cancelBooking(id: string): Observable<any> {
     return this.http
       .delete<ApiResponse<any>>(`${this.apiUrl}/Booking/CancelBooking/${id}`, { withCredentials: true })
-      .pipe(map(res => res.data));
+      .pipe(
+        tap(() => this.clearCache()),
+        map(res => res.data)
+      );
+  }
+
+  // Delete booking permanently (Admin only)
+  deleteBooking(id: string): Observable<any> {
+    return this.http
+      .delete<ApiResponse<any>>(`${this.apiUrl}/Booking/DeleteBooking/${id}`, { withCredentials: true })
+      .pipe(
+        tap(() => this.clearCache()),
+        map(res => res.data)
+      );
+  }
+
+  // Download Visa or Ticket PDF for a traveler
+  downloadDocument(bookingId: number, travelerId: number, documentType: 'visa' | 'ticket'): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/Booking/${bookingId}/Documents/${travelerId}/${documentType}`,
+      { responseType: 'blob', withCredentials: true }
+    );
   }
 }
 

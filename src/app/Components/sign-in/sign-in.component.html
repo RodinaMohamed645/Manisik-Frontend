@@ -20,7 +20,8 @@
     <form [formGroup]="registrationForm" (ngSubmit)="register()" class="space-y-4">
       <!-- First Name -->
       <div>
-        <label for="FirstName" class="block font-bold text-[var(--color-text)] mb-1">FirstName<span class="text-red-600">*</span></label>
+        <label for="FirstName" class="block font-bold text-[var(--color-text)] mb-1">FirstName<span
+            class="text-red-600">*</span></label>
         <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
           <i class="fas fa-user text-[var(--color-text-muted)] mr-2"></i>
           <input type="text" id="FirstName" formControlName="FirstName" placeholder="Enter your FirstName"
@@ -31,9 +32,10 @@
         }
       </div>
 
-       <!-- Last Name -->
+      <!-- Last Name -->
       <div>
-        <label for="LastName" class="block font-bold text-[var(--color-text)] mb-1">LastName<span class="text-red-600">*</span></label>
+        <label for="LastName" class="block font-bold text-[var(--color-text)] mb-1">LastName<span
+            class="text-red-600">*</span></label>
         <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
           <i class="fas fa-user text-[var(--color-text-muted)] mr-2"></i>
           <input type="text" id="LastName" formControlName="LastName" placeholder="Enter your LastName"
@@ -46,8 +48,10 @@
 
       <!-- Email Address -->
       <div>
-        <label for="email" class="block font-bold text-[var(--color-text)] mb-1">Email Address<span class="text-red-600">*</span></label>
-        <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
+        <label for="email" class="block font-bold text-[var(--color-text)] mb-1">Email Address<span
+            class="text-red-600">*</span></label>
+        <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]"
+          [class.border-red-500]="getApiError('email')">
           <i class="fas fa-envelope text-[var(--color-text-muted)] mr-2"></i>
           <input type="email" id="email" formControlName="email" placeholder="Enter your Email"
             class="w-full outline-none text-[var(--color-text)] bg-transparent" />
@@ -58,26 +62,32 @@
         @if (registrationForm.get('email')?.touched && registrationForm.get('email')?.hasError('email')) {
         <div class="text-red-600 text-sm mt-1">Please enter a valid Email Address</div>
         }
+        @if (getApiError('email')) {
+        <div class="text-red-600 text-sm mt-1">{{ getApiError('email') }}</div>
+        }
       </div>
 
       <!-- Phone Number -->
       <div>
         <label for="phoneNumber" class="block font-bold text-[var(--color-text)] mb-1">Phone Number</label>
-        <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
+        <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]"
+          [class.border-red-500]="getApiError('phonenumber')">
           <i class="fas fa-phone text-[var(--color-text-muted)] mr-2"></i>
-          <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="Enter your Phone Number"
+          <input type="tel" id="phoneNumber" formControlName="phoneNumber"
+            placeholder="Enter your Phone Number (optional)"
             class="w-full outline-none text-[var(--color-text)] bg-transparent" />
         </div>
-        @if (registrationForm.get('phoneNumber')?.hasError('phoneNumber')) {
-        <div class="text-red-600 text-sm mt-1">Please enter a valid Phone Number</div>
+        @if (getApiError('phonenumber')) {
+        <div class="text-red-600 text-sm mt-1">{{ getApiError('phonenumber') }}</div>
         }
       </div>
 
       <!-- Password -->
       <div>
-        <label for="password" class="block font-bold text-[var(--color-text)] mb-1">Password<span class="text-red-600">*</span>
+        <label for="password" class="block font-bold text-[var(--color-text)] mb-1">Password<span
+            class="text-red-600">*</span>
         </label>
-                  <small class="text-[var(--color-text-muted)] ml-2">At least 6 characters or digits</small>
+        <small class="text-[var(--color-text-muted)] ml-2">At least 6 characters or digits</small>
 
         <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
           <i class="fas fa-lock text-[var(--color-text-muted)] mr-2"></i>
@@ -90,23 +100,27 @@
         @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.hasError('required')) {
         <div class="text-red-600 text-sm mt-1">Password field is required</div>
         }
-        @if (registrationForm.hasError('password') && registrationForm.get('password')?.touched) {
-        <div class="text-red-600 text-sm mt-1">Password should contain 6 characters</div>
+        @if (registrationForm.get('password')?.touched && registrationForm.get('password')?.hasError('minlength')) {
+        <div class="text-red-600 text-sm mt-1">Password should contain at least 6 characters</div>
         }
       </div>
 
       <!-- Confirm Password -->
       <div>
-        <label for="confirmPassword" class="block font-bold text-[var(--color-text)] mb-1">Confirm Password<span class="text-red-600">*</span></label>
+        <label for="confirmPassword" class="block font-bold text-[var(--color-text)] mb-1">Confirm Password<span
+            class="text-red-600">*</span></label>
         <div class="flex items-center border border-[var(--border)] rounded px-3 py-2 bg-[var(--color-bg)]">
           <i class="fas fa-lock text-[var(--color-text-muted)] mr-2"></i>
-          <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" formControlName="confirmPassword"
-            placeholder="Re-enter your Password" class="w-full outline-none text-[var(--color-text)] bg-transparent" />
-          <button type="button" (click)="showConfirmPassword = !showConfirmPassword" class="ml-2 text-[var(--color-text-muted)]">
+          <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword"
+            formControlName="confirmPassword" placeholder="Re-enter your Password"
+            class="w-full outline-none text-[var(--color-text)] bg-transparent" />
+          <button type="button" (click)="showConfirmPassword = !showConfirmPassword"
+            class="ml-2 text-[var(--color-text-muted)]">
             <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
           </button>
         </div>
-        @if (registrationForm.get('confirmPassword')?.touched && registrationForm.get('confirmPassword')?.hasError('required')) {
+        @if (registrationForm.get('confirmPassword')?.touched &&
+        registrationForm.get('confirmPassword')?.hasError('required')) {
         <div class="text-red-600 text-sm mt-1">Confirm Password field is required</div>
         }
         @if (registrationForm.hasError('passwordMismatch') && registrationForm.get('confirmPassword')?.touched) {
@@ -114,7 +128,7 @@
         }
       </div>
 
-     
+
 
       <!-- Terms & Conditions -->
       <div>
@@ -125,7 +139,8 @@
             <a href="#" class="underline text-blue-600">Privacy Policy</a>
           </label>
         </div>
-        @if (registrationForm.get('agreeToTerms')?.touched && registrationForm.get('agreeToTerms')?.hasError('requiredTrue')) {
+        @if (registrationForm.get('agreeToTerms')?.touched &&
+        registrationForm.get('agreeToTerms')?.hasError('requiredTrue')) {
         <div class="text-red-600 text-sm mt-1">You must agree to the terms and conditions</div>
         }
       </div>
@@ -139,7 +154,7 @@
       <div class="text-center mt-4">
         <p class="text-[var(--color-text-muted)]">
           Already have an account?
-          <a  (click)="redirectToLogin()" class="text-green-700 font-semibold underline">Login</a>
+          <a (click)="redirectToLogin()" class="text-green-700 font-semibold underline">Login</a>
         </p>
       </div>
     </form>
@@ -149,4 +164,3 @@
 <div class="text-center mt-4">
   <p class="text-[var(--color-text-muted)]">🔒 Your information is secure and encrypted</p>
 </div>
-

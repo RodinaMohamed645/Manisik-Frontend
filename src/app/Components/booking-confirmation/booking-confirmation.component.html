@@ -1,230 +1,244 @@
-<section class="min-h-[60vh] flex flex-col items-center justify-center p-6">
+<section
+  class="min-h-screen bg-gray-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-6 print:bg-white print:p-0">
+
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="text-center space-y-4">
-    <div class="text-6xl">⏳</div>
-    <h1 class="text-2xl font-bold">Loading Booking Details...</h1>
+  <div *ngIf="isLoading" class="text-center space-y-4 print:hidden">
+    <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+    <h1 class="text-xl font-medium text-gray-600 dark:text-gray-300">Generating Receipt...</h1>
   </div>
 
-  <!-- Payment Complete State -->
-  <div *ngIf="paymentComplete && !isLoading" class="text-center space-y-6">
-    <div class="text-6xl">🎉</div>
-    <h1 class="text-3xl font-bold text-green-600">Payment Confirmed!</h1>
-    <p class="text-gray-600 max-w-xl">
-      Your booking has been confirmed successfully. A confirmation email will be
-      sent shortly with all the details.
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !booking"
+    class="text-center space-y-6 max-w-md w-full p-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-xl animate-fadeIn">
+    <div
+      class="w-20 h-20 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="text-4xl font-bold">!</span>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Receipt Not Found</h2>
+    <p class="text-gray-500 dark:text-gray-400">
+      We couldn't find the booking details. This might be because the payment is still processing or the ID is
+      incorrect.
     </p>
-    <div class="space-y-2 text-sm text-gray-500">
-      <p *ngIf="bookingId">Booking ID: <span class="font-semibold">{{ bookingId }}</span></p>
-    </div>
-    <div class="flex flex-col md:flex-row gap-3">
-      <button
-        *ngIf="booking"
-        (click)="downloadReceipt()"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-      >
-        Download Receipt (PDF)
+    <div class="flex flex-col gap-3">
+      <button (click)="goHome()"
+        class="w-full px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all">
+        Go Home
       </button>
-
-      <button
-        class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
-        (click)="goToDashboard()"
-      >
-        View Dashboard
-      </button>
-      <button
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-        (click)="goHome()"
-      >
-        Back to Home
+      <button (click)="goToDashboard()"
+        class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+        Go to Dashboard
       </button>
     </div>
   </div>
 
-  <!-- Booking Summary & Payment Button -->
-  <div *ngIf="booking && !paymentComplete && !isLoading" class="max-w-4xl w-full space-y-6">
-    <div class="text-center">
-      <div class="text-6xl mb-4">📋</div>
-      <h1 class="text-3xl font-bold">Booking Summary</h1>
-      <p class="text-gray-600 mt-2">Review your booking and proceed to payment</p>
+  <!-- Receipt Card -->
+  <div *ngIf="!isLoading && booking" id="receipt-container"
+    class="max-w-3xl w-full bg-white dark:bg-zinc-900 shadow-2xl rounded-3xl overflow-hidden print:shadow-none print:w-full print:max-w-none print:rounded-none flex flex-col h-auto print:text-black">
+
+    <!-- Receipt Header -->
+    <div
+      class="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white text-center print:bg-white print:text-black print:border-b-2 print:border-gray-200 print:mb-4">
+      <div
+        class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm print:hidden">
+        <span class="text-3xl">✓</span>
+      </div>
+      <!-- Logo for Print (Optional placeholder if no logo asset) -->
+      <div class="hidden print:block text-4xl font-bold text-blue-600 mb-4">Manasik</div>
+
+      <h1 class="text-3xl font-bold mb-2 print:text-5xl">Payment Receipt</h1>
+      <p class="text-blue-100 print:text-gray-600 print:text-xl">Thank you for your booking</p>
     </div>
 
-    <!-- Booking Details Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 space-y-6">
-      <!-- Booking Information -->
-      <div class="border-b pb-4 dark:border-gray-700">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">📋 Booking Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">Booking Number:</span>
-            <span class="font-semibold dark:text-white">{{ bookingId }}</span>
+    <!-- Receipt Body -->
+    <div class="p-8 space-y-8 flex-grow">
+
+      <!-- Customer & Booking Info -->
+      <div class="grid grid-cols-2 gap-8 pb-8 border-b border-dashed border-gray-200 dark:border-zinc-800">
+        <div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 print:text-gray-600">Customer
+            Details</p>
+          <div class="text-gray-900 dark:text-white font-medium print:text-black">
+            <p class="text-lg" *ngIf="booking.travelers?.[0]">{{ booking.travelers?.[0]?.firstName }} {{
+              booking.travelers?.[0]?.lastName }}
+            </p>
+            <p class="text-lg" *ngIf="!booking.travelers?.[0] && currentUser">{{ currentUser.fullName }}</p>
+            <p class="text-sm text-gray-500 break-all print:text-gray-700" *ngIf="booking.travelers?.[0]">{{
+              booking.travelers?.[0]?.email
+              }}
+            </p>
+            <p class="text-sm text-gray-500 break-all print:text-gray-700"
+              *ngIf="!booking.travelers?.[0] && currentUser">{{
+              currentUser.email }}
+            </p>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">Number of Travelers:</span>
-            <span class="font-semibold dark:text-white">{{ booking.numberOfTravelers || 1 }}</span>
-          </div>
-          <div class="flex justify-between" *ngIf="booking.travelStartDate">
-            <span class="text-gray-500 dark:text-gray-400">Travel Start:</span>
-            <span class="font-semibold dark:text-white">{{ booking.travelStartDate | date:'mediumDate' }}</span>
-          </div>
-          <div class="flex justify-between" *ngIf="booking.travelEndDate">
-            <span class="text-gray-500 dark:text-gray-400">Travel End:</span>
-            <span class="font-semibold dark:text-white">{{ booking.travelEndDate | date:'mediumDate' }}</span>
-          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 print:text-gray-600">Booking
+            Reference</p>
+          <p class="text-2xl font-mono font-bold text-gray-900 dark:text-white print:text-black">{{
+            booking.bookingNumber || '#' +
+            booking.id }}</p>
+          <p class="text-sm text-gray-500 mt-1 print:text-gray-700">Date: {{ (booking.paymentDate || booking.updatedAt)
+            | date:'medium'
+            }}</p>
+          <p class="text-sm text-purple-600 dark:text-purple-400 mt-1 font-semibold print:text-gray-800"
+            *ngIf="booking.type !== undefined">
+            Trip Type: {{ (booking.type === '1' || booking.type === 'Hajj' || booking.type?.toString()?.toLowerCase()
+            ===
+            'hajj') ? 'Hajj ✨' :
+            'Umrah 🕋' }}
+          </p>
+          <p class="text-sm text-blue-600 mt-1 font-medium print:text-gray-800" *ngIf="booking.travelStartDate">
+            Trip: {{ booking.travelStartDate | date:'mediumDate' }}
+            <span *ngIf="booking.travelEndDate"> - {{ booking.travelEndDate | date:'mediumDate' }}</span>
+          </p>
         </div>
       </div>
 
-      <!-- Main Traveler Information -->
-      <div class="border-b pb-4 dark:border-gray-700" *ngIf="payerName || payerEmail || payerPhone">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">👤 Main Traveler Details</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div class="flex items-center gap-3" *ngIf="payerName">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span class="text-blue-600 dark:text-blue-300 font-semibold">{{ payerName.charAt(0).toUpperCase() }}</span>
-            </div>
-            <div>
-              <p class="text-gray-500 dark:text-gray-400 text-xs">Full Name</p>
-              <p class="font-semibold dark:text-white">{{ payerName }}</p>
-            </div>
+      <!-- Payment Method & Transaction -->
+      <div class="grid grid-cols-2 gap-8 pb-8 border-b border-dashed border-gray-200 dark:border-zinc-800">
+        <div>
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 print:text-gray-600">Payment
+            Method</p>
+          <div class="flex items-center gap-2">
+            <span
+              class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-sm font-bold print:border print:border-gray-300 print:text-black print:bg-gray-100">STRIPE</span>
+            <span class="text-gray-400 text-sm print:text-gray-600">•••• 4242</span>
           </div>
-          <div class="flex items-center gap-3" *ngIf="payerEmail">
-            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span class="text-green-600 dark:text-green-300">✉️</span>
-            </div>
-            <div>
-              <p class="text-gray-500 dark:text-gray-400 text-xs">Email Address</p>
-              <p class="font-semibold dark:text-white">{{ payerEmail }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3 md:col-span-2" *ngIf="payerPhone">
-            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-              <span class="text-purple-600 dark:text-purple-300">📱</span>
-            </div>
-            <div>
-              <p class="text-gray-500 dark:text-gray-400 text-xs">Phone Number</p>
-              <p class="font-semibold dark:text-white">{{ payerPhone }}</p>
-            </div>
-          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 print:text-gray-600">Transaction
+            ID</p>
+          <p class="text-sm font-mono text-gray-500 break-all print:text-gray-700">{{ paymentIntentId ||
+            booking.payment?.paymentIntentId ||
+            booking.payment?.id || 'N/A' }}</p>
         </div>
       </div>
 
-      <!-- Price Breakdown -->
-      <div class="border-b pb-4 dark:border-gray-700">
-        <h2 class="text-xl font-semibold mb-4 dark:text-white">💰 Price Breakdown</h2>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Package Price</span>
-            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.70).toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Hotels & Accommodation</span>
-            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.20).toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Transportation</span>
-            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.08).toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Service Fee</span>
-            <span class="font-medium dark:text-white">${{ (booking.totalPrice * 0.02).toFixed(2) }}</span>
-          </div>
-          <div class="border-t pt-3 dark:border-gray-600">
-            <div class="flex justify-between items-center text-xl font-bold">
-              <span class="dark:text-white">Total Amount</span>
-              <span class="text-green-600 dark:text-green-400">${{ booking.totalPrice || 0 }}</span>
+
+      <!-- Itemized Breakdown -->
+      <div>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 print:text-black">
+          Detailed Breakdown
+        </h3>
+        <div
+          class="bg-gray-50 dark:bg-zinc-800/50 rounded-lg p-6 space-y-4 print:bg-white print:p-0 print:border print:border-gray-200">
+
+          <!-- Makkah Hotel -->
+          <div *ngIf="booking.makkahHotelId"
+            class="flex justify-between text-sm text-gray-700 dark:text-gray-300 print:text-black">
+            <div class="flex flex-col">
+              <span class="font-medium print:text-black">Makkah Hotel Accommodation</span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.makkahHotel?.checkInDate">
+                Check-in: {{ booking.makkahHotel?.checkInDate | date:'mediumDate' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.makkahHotel?.checkOutDate">
+                Check-out: {{ booking.makkahHotel?.checkOutDate | date:'mediumDate' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.makkahHotel?.numberOfRooms">
+                Rooms: {{ booking.makkahHotel?.numberOfRooms }}
+              </span>
             </div>
+            <span class="font-medium print:text-black">{{ booking.makkahHotelPrice || 0 | currency:'SAR' }}</span>
           </div>
-        </div>
-      </div>
 
-      <!-- Payment Button -->
-      <!-- Customer Information Form -->
-      <div class="border-t pt-6" *ngIf="payerName || payerEmail">
-        <h3 class="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wide">Customer Information</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-gray-500 uppercase">Full Name</label>
-            <input 
-              type="text" 
-              [(ngModel)]="payerName" 
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
-              placeholder="Enter full name"
-            >
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-gray-500 uppercase">Email Address</label>
-            <input 
-              type="email" 
-              [(ngModel)]="payerEmail" 
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
-              placeholder="Enter email address"
-            >
-          </div>
-          <div class="space-y-1 md:col-span-2">
-            <label class="text-xs font-medium text-gray-500 uppercase">Phone Number</label>
-            <input 
-              type="tel" 
-              [(ngModel)]="payerPhone" 
-              class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none font-medium text-gray-800"
-              placeholder="Enter phone number"
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- Payment Button & Form -->
-      <div class="pt-6 space-y-4">
-        <!-- Step 1: Initialize Payment -->
-        <button
-          *ngIf="!clientSecret && !isPaymentProcessing"
-          (click)="initiatePayment()"
-          class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg flex items-center justify-center gap-2"
-        >
-          <span>💳</span> Proceed to Payment
-        </button>
-
-        <!-- Download summary before payment -->
-        <button
-          *ngIf="booking"
-          (click)="downloadReceipt()"
-          class="w-full bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors shadow-lg flex items-center justify-center gap-2"
-        >
-          Download Booking Summary (PDF)
-        </button>
-
-        <!-- Step 2: Stripe Payment Element Form -->
-        <div [class.hidden]="!clientSecret" class="space-y-4 animate-fade-in">
-          <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div id="payment-element" class="min-h-[200px]">
-              <!-- Stripe Payment Element will be mounted here -->
+          <!-- Madinah Hotel -->
+          <div *ngIf="booking.madinahHotelId"
+            class="flex justify-between text-sm text-gray-700 dark:text-gray-300 print:text-black">
+            <div class="flex flex-col">
+              <span class="font-medium print:text-black">Madinah Hotel Accommodation</span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.madinahHotel?.checkInDate">
+                Check-in: {{ booking.madinahHotel?.checkInDate | date:'mediumDate' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.madinahHotel?.checkOutDate">
+                Check-out: {{ booking.madinahHotel?.checkOutDate | date:'mediumDate' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.madinahHotel?.numberOfRooms">
+                Rooms: {{ booking.madinahHotel?.numberOfRooms }}
+              </span>
             </div>
+            <span class="font-medium print:text-black">{{ booking.madinahHotelPrice || 0 | currency:'SAR' }}</span>
           </div>
-          
-          <button
-            *ngIf="clientSecret"
-            (click)="confirmPayment()"
-            [disabled]="isPaymentProcessing"
-            class="w-full bg-green-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <span *ngIf="isPaymentProcessing" class="animate-spin">↻</span>
-            {{ isPaymentProcessing ? 'Processing Payment...' : 'Confirm Payment' }}
-          </button>
-        </div>
-        
-        <!-- Error Message -->
-        <p *ngIf="paymentError" class="text-red-500 text-center font-medium bg-red-50 p-2 rounded border border-red-200">
-          {{ paymentError }}
-        </p>
-      </div>
-    </div>
 
-    <!-- Back Button -->
-    <div class="text-center">
-      <button
-        (click)="goHome()"
-        class="text-blue-600 hover:text-blue-700 font-semibold"
-      >
-        ← Back to Home
-      </button>
+          <!-- International Flight -->
+          <div *ngIf="booking.internationalTransportId"
+            class="flex justify-between text-sm text-gray-700 dark:text-gray-300 print:text-black">
+            <div class="flex flex-col">
+              <span class="font-medium print:text-black">International Flight</span>
+              <span class="text-xs text-gray-500 print:text-gray-600"
+                *ngIf="booking.internationalTransport?.departureDate">
+                Departure: {{ booking.internationalTransport?.departureDate | date:'medium' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600"
+                *ngIf="booking.internationalTransport?.arrivalDate">
+                Arrival: {{ booking.internationalTransport?.arrivalDate | date:'medium' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600"
+                *ngIf="booking.internationalTransport?.carrierName">
+                Carrier: {{ booking.internationalTransport?.carrierName }}
+              </span>
+            </div>
+            <span class="font-medium print:text-black">{{ booking.internationalTransportPrice || 0 | currency:'SAR'
+              }}</span>
+          </div>
+
+          <!-- Ground Transport -->
+          <div *ngIf="booking.groundTransportId"
+            class="flex justify-between text-sm text-gray-700 dark:text-gray-300 print:text-black">
+            <div class="flex flex-col">
+              <span class="font-medium print:text-black">Ground Transportation</span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.groundTransport?.serviceDate">
+                Service Date: {{ booking.groundTransport?.serviceDate | date:'mediumDate' }}
+              </span>
+              <span class="text-xs text-gray-500 print:text-gray-600" *ngIf="booking.groundTransport?.serviceName">
+                Service: {{ booking.groundTransport?.serviceName }}
+              </span>
+            </div>
+            <span class="font-medium print:text-black">{{ booking.groundTransportPrice || 0 | currency:'SAR' }}</span>
+          </div>
+
+          <div
+            class="border-t border-gray-200 dark:border-zinc-700 pt-2 flex justify-between text-sm text-gray-600 dark:text-gray-400 print:text-gray-700">
+            <span>Service Fees & Taxes (5%)</span>
+            <span>{{ booking.serviceFee || ((booking.totalPrice || 0) * 0.05) | currency:'SAR' }}</span>
+          </div>
+
+          <!-- Total -->
+          <div class="pt-4 border-t-2 border-gray-200 dark:border-zinc-700 flex justify-between items-end mt-2">
+            <span class="text-lg font-bold text-gray-900 dark:text-white print:text-black">Amount Paid</span>
+            <span class="text-2xl font-bold text-green-600 dark:text-green-400 print:text-black">{{ booking.totalPrice
+              || 0 |
+              currency:'SAR' }}</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div
+        class="bg-gray-50 dark:bg-zinc-800/50 -mx-8 -mb-8 p-6 text-center text-sm text-gray-500 border-t border-gray-100 dark:border-zinc-800 print:bg-white print:border-none print:mt-8">
+        <p>A confirmation email has been sent to <span
+            class="font-medium text-gray-900 dark:text-gray-300 print:text-black">{{
+            booking.travelers?.[0]?.email || currentUser?.email || 'your email' }}</span>.</p>
+        <p class="mt-1 print:hidden">Need help? Contact support at <a href="mailto:support&#64;manisik.com"
+            class="text-blue-600 hover:underline">support&#64;manisik.com</a></p>
+        <p class="hidden print:block mt-4 text-xs text-gray-400">Manasik Inc. • 123 Travel Way, World •
+          support&#64;manisik.com</p>
+      </div>
+
     </div>
   </div>
+
+  <!-- Actions (Hidden in Print) -->
+  <div *ngIf="!isLoading && booking" class="mt-8 flex gap-4 print:hidden">
+    <button (click)="downloadReceipt()"
+      class="px-6 py-3 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white font-semibold rounded-xl shadow-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-all flex items-center gap-2">
+      <span class="text-xl">🖨️</span> Print / Download Receipt
+    </button>
+    <button (click)="goToDashboard()"
+      class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-2">
+      Go to Dashboard <span>→</span>
+    </button>
+  </div>
+
 </section>

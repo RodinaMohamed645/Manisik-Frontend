@@ -184,19 +184,19 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   onSearchSubmit(): void {
     const q = this.searchQuery().trim();
-    if (q) this.router.navigate(['/search'], { queryParams: { q } }).catch(console.error);
+    if (q) this.router.navigate(['/search'], { queryParams: { q } }).catch(() => {});
   }
 
   onActionClick(action: QuickAction): void {
-    if (action.route) this.router.navigate([action.route]).catch(console.error);
+    if (action.route) this.router.navigate([action.route]).catch(() => {});
   }
 
   onViewPackageDetails(id: number): void {
-    this.router.navigate(['/packages', id]).catch(console.error);
+    this.router.navigate(['/packages', id]).catch(() => {});
   }
 
   onViewAllPackages(): void {
-    this.router.navigate(['/packages']).catch(console.error);
+    this.router.navigate(['/packages']).catch(() => {});
   }
 
   onNewsletterSubmit(): void {

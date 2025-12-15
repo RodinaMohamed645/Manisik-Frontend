@@ -347,6 +347,30 @@ p {
   color: var(--color-text);
 }
 
-label {
-  color: var(--color-text);
+/* Print Styles - Hide everything except receipt container */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #receipt-container, #receipt-container * {
+    visibility: visible;
+  }
+
+  #receipt-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: none !important;
+  }
+  
+  /* Hide specific elements explicitly just in case */
+  app-navbar, app-footer, .print-hidden {
+    display: none !important;
+  }
 }

@@ -31,6 +31,7 @@ export interface UserDto {
   preferredLanguage?: 'en' | 'ar' | null;
   roles?: string[] | null;
   isActive?: boolean;
+  fullName?: string | null;
   createdAt?: string | null;
 }
 

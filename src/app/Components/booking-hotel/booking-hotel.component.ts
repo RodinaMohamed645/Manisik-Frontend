@@ -143,7 +143,7 @@ export class BookingHotelComponent implements OnInit {
         });
         this.toastr.info(this.i18n.isRTL() ? 'تم تحميل المسودة' : 'Draft loaded');
       } catch (e) {
-        console.warn('Failed to prefill from pending booking', e);
+
       }
       return;
     }
@@ -242,6 +242,10 @@ export class BookingHotelComponent implements OnInit {
 
     const numberOfNights = Math.max(1, Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24)));
 
+    // Get existing bookingId from localStorage if available
+    const existingData = this.auth.getBookingData() || {};
+    const currentBookingId = existingData.bookingId || null;
+
     const bookingDto: HotelBookingDto = {
       hotelId: this.hotel.id,
       hotelName: this.hotel.name,
@@ -254,6 +258,7 @@ export class BookingHotelComponent implements OnInit {
       numberOfNights: numberOfNights,
       pricePerNight: this.room.pricePerNight,
       totalPrice: this.totalPrice,
+      bookingId: currentBookingId, // Pass existing bookingId to add to same pending booking
     };
 
     this.bookingService.bookHotel(bookingDto).subscribe({
@@ -262,6 +267,15 @@ export class BookingHotelComponent implements OnInit {
           this.i18n.translate('booking.success'),
           this.i18n.translate('success')
         );
+
+        // Immediately capture bookingId from response if available
+        const returnedBookingId = res?.data?.bookingId || res?.data?.BookingId || res?.bookingId;
+        if (returnedBookingId) {
+          const current = this.auth.getBookingData() || {};
+          current.bookingId = returnedBookingId;
+          this.auth.saveBookingData(current);
+          // console.log('Stored bookingId from response:', returnedBookingId);
+        }
 
         // After successful booking, refresh pending hotel drafts from server and persist to local storage
         this.bookingsService.getMyPendingHotelBookings().subscribe({
@@ -322,25 +336,25 @@ export class BookingHotelComponent implements OnInit {
                 this.router.navigate(['/booking-package']);
               }
             } catch (e) {
-              console.warn('Failed to update local draft after booking', e);
+
               this.router.navigate(['/booking-package']);
             }
           },
           error: (err) => {
-            console.warn('Failed to refresh pending hotel drafts', err);
+
             this.router.navigate(['/booking-package']);
           }
         });
       },
       error: (err: any) => {
-        // Show only the backend message in toaster
         const errorMsg = err?.error?.message || this.i18n.translate('booking.error.failed');
-        this.toastr.error(errorMsg);
         
-        // If it's a city conflict, suggest discarding existing booking
-        if (errorMsg.toLowerCase().includes('already booked') && errorMsg.toLowerCase().includes('city')) {
-          // Refresh pending bookings to show the discard option
-          this.checkPendingBookings();
+        // Show custom warning if related to pending/existing booking
+        if (errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('pending')) {
+           this.toastr.warning('Please complete payment for your pending booking in the dashboard', 'Pending Booking');
+           this.checkPendingBookings();
+        } else {
+           this.toastr.error(errorMsg);
         }
       },
     });

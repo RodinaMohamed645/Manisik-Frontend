@@ -10,12 +10,12 @@ export enum AirArrivalAirport {
   Taif = 'Taif',
 }
 export enum AirDepartureAirport {
-  CairoInternational = 'Cairo', // CAI
-  BorgElArabAlexandria = 'BorgElArabAlexandria', // HBE
-  SharmElSheikhInternational = 'SharmElSheikh', // SSH
-  HurghadaInternational = 'Hurghada', // HRG
-  AssiutInternational = 'Assiut', // ATZ
-  SohagInternational = 'Sohag', // HMB
+  Cairo = 'Cairo', // CAI
+  BorgElArabAlexandria = 'Borg El Arab (Alexandria)', // HBE
+  SharmElSheikh = 'Sharm El Sheikh', // SSH
+  Hurghada = 'Hurghada', // HRG
+  Assiut = 'Assiut', // ATZ
+  Sohag = 'Sohag', // HMB
 }
 export enum SeaDepartureAirport {
   SafagaPort = 'SafagaPort',

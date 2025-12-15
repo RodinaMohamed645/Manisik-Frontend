@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,9 +9,10 @@ import { CommonModule } from '@angular/common';
 import { TransportOption } from 'src/app/interfaces';
 import { BookingInternationalTransport } from 'src/app/interfaces/booking-international-transport';
 import { BookingInternationalTransportService } from 'src/app/core/services/booking-international-transport.service';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-// import { ReactiveFormsModule } from '@angular/forms'
+import { AuthService } from 'src/app/core/services/auth.service';
+import { BookingsService } from 'src/app/core/services/bookings.service';
 
 @Component({
   selector: 'app-booking-international-transport',
@@ -23,10 +24,12 @@ import { ToastrService } from 'ngx-toastr';
 export class BookingInternationalTransportComponent implements OnInit {
   @Input() selectedDepartureFlight!: TransportOption;
 
+  private readonly auth = inject(AuthService);
+  private readonly bookingsService = inject(BookingsService);
+  private readonly router = inject(Router);
+  
   bookingForm!: FormGroup;
 
-  departureTotal = 0;
-  returnTotal = 0;
   totalBookingPrice = 0;
 
   constructor(
@@ -39,18 +42,8 @@ export class BookingInternationalTransportComponent implements OnInit {
     const nav = history.state;
     this.selectedDepartureFlight = nav.selectedFlight;
     if (!this.selectedDepartureFlight) {
-      console.error('No flight selected!');
       return;
     }
-    console.log('Selected Flight:', this.selectedDepartureFlight);
-
-    const departureDateObj = new Date(
-      this.selectedDepartureFlight.departureDate
-    );
-    const arrivalDateObj = new Date(this.selectedDepartureFlight.arrivalDate);
-    const returnDateObj = this.selectedDepartureFlight.returnDate
-      ? new Date(this.selectedDepartureFlight.returnDate)
-      : undefined;
 
     this.bookingForm = this.fb.group({
       departureBooking: this.fb.group({
@@ -65,80 +58,97 @@ export class BookingInternationalTransportComponent implements OnInit {
         ],
       }),
     });
-    //console.log(this.bookingForm.status); // INVALID or VALID
-    // console.log(this.bookingForm.errors); // any top-level errors
-    // console.log(this.bookingForm.get('departureBooking.transportId')?.errors);
-    // console.log(this.bookingForm.get('departureBooking.numberOfSeats')?.errors);
+    
     this.calculateTotals();
   }
 
   calculateTotals() {
-    const seats =
-      this.bookingForm.get('departureBooking.numberOfSeats')?.value || 1;
-    this.departureTotal = seats * this.selectedDepartureFlight.price;
-    this.returnTotal = seats * this.selectedDepartureFlight.price;
-    this.totalBookingPrice = this.departureTotal + this.returnTotal;
+    const seats = this.bookingForm.get('departureBooking.numberOfSeats')?.value || 1;
+    this.totalBookingPrice = seats * this.selectedDepartureFlight.price;
   }
 
   submitBooking() {
-    console.log('Booking Form Values:');
     if (this.bookingForm.invalid) {
-      console.log('Form is invalid');
+      this.bookingForm.markAllAsTouched();
       return;
     }
 
-    const seats =
-      this.bookingForm.get('departureBooking.numberOfSeats')?.value || 1;
-    //  CarrierName: this.selectedDepartureFlight.carrierName,
-    //   FlightNumber: this.selectedDepartureFlight.flightNumber,
-    //   DepartureAirport: this.selectedDepartureFlight.departureAirport,
-    //   ArrivalAirport: this.selectedDepartureFlight.arrivalAirport,
-    //   DepartureDate: new Date(this.selectedDepartureFlight.departureDate),
+    const seats = this.bookingForm.get('departureBooking.numberOfSeats')?.value || 1;
 
-    // CarrierName: this.selectedDepartureFlight.carrierName,
-    //   FlightNumber: this.selectedDepartureFlight.flightNumber,
-    //   DepartureAirport: this.selectedDepartureFlight.arrivalAirport,
-    //   ArrivalAirport: this.selectedDepartureFlight.departureAirport,
-    //   DepartureDate: new Date(this.selectedDepartureFlight.returnDate!),
+    // Get existing bookingId from localStorage if available
+    const existingData = this.auth.getBookingData() || {};
+    const currentBookingId = existingData.bookingId || null;
 
-    const depBooking: BookingInternationalTransport = {
+    // Simple single payload - ID covers the whole package (One Way or Round Trip)
+    const bookingPayload: BookingInternationalTransport = {
       TransportId: +this.selectedDepartureFlight.id!,
       NumberOfSeats: seats,
-
+      Status: 0, // Pending
       PricePerSeat: this.selectedDepartureFlight.price,
-      TotalPrice: this.departureTotal,
+      TotalPrice: this.totalBookingPrice,
+      BookingId: currentBookingId, 
     };
-    console.log('Departure Booking DTO:', depBooking);
 
-    const retBooking: BookingInternationalTransport = {
-      TransportId: +this.selectedDepartureFlight.id!,
-      NumberOfSeats: seats,
+    this.bookingService.bookTransport(bookingPayload).subscribe({
+      next: (response: any) => {
+        const returnedBookingId = response?.data?.bookingId || response?.data?.BookingId || response?.bookingId;
+        
+        if (returnedBookingId) {
+          const current = this.auth.getBookingData() || {};
+          current.bookingId = returnedBookingId;
+          this.auth.saveBookingData(current);
+        }
 
-      PricePerSeat: this.selectedDepartureFlight.price,
-      TotalPrice: this.returnTotal,
-    };
-    console.log('Return Booking DTO:', retBooking);
+        this.toastr.success('Flight booked successfully!', 'Success');
 
-    this.bookingService.bookTransport(depBooking).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.bookingService.bookTransport(retBooking).subscribe({
-          //next: () => alert('Round-trip booked successfully!'),
-          next: () => {
-            this.toastr.success(
-              'Round-trip booked successfully!',
-              'Booking Confirmed'
-            );
+        // Sync transport data to localStorage
+        this.bookingsService.getMyPendingTransportBookings().subscribe({
+          next: (pending) => {
+            const current = this.auth.getBookingData() || {};
+            
+            if (pending && pending.length > 0) {
+              current.transportData = pending[pending.length - 1]; // Use latest
+              if (pending[pending.length - 1].bookingId) {
+                current.bookingId = pending[pending.length - 1].bookingId;
+              }
+            } else {
+              // Fallback local data
+              current.transportData = {
+                bookingId: returnedBookingId || current.bookingId,
+                transportId: this.selectedDepartureFlight.id,
+                carrierName: this.selectedDepartureFlight.carrierName,
+                flightClass: this.selectedDepartureFlight.flightClass,
+                departureDate: this.selectedDepartureFlight.departureDate,
+                returnDate: this.selectedDepartureFlight.returnDate,
+                totalPrice: this.totalBookingPrice,
+                numberOfSeats: seats
+              };
+            }
+            
+            this.auth.saveBookingData(current);
+            this.router.navigate(['/transport'], { queryParams: { tab: 'ground' } });
           },
-          // error: (err) => alert('Return flight booking failed: ' + err.message),
+          error: () => {
+             // Fallback on error
+             const current = this.auth.getBookingData() || {};
+             current.transportData = {
+                bookingId: returnedBookingId || current.bookingId,
+                transportId: this.selectedDepartureFlight.id,
+                carrierName: this.selectedDepartureFlight.carrierName,
+                flightClass: this.selectedDepartureFlight.flightClass,
+                departureDate: this.selectedDepartureFlight.departureDate,
+                returnDate: this.selectedDepartureFlight.returnDate,
+                totalPrice: this.totalBookingPrice,
+                numberOfSeats: seats
+              };
+              this.auth.saveBookingData(current);
+              this.router.navigate(['/transport'], { queryParams: { tab: 'ground' } });
+          }
         });
       },
       error: (err) => {
         const backendMessage = err?.error?.message ?? 'Something went wrong';
         this.toastr.error(backendMessage, 'Booking Failed');
-        console.error('Booking failed:', backendMessage);
-        //console.log('Error booking departure flight:', err.message);
-        //alert('Departure flight booking failed: ' + err.message);
       },
     });
   }

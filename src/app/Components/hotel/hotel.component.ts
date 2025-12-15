@@ -5,7 +5,8 @@ import { HotelsService } from 'src/app/core/services/hotels.service';
 import { I18nService } from 'src/app/core/services/i18n.service';
 import { Hotel, HotelSearchParams } from 'src/app/interfaces/hotel.interface';
 import { LucideAngularModule } from 'lucide-angular';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-hotel',
   imports: [FormsModule, CommonModule, LucideAngularModule],
@@ -13,33 +14,44 @@ import { Router } from '@angular/router';
   styleUrl: './hotel.component.css',
 })
 export class HotelComponent implements OnInit {
-  // expose I18nService to template so we can call i18n.translate(...) inside hotel templates
   readonly i18n = inject(I18nService);
+
   viewMode: 'grid' | 'list' = 'grid';
   searchText: string = '';
-  city: string = 'All'; // Show all hotels by default
-  sortBy: string = 'recommended'; // default option
+
+  // 👇 القيم اللي الـ backend فاهمها
+  city: 'All' | 'Makkah' | 'Madinah' = 'All';
+
+  sortBy: string = 'recommended';
   loading = false;
 
   hotels: Hotel[] = [];
-  // Inject HotelsService to fetch data and Router to navigate to details page
+
   private readonly router = inject(Router);
-  constructor(private hotelService: HotelsService) {}
+  private readonly route = inject(ActivatedRoute);
+
+  constructor(private hotelService: HotelsService) { }
 
   ngOnInit(): void {
-    this.loadHotels();
+    this.route.queryParams.subscribe(params => {
+      if (params['city']) {
+        this.city = params['city'];
+      }
+      this.loadHotels();
+    });
   }
 
   loadHotels() {
     this.loading = true;
 
     const params: HotelSearchParams = {
-      //city: this.city,
-      sortBy: '', // default empty
+      sortBy: '',
     };
+
     if (this.city && this.city !== 'All') {
-      params.city = this.city;
+      params.city = this.city; // Makkah | Madinah
     }
+
     switch (this.sortBy) {
       case 'distance':
         params.sortBy = 'distance';
@@ -52,14 +64,14 @@ export class HotelComponent implements OnInit {
         break;
     }
 
-    // Call the service with combined city and sort filter
+    console.log('City sent to API:', params.city);
+
     this.hotelService.getHotels(params).subscribe({
       next: (data) => {
         this.hotels = data;
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Failed to load hotels', err);
+      error: () => {
         this.hotels = [];
         this.loading = false;
       },
@@ -69,23 +81,43 @@ export class HotelComponent implements OnInit {
   toggleView(mode: 'grid' | 'list') {
     this.viewMode = mode;
   }
+
   getImageUrl(hotel: Hotel): string {
     return this.hotelService.getImageUrl(hotel);
   }
+
+  availableRoomsCount(hotel: Hotel): number {
+    if (!hotel || !hotel.rooms) return 0;
+    let total = 0;
+    for (const r of hotel.rooms) {
+      const any = (r as any).availableRooms;
+      if (typeof any === 'number') {
+        total += any;
+      } else {
+        total += r.isActive ? 1 : 0;
+      }
+    }
+    return total;
+  }
+
+  // 👇 سيبنا search بالاسم فقط
   filteredHotels() {
     let filtered = this.hotels;
-    // Filter by search text
+
     if (this.searchText) {
       const searchLower = this.searchText.toLowerCase();
       filtered = filtered.filter((hotel) =>
         hotel.name.toLowerCase().includes(searchLower)
       );
     }
+
     return filtered;
   }
+
   onFilterChange() {
     this.loadHotels();
   }
+
   getStarArray(rating: number) {
     const maxStars = 5;
     return {
@@ -94,14 +126,7 @@ export class HotelComponent implements OnInit {
     };
   }
 
-  /**
-   * Navigate to the Hotel Details page.
-   * We only navigate; the HotelDetailsComponent will fetch the hotel by ID
-   * using HotelsService (keeps data fetching single-responsibility).
-   */
   viewDetails(hotelId: number) {
-    this.router
-      .navigate(['/hotels', hotelId])
-      .catch((err) => console.error('Navigation error:', err));
+    this.router.navigate(['/hotels', hotelId]).catch(() => { });
   }
 }

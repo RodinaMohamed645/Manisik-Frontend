@@ -18,7 +18,7 @@ export class PaymentService {
 
   createPayment(payload: CreatePaymentRequest): Observable<PaymentResponse> {
     return this.http.post<PaymentResponse>(
-      `${this.apiUrl}/Payment/CreatePayment`,
+      `${this.apiUrl}/Stripe/CreatePayment`,
       payload,
       { withCredentials: true }
     );
@@ -30,6 +30,14 @@ export class PaymentService {
     return this.http.post<{ message: string }>(
       `${this.apiUrl}/Payment/CapturePayPalOrder`,
       payload,
+      { withCredentials: true }
+    );
+  }
+
+  confirmStripePayment(paymentIntentId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/Stripe/ConfirmPayment`,
+      { paymentIntentId },
       { withCredentials: true }
     );
   }

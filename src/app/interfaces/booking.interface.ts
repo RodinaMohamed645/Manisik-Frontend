@@ -83,6 +83,7 @@ export interface Booking {
 
 export interface CreateBookingRequest {
   type: TripType;
+  status?: string;
   travelStartDate: string;
   travelEndDate?: string;
   numberOfTravelers: number;
