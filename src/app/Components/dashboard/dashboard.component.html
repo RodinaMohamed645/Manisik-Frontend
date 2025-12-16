@@ -366,10 +366,11 @@
                                     </div>
                                 </div>
 
-                                <!-- Visa & Ticket Documents (Only for Confirmed bookings) -->
-                                <div *ngIf="(booking.status === 'Confirmed' || booking.status === 'Paid') && booking.travelers?.length"
+                                <!-- Visa & Ticket Documents (Strictly Confirmed bookings only) -->
+                                <div *ngIf="booking.status === 'Confirmed' && booking.travelers?.length"
                                     class="flex flex-wrap gap-2 mt-3" (click)="$event.stopPropagation()">
-                                    <ng-container *ngFor="let traveler of booking.travelers">
+                                    <!-- DEBUG: Status is {{booking.status}} -->
+                                    <ng-container *ngFor="let traveler of booking.travelers; trackBy: trackByIndex">
                                         <button (click)="downloadDocument(booking, traveler, 'visa')"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs border border-blue-200 hover:bg-blue-100 transition-colors font-medium">
                                             <span>📄</span> Visa - {{ traveler.firstName }}
@@ -893,7 +894,8 @@
                                             <select [id]="'roomType'+i" [(ngModel)]="room.roomType"
                                                 [name]="'roomType'+i" required
                                                 class="w-full px-2 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)]">
-                                                <option *ngFor="let type of roomTypes()" [value]="type">{{ type }}</option>
+                                                <option *ngFor="let type of roomTypes()" [value]="type">{{ type }}
+                                                </option>
                                             </select>
                                         </div>
                                         <div>
@@ -1633,7 +1635,7 @@
                             <span *ngIf="traveler.isMainTraveler"
                                 class="px-2 py-0.5 text-xs bg-[var(--primary)]/10 text-[var(--primary)] rounded-full">Main</span>
 
-                            <!-- Document Download Buttons (only for Confirmed bookings) -->
+                            <!-- Document Download Buttons (Strictly for Confirmed bookings) -->
                             <div *ngIf="selectedBookingDetails()?.status === 'Confirmed'"
                                 class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                 <button
